@@ -6,7 +6,7 @@ Reference Vim 9.1.16 · @replit/codemirror-vim 6.4.0 · vim-core 0.1.0 · @codem
 
 Each case is replayed key by key in reference Vim and in the headless browser engine. After every key the text, mode and cursor must be equal; at the end visual selection, named registers and marks are compared too. Registers recorded with `q` are not compared (engine-specific key codes). Semantic goals (e.g. "cursor visited the end before the first edit") are listed but not judged yet.
 
-**77 match · 3 same result but differ while typing · 25 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 105 cases.
+**176 match · 5 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 181 cases.
 
 | Case | MVP | Result | Keys (first differing key in bold) | Difference: Vim → browser engine |
 |---|---|---|---|---|
@@ -45,55 +45,55 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | V033 | MVP | ✅ match | `G$bbciwnowy<Esc>` | <br>_Semantic goal not judged yet: Kursor odwiedził `(2,20)` przed pierwszą edycją._ |
 | V034 |  | ✅ match | `ci"kot<Esc>` |  |
 | V035 |  | ✅ match | `di(` |  |
-| V036 |  | ❌ differs | `ci` **t** `lis<Esc>` | text: `["<b></b>"]` → `["<b>kot</b>"]`<br>cursor: `[1,4]` → `[1,5]`<br>**Final state:** text: `["<b>lis</b>"]` → `["<b>klisot</b>"]`<br>cursor: `[1,6]` → `[1,7]` |
+| V036 |  | ✅ match | `citlis<Esc>` |  |
 | V037 |  | ✅ match | `vwe` |  |
 | V038 |  | ✅ match | `/^DROP$<CR>dd` |  |
 | V039 |  | ✅ match | `maG`a` | <br>_Semantic goal not judged yet: Po ustawieniu znacznika odwiedzono wiersz 3 przed powrotem._ |
 | V040 |  | ✅ match | `ddp` |  |
 | V041 |  | ✅ match | `/red<CR>ciwblue<Esc>n.` | <br>_Semantic goal not judged yet: Druga zamiana nastąpiła przez powtórzenie ostatniej zmiany._ |
 | V042 |  | ✅ match | `:%s/old/new/<CR>` |  |
-| V043 |  | ❌ differs | `:2,4d` **<CR>** `` | cursor: `[2,1]` → `[1,1]` |
+| V043 |  | ✅ match | `:2,4d<CR>` |  |
 | V044 |  | ✅ match | `da[` |  |
 | V045 |  | ✅ match | `"b2yy` |  |
 | V046 |  | ✅ match | `g~~` |  |
 | V047 |  | ✅ match | `%` |  |
-| V048 |  | ❌ differs | `:3t0` **<CR>** `` | text: `["trzy","jeden","dwa","trzy"]` → `["jeden","dwa","trzy"]` |
+| V048 |  | ✅ match | `:3t0<CR>` |  |
 | V049 |  | ✅ match | `:%s/\<id\>/key/g<CR>` |  |
-| V050 |  | ❌ differs | `:2,3s/a/x/g` **<CR>** `` | cursor: `[3,1]` → `[3,2]` |
+| V050 |  | ✅ match | `:2,3s/a/x/g<CR>` |  |
 | V051 |  | ✅ match | `:%s/\(\w\+\),\(\w\+\)/\2 \1/<CR>` |  |
-| V052 |  | ❌ differs | `:g/^DBG␠/d` **<CR>** `` | cursor: `[2,1]` → `[1,1]` |
-| V053 |  | ❌ differs | `:v/^OK␠/d` **<CR>** `` | cursor: `[2,1]` → `[1,1]` |
-| V054 |  | ❌ differs | `<C-v>2jI` **#** `␠<Esc>` | text: `["#host","port","mode"]` → `["#host","#port","#mode"]`<br>**Final state:** cursor: `[1,1]` → `[1,2]`<br>_Semantic goal not judged yet: Wstawienie pochodzi z jednego zaznaczenia blokowego wysokości 3._ |
+| V052 |  | ✅ match | `:g/^DBG /d<CR>` |  |
+| V053 |  | ✅ match | `:v/^OK /d<CR>` |  |
+| V054 |  | 🟡 same result, differs while typing | `<C-v>2jI` **#** `␠<Esc>` | text: `["#host","port","mode"]` → `["#host","#port","#mode"]`<br>_Semantic goal not judged yet: Wstawienie pochodzi z jednego zaznaczenia blokowego wysokości 3._ |
 | V055 |  | ✅ match | `<C-v>2jx` | <br>_Semantic goal not judged yet: Usunięto prostokąt o wymiarach 3 wiersze × 1 kolumna._ |
-| V056 |  | ❌ differs | `:2,5sort␠u` **<CR>** `` | cursor: `[2,1]` → `[1,1]` |
-| V057 |  | ❌ differs | `:2,3m5` **<CR>** `` | text: `["a","d","e","b","c","f"]` → `["a","b","c","d","e","f"]`<br>cursor: `[5,1]` → `[1,1]` |
+| V056 |  | ✅ match | `:2,5sort u<CR>` |  |
+| V057 |  | ✅ match | `:2,3m5<CR>` |  |
 | V058 |  | ✅ match | `"ayiwj0"Ayiw` |  |
 | V059 |  | ✅ match | `yiwj"_dd` |  |
-| V060 |  | ❌ differs | `qqI-␠<Esc>jq2@` **q** `` | cursor: `[3,2]` → `[3,5]`<br>_Semantic goal not judged yet: Makro w `q` nagrane w próbie i odtworzone na dwóch kolejnych wierszach._ |
-| V061 |  | ❌ differs | `oB<Esc>` **u** `<C-r>` | text: `["A"]` → `["A",""]`<br>cursor: `[1,1]` → `[2,1]`<br>**Final state:** cursor: `[1,1]` → `[2,1]`<br>_Semantic goal not judged yet: W historii po dodaniu wiersza występują cofnięcie i ponowienie tej edycji._ |
+| V060 |  | ✅ match | `qqI- <Esc>jq2@q` | <br>_Semantic goal not judged yet: Makro w `q` nagrane w próbie i odtworzone na dwóch kolejnych wierszach._ |
+| V061 |  | ✅ match | `oB<Esc>u<C-r>` | <br>_Semantic goal not judged yet: W historii po dodaniu wiersza występują cofnięcie i ponowienie tej edycji._ |
 | V062 |  | ✅ match | `ma2jmb:'a,'bs/x/y/g<CR>` |  |
 | V063 |  | ✅ match | `?^ERR<CR>n` | <br>_Semantic goal not judged yet: Dwa trafienia wyszukiwania wstecz w kolejności 3 → 1._ |
 | V064 |  | ✅ match | `3gJ` |  |
-| V065 |  | ❌ differs | `:2,4s/^\(\s*\)old:/\1new:/` **<CR>** `` | cursor: `[4,3]` → `[4,1]` |
-| V066 |  | ❌ differs | `qa:s/^\([^:]*\):\(.*\)$/\2␠(\1)/<CR>j0q2@` **a** `` | text: `["dev (ela)","ops (jan)","ux (ola)","--"]` → `["dev (ela)","jan:ops","ola:ux","--"]`<br>mode: `"normal"` → `"cmdline"`<br>_Semantic goal not judged yet: Makro nagrane w `a` i użyte do przetworzenia kolejnych dwóch rekordów._ |
-| V067 |  | ❌ differs | `:g/^X␠/s/\S\+$/[&]/` **<CR>** `` | text: `["X [a]","Y b","X [c]","X [d]"]` → `["X [&]","Y b","X [&]","X [&]"]`<br>cursor: `[4,1]` → `[4,3]` |
-| V068 |  | ❌ differs | `:/^BEGIN$/,/^END$/s/\s\+$//e` **<CR>** `` | text: `["top  ","BEGIN","  alfa"," beta","","END","end  "]` → `["top  ","BEGIN","  alfa"," beta","END","end  "]`<br>cursor: `[4,2]` → `[4,6]` |
+| V065 |  | ✅ match | `:2,4s/^\(\s*\)old:/\1new:/<CR>` |  |
+| V066 |  | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` | <br>_Semantic goal not judged yet: Makro nagrane w `a` i użyte do przetworzenia kolejnych dwóch rekordów._ |
+| V067 |  | ✅ match | `:g/^X /s/\S\+$/[&]/<CR>` |  |
+| V068 |  | ✅ match | `:/^BEGIN$/,/^END$/s/\s\+$//e<CR>` |  |
 | V069 |  | ✅ match | `f=l"ayiwj0f=l"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>` |  |
-| V070 |  | ❌ differs | `:/^BEGIN$/+1,/^END$/-1g/^#/d` **<CR>** `:/^BEGIN$/+1,/^END$/-1sort␠u<CR>` | cursor: `[4,1]` → `[1,1]`<br>**Final state:** cursor: `[3,1]` → `[1,1]` |
-| V071 |  | ❌ differs | `<C-v>2jg` **<C-a>** `` | text: `["row 1: a","row 2: b","row 3: c"]` → `["row 0: a","row 0: b","row 0: c"]`<br>mode: `"normal"` → `"visual-block"`<br>_Semantic goal not judged yet: Rosnąca numeracja powstała na zaznaczonym bloku cyfr._ |
-| V072 |  | ❌ differs | `:%s/\<\(\k\+\)\s\+\1\>/\1/g` **<CR>** `` | text: `["to test","że działa","raz dwa"]` → `["to to test","że że działa","raz dwa"]`<br>cursor: `[2,1]` → `[1,1]` |
-| V073 |  | ❌ differs | `:%s/␠␠#.*$//e` **<CR>** `:%sort<CR>` | cursor: `[3,1]` → `[3,4]`<br>**Final state:** cursor: `[1,1]` → `[3,6]` |
-| V074 |  | ❌ differs | `:%s/^\(flag_\w\+=\)\(\w\+\)/\1\U\2\E/` **<CR>** `` | text: `["flag_a=OFF # off","plain=off","flag_b=ON"]` → `["flag_a=\\Uoff\\E # off","plain=off","flag_b=\\Uon\\E"]` |
-| V075 |  | ❌ differs | `:g/^@␠/t$` **<CR>** `:4,5s/^@␠//<CR>` | text: `["@ A","p","@ B","@ A","@ B"]` → `["@ A","p","@ B"]`<br>cursor: `[5,1]` → `[1,1]`<br>**Final state:** text: `["@ A","p","@ B","A","B"]` → `["@ A","p","@ B"]`<br>cursor: `[5,1]` → `[1,1]` |
+| V070 |  | ✅ match | `:/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>` |  |
+| V071 |  | ✅ match | `<C-v>2jg<C-a>` | <br>_Semantic goal not judged yet: Rosnąca numeracja powstała na zaznaczonym bloku cyfr._ |
+| V072 |  | ✅ match | `:%s/\<\(\k\+\)\s\+\1\>/\1/g<CR>` |  |
+| V073 |  | ✅ match | `:%s/  #.*$//e<CR>:%sort<CR>` |  |
+| V074 |  | ✅ match | `:%s/^\(flag_\w\+=\)\(\w\+\)/\1\U\2\E/<CR>` |  |
+| V075 |  | ✅ match | `:g/^@ /t$<CR>:4,5s/^@ //<CR>` |  |
 | V076 |  | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["HEAD","A-:x","B:y","C:z","END"]` → `["HEAD","A-:x","B-:y","C-:z","END"]`<br>_Semantic goal not judged yet: Jedna zmiana blokowa na prostokącie 3 × 2._ |
-| V077 |  | 🟡 same result, differs while typing | `ma:2,4s/(bad)/(ok)/` **<CR>** ``a` | cursor: `[4,1]` → `[4,5]` |
+| V077 |  | ✅ match | `ma:2,4s/(bad)/(ok)/<CR>`a` |  |
 | V078 |  | ✅ match | `qa0f:r=lxj0q2@a` | <br>_Semantic goal not judged yet: Zarejestrowano i odtworzono `a`. W świeżym buforze jedno `@a` ma przekształcić `tryb: auto↵END` w `tryb=auto↵END` i skończyć w `(2,1)`._ |
-| V079 |  | ❌ differs | `:2,5sort␠nu` **<CR>** `:g/␠run$/s/run$/RUN/<CR>` | cursor: `[2,1]` → `[1,1]`<br>**Final state:** cursor: `[4,1]` → `[4,4]` |
-| V080 |  | 🟡 same result, differs while typing | `:3,5g/^␠␠DEBUG␠/d` **<CR>** `:3,4s/\<old\>/new/g<CR>:3,4s/^␠␠//<CR>` | cursor: `[4,3]` → `[1,1]` |
+| V079 |  | ✅ match | `:2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>` |  |
+| V080 |  | ✅ match | `:3,5g/^  DEBUG /d<CR>:3,4s/\<old\>/new/g<CR>:3,4s/^  //<CR>` |  |
 | P001 |  | ✅ match | `xxu` |  |
 | P002 |  | ✅ match | `ix<Esc>iy<Esc>u` |  |
-| P003 |  | ❌ differs | `:s/\<że\>/to/g` **<CR>** `` | text: `["to to działa"]` → `["że że działa"]` |
-| P004 |  | ❌ differs | `:s/\<\(\k\+\)\s\+\1\>/\1/` **<CR>** `` | text: `["że działa"]` → `["że że działa"]` |
+| P003 |  | ✅ match | `:s/\<że\>/to/g<CR>` |  |
+| P004 |  | ✅ match | `:s/\<\(\k\+\)\s\+\1\>/\1/<CR>` |  |
 | P005 |  | ✅ match | `ciwkot<Esc>` |  |
 | P006 |  | ✅ match | `w` |  |
 | P007 |  | ✅ match | `rą` |  |
@@ -101,7 +101,7 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | P009 |  | ✅ match | `dw` |  |
 | P010 |  | ✅ match | `/ląd<CR>` |  |
 | P011 |  | ✅ match | `l` |  |
-| P012 |  | ❌ differs | `` **x** `` | text: `["x"]` → `["́x"]` |
+| P012 |  | ✅ match | `x` |  |
 | P013 |  | ✅ match | `A!<Esc>j.` |  |
 | P014 |  | ✅ match | `3ia<Esc>` |  |
 | P015 |  | ✅ match | `cwX<Esc>` |  |
@@ -115,3 +115,79 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | P023 |  | ✅ match | `<C-a>` |  |
 | P024 |  | ✅ match | `<C-a>` |  |
 | P025 |  | ✅ match | `i<BS><Esc>` |  |
+| P026 |  | ✅ match | `/Kot<CR>` |  |
+| P027 |  | ✅ match | `:s/kot/X/<CR>` |  |
+| P028 |  | ✅ match | `/\ckot<CR>` |  |
+| P029 |  | ✅ match | `:s/a\{,2}/X/<CR>` |  |
+| P030 |  | ✅ match | `:s/\v(\w+)-(\w+)/\2-\1/<CR>` |  |
+| P031 |  | ✅ match | `:s/\(\d\+\)\@<=px//<CR>` |  |
+| P032 |  | ✅ match | `:s/foo\zsbar/X/<CR>` |  |
+| P033 |  | ✅ match | `:%s/[^x]\+/Y/<CR>` |  |
+| P034 |  | ✅ match | `:s/a/\r/<CR>` |  |
+| P035 |  | ✅ match | `:s/\(.\)/\u\1/<CR>` |  |
+| P036 |  | ✅ match | `:s/\w\+/\L&/<CR>` |  |
+| P037 |  | ✅ match | `:s/\./!/<CR>` |  |
+| P038 |  | ✅ match | `:s/a\|b/X/g<CR>` |  |
+| P039 |  | ✅ match | `:s/x*/-/g<CR>` |  |
+| P040 |  | ✅ match | `:s/a^b/X/<CR>` |  |
+| P041 |  | ✅ match | `:s/a$b/X/<CR>` |  |
+| P042 |  | ✅ match | `:s/\%(ab\)\+/X/<CR>` |  |
+| P043 |  | ✅ match | `:s/\<ż/Ż/g<CR>` |  |
+| P044 |  | ✅ match | `:s/\Vx.y/Z/<CR>` |  |
+| P045 |  | ✅ match | `:s/a\{-1,}/X/<CR>` |  |
+| P046 |  | ✅ match | `*` |  |
+| P047 |  | ✅ match | `*` |  |
+| P048 |  | ✅ match | `/ab<CR>n` |  |
+| P049 |  | ✅ match | `:s/kot/x/i<CR>` |  |
+| P050 |  | ✅ match | `:s/a/X/<CR>:s/b/~~/<CR>` |  |
+| P051 |  | ✅ match | `:m0<CR>` |  |
+| P052 |  | ✅ match | `:m$<CR>` |  |
+| P053 |  | ✅ match | `:3,4m0<CR>` |  |
+| P054 |  | ✅ match | `:t$<CR>` |  |
+| P055 |  | ✅ match | `:co+1<CR>` |  |
+| P056 |  | ✅ match | `:m.<CR>` |  |
+| P057 |  | ✅ match | `:/\<id\>/d<CR>` |  |
+| P058 |  | ✅ match | `qa0fqrXjq@a` |  |
+| P059 |  | ✅ match | `qq:s/a/b/<CR>jq2@q` |  |
+| P060 |  | ✅ match | `qaqqarYj@aq@a` |  |
+| P061 |  | ✅ match | `qa0f,r;jq5@a` |  |
+| P062 |  | ✅ match | `qq:s/a/X/<CR>jq3@q` |  |
+| P063 |  | ✅ match | `qq:s/a/X/e<CR>jq3@q` |  |
+| P064 |  | ✅ match | `j` |  |
+| P065 |  | ✅ match | `k` |  |
+| P066 |  | ✅ match | `l` |  |
+| P067 |  | ✅ match | `qq/a<CR>rbq2@q` |  |
+| P068 |  | ✅ match | `qqVj:s/a/b/<CR>jq@q` |  |
+| P069 |  | ✅ match | `:/BEGIN/d<CR>` |  |
+| P070 |  | ✅ match | `:s/,/\r/g<CR>` |  |
+| P071 |  | ✅ match | `:g/x/s/x/z/<CR>` |  |
+| P072 |  | ✅ match | `:%sort<CR>` |  |
+| P073 |  | ✅ match | `:g/a/s/b/X/<CR>` |  |
+| P074 |  | ✅ match | `<C-a>` |  |
+| P075 |  | ✅ match | `<C-a>` |  |
+| P076 |  | ✅ match | `Vj<C-a>` |  |
+| P077 |  | ✅ match | `VG2g<C-a>` |  |
+| P078 |  | ✅ match | `<C-v>jl<C-x>` |  |
+| P079 |  | ✅ match | `VGg<C-a>` |  |
+| P080 |  | ✅ match | `dit` |  |
+| P081 |  | ✅ match | `dat` |  |
+| P082 |  | ✅ match | `citnew<Esc>` |  |
+| P083 |  | ✅ match | `yitP` |  |
+| P084 |  | ✅ match | `ylP` |  |
+| P085 |  | ✅ match | `yiwP` |  |
+| P086 |  | ✅ match | `yiwp` |  |
+| P087 |  | 🟡 same result, differs while typing | `<C-v>jA` **!** `<Esc>` | text: `["a!b","cd"]` → `["a!b","c!d"]` |
+| P088 |  | 🟡 same result, differs while typing | `<C-v>jI` **-** `<Esc>` | text: `["a-bc","def"]` → `["a-bc","d-ef"]` |
+| P089 |  | 🟡 same result, differs while typing | `<C-v>jc` **X** `<Esc>` | text: `["aXc","df"]` → `["aXc","dXf"]` |
+| P090 |  | ✅ match | `$` |  |
+| P091 |  | ✅ match | `h` |  |
+| P092 |  | ✅ match | `X` |  |
+| P093 |  | ✅ match | `:s/a/b/g<CR>u` |  |
+| P094 |  | ✅ match | `qqxq2@qu` |  |
+| P095 |  | ✅ match | `A!<Esc>j.u` |  |
+| P096 |  | ✅ match | `cwX<Esc>wxuu` |  |
+| P097 |  | ✅ match | `xxuu<C-r><C-r>` |  |
+| P098 |  | ✅ match | `:g/x/d<CR>u` |  |
+| P099 |  | ✅ match | `oB<Esc>u<C-r>` |  |
+| P100 |  | ✅ match | `jOB<Esc>u<C-r>` |  |
+| P101 |  | ✅ match | `:4d<CR>u` |  |

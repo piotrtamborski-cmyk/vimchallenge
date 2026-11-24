@@ -11,6 +11,7 @@ it against real Vim. The web app comes next.
 | Path | What |
 |---|---|
 | `packages/engine` | The editing engine: CodeMirror 6 + [`@replit/codemirror-vim`](https://github.com/replit/codemirror-vim), the shared editor profile, key notation and positions. `@vimchallenge/engine/headless` runs the same engine in Node (jsdom) for the server-side judge. |
+| `packages/vim-core` | Vendored fork of `@replit/codemirror-vim-core` (MIT) with the fixes found by conformance. npm links it in place of the published package. |
 | `packages/conformance` | Replays every case key by key in reference Vim and in the headless engine and writes [`MATRIX.md`](packages/conformance/MATRIX.md). |
 | `packages/conformance/cases` | `plan-bank-v1.json` — the 80 planned tasks with the author's keys; `probes.json` — extra cases aimed at known weak spots (undo grouping, Unicode, regex). |
 

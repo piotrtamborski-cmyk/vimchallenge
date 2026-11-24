@@ -1884,5 +1884,205 @@
         "x"
       ]
     }
+  },
+  {
+    "id": "P093",
+    "source": "probe",
+    "title": "u after :s with the g flag undoes all of it",
+    "keys": ":s/a/b/g<CR>u",
+    "initial": {
+      "lines": [
+        "a a a"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a a a"
+      ]
+    }
+  },
+  {
+    "id": "P094",
+    "source": "probe",
+    "title": "u after a macro run undoes the whole run",
+    "keys": "qqxq2@qu",
+    "initial": {
+      "lines": [
+        "abcd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "bcd"
+      ]
+    }
+  },
+  {
+    "id": "P095",
+    "source": "probe",
+    "title": "u after . undoes one repeat",
+    "keys": "A!<Esc>j.u",
+    "initial": {
+      "lines": [
+        "a",
+        "b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a!",
+        "b"
+      ]
+    }
+  },
+  {
+    "id": "P096",
+    "source": "probe",
+    "title": "u twice after cw then x",
+    "keys": "cwX<Esc>wxuu",
+    "initial": {
+      "lines": [
+        "ab cd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "ab cd"
+      ]
+    }
+  },
+  {
+    "id": "P097",
+    "source": "probe",
+    "title": "Redo twice after two undos",
+    "keys": "xxuu<C-r><C-r>",
+    "initial": {
+      "lines": [
+        "abc"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "c"
+      ]
+    }
+  },
+  {
+    "id": "P098",
+    "source": "probe",
+    "title": "u after :g/d",
+    "keys": ":g/x/d<CR>u",
+    "initial": {
+      "lines": [
+        "x",
+        "y",
+        "x"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x",
+        "y",
+        "x"
+      ]
+    }
+  },
+  {
+    "id": "P099",
+    "source": "probe",
+    "title": "Cursor after undo and redo of o",
+    "keys": "oB<Esc>u<C-r>",
+    "initial": {
+      "lines": [
+        "A",
+        "Z"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B",
+        "Z"
+      ]
+    }
+  },
+  {
+    "id": "P100",
+    "source": "probe",
+    "title": "Cursor after undo and redo of O",
+    "keys": "jOB<Esc>u<C-r>",
+    "initial": {
+      "lines": [
+        "A",
+        "Z"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B",
+        "Z"
+      ]
+    }
+  },
+  {
+    "id": "P101",
+    "source": "probe",
+    "title": "Cursor after undo of :d on another line",
+    "keys": ":4d<CR>u",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "  d",
+        "e"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "  d",
+        "e"
+      ]
+    }
   }
 ]

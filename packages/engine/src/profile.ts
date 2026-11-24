@@ -4,16 +4,21 @@
  * The reference Vim gets the same profile in packages/conformance/vim/driver.vim.
  */
 import type { Extension } from '@codemirror/state';
+import { vimUndoSteps } from './undo.ts';
 
 export const PROFILE_VERSION = 1;
 
 export function editorProfileExtensions(m: {
   state: typeof import('@codemirror/state');
+  view: typeof import('@codemirror/view');
   commands: typeof import('@codemirror/commands');
   language: typeof import('@codemirror/language');
+  vim: typeof import('@replit/codemirror-vim');
 }): Extension[] {
   return [
-    m.commands.history(),
+    m.commands.history({ minDepth: 1000 }),
+    // One undo step per Vim change, independent of typing speed.
+    ...vimUndoSteps(m),
     // Visual-block commands (<C-v>…I, x, c) work on one selection range per line.
     m.state.EditorState.allowMultipleSelections.of(true),
     m.state.EditorState.tabSize.of(4),

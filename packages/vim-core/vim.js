@@ -3473,7 +3473,11 @@ export function initVim(CM) {
       });
     },
     redo: function(cm, actionArgs) {
-      repeatFn(cm, CM.commands.redo, actionArgs.repeat)();
+      // Same cursor rule as undo: start of the changed text.
+      cm.operation(function() {
+        repeatFn(cm, CM.commands.redo, actionArgs.repeat)();
+        cm.setCursor(clipCursorToContent(cm, cm.getCursor('start')));
+      });
     },
     setRegister: function(_cm, actionArgs, vim) {
       vim.inputState.registerName = actionArgs.selectedCharacter;
