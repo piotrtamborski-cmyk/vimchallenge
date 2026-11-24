@@ -1385,5 +1385,120 @@
         "b"
       ]
     }
+  },
+  {
+    "id": "P069",
+    "source": "probe",
+    "title": "Ex address search wraps around the end",
+    "keys": ":/BEGIN/d<CR>",
+    "initial": {
+      "lines": [
+        "x",
+        "BEGIN",
+        "y"
+      ],
+      "cursor": [
+        3,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x",
+        "y"
+      ]
+    }
+  },
+  {
+    "id": "P070",
+    "source": "probe",
+    "title": "Cursor after :s splitting a line",
+    "keys": ":s/,/\\r/g<CR>",
+    "initial": {
+      "lines": [
+        "a,b,c"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "b",
+        "c"
+      ]
+    }
+  },
+  {
+    "id": "P071",
+    "source": "probe",
+    "title": "Cursor after :g with :s",
+    "keys": ":g/x/s/x/z/<CR>",
+    "initial": {
+      "lines": [
+        "  x",
+        "y",
+        "  x"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  z",
+        "y",
+        "  z"
+      ]
+    }
+  },
+  {
+    "id": "P072",
+    "source": "probe",
+    "title": "Cursor after :sort on an indented range",
+    "keys": ":%sort<CR>",
+    "initial": {
+      "lines": [
+        "  b",
+        "  a"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  a",
+        "  b"
+      ]
+    }
+  },
+  {
+    "id": "P073",
+    "source": "probe",
+    "title": ":g whose command fails on some lines",
+    "keys": ":g/a/s/b/X/<CR>",
+    "initial": {
+      "lines": [
+        "ab",
+        "a",
+        "ab"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "aX",
+        "a",
+        "aX"
+      ]
+    }
   }
 ]

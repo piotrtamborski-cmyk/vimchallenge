@@ -5852,6 +5852,13 @@ export function initVim(CM) {
           }
           var nextPos = cursor.from();
           if (!nextPos) {
+            // 'wrapscan' (on by default): continue from the other end of the buffer.
+            cursor = cm.getSearchCursor(query, forward ? new Pos(cm.firstLine(), 0)
+                : new Pos(cm.lastLine(), cm.getLine(cm.lastLine()).length));
+            if (forward) cursor.findNext(); else cursor.findPrevious();
+            nextPos = cursor.from();
+          }
+          if (!nextPos) {
             throw new Error("Pattern not found" + query);
           }
           line = nextPos.line;
@@ -6253,6 +6260,8 @@ export function initVim(CM) {
         }
       }
       cm.replaceRange(text.join('\n'), curStart, curEnd);
+      // Like Vim: first non-blank of the first sorted line.
+      cm.setCursor(new Pos(curStart.line, findFirstNonWhiteSpaceCharacter(cm.getLine(curStart.line))));
     },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     vglobal: function(cm, params) {
@@ -6337,13 +6346,17 @@ export function initVim(CM) {
           matchedLines.push(cmd ? cm.getLineHandle(i) : line);
         }
       }
+      if (!matchedLines.length) commandFailed(); // E486 in Vim
       // if there is no [cmd], just display the list of matched lines
       if (!cmd) {
         showConfirm(cm, matchedLines.join('\n'));
         return;
       }
       var index = 0;
+      // Errors of the command on single lines do not make :g fail (Vim reports them at the end).
+      var failedBefore = vimGlobalState.macroModeState.failed;
       var nextCommand = function() {
+        vimGlobalState.macroModeState.failed = failedBefore;
         if (index < matchedLines.length) {
           var lineHandle = matchedLines[index++];
           var lineNum = cm.getLineNumber(lineHandle);
@@ -6518,6 +6531,9 @@ export function initVim(CM) {
         { anchor: new Pos(line, 0),
           head: new Pos(lineEnd + 1, 0) }
       ]);
+      // Like Vim: first non-blank of the line after the deleted range.
+      var target = Math.min(line, cm.lastLine());
+      cm.setCursor(new Pos(target, findFirstNonWhiteSpaceCharacter(cm.getLine(target))));
     },
     /** :[range]copy {address} and :t — copy lines below {address} (0: above the first line). */
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
@@ -6684,6 +6700,8 @@ export function initVim(CM) {
     var matches = 0;
     
     /** @type {Pos}*/ var lastPos;
+    /** Line where the last replacement ends (after any line breaks it inserted). */
+    /** @type {number|undefined}*/ var lastReplacedLine;
     /** @type {number}*/ var modifiedLineNumber
     /** @type {boolean}*/var joined;
     function replaceAll() {
@@ -6724,6 +6742,7 @@ export function initVim(CM) {
       var unmodifiedLineNumber = searchCursor.to().line;
       searchCursor.replace(newText);
       modifiedLineNumber = searchCursor.to().line;
+      lastReplacedLine = modifiedLineNumber;
       lineEnd += modifiedLineNumber - unmodifiedLineNumber;
       joined = modifiedLineNumber < unmodifiedLineNumber;
     }
@@ -6764,10 +6783,14 @@ export function initVim(CM) {
       if (close) { close(); }
       cm.focus();
       if (lastPos) {
-        cm.setCursor(lastPos);
+        // Like Vim: first non-blank of the line where the last substitution ended.
+        var endPos = !confirm && lastReplacedLine !== undefined
+          ? new Pos(lastReplacedLine, findFirstNonWhiteSpaceCharacter(cm.getLine(lastReplacedLine)))
+          : lastPos;
+        cm.setCursor(endPos);
         var vim = cm.state.vim;
         vim.exMode = false;
-        vim.lastHPos = vim.lastHSPos = lastPos.ch;
+        vim.lastHPos = vim.lastHSPos = endPos.ch;
       }
       if (callback) { callback(); }
       else if (done) {
