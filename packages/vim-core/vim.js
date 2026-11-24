@@ -245,6 +245,10 @@ export function initVim(CM) {
     { keys: 'zb', type: 'action', action: 'scrollToCursor', actionArgs: { position: 'bottom' }},
     { keys: 'z-', type: 'action', action: 'scrollToCursor', actionArgs: { position: 'bottom' }, motion: 'moveToFirstNonWhiteSpaceCharacter' },
     { keys: '.', type: 'action', action: 'repeatLastEdit' },
+    { keys: '<C-a>', type: 'action', action: 'incrementNumbersInSelection', isEdit: true, actionArgs: {increase: true, progressive: false}, context: 'visual'},
+    { keys: '<C-x>', type: 'action', action: 'incrementNumbersInSelection', isEdit: true, actionArgs: {increase: false, progressive: false}, context: 'visual'},
+    { keys: 'g<C-a>', type: 'action', action: 'incrementNumbersInSelection', isEdit: true, actionArgs: {increase: true, progressive: true}, context: 'visual'},
+    { keys: 'g<C-x>', type: 'action', action: 'incrementNumbersInSelection', isEdit: true, actionArgs: {increase: false, progressive: true}, context: 'visual'},
     { keys: '<C-a>', type: 'action', action: 'incrementNumberToken', isEdit: true, actionArgs: {increase: true, backtrack: false}},
     { keys: '<C-x>', type: 'action', action: 'incrementNumberToken', isEdit: true, actionArgs: {increase: false, backtrack: false}},
     { keys: '<C-t>', type: 'action', action: 'indent', actionArgs: { indentRight: true }, context: 'insert' },
@@ -3528,10 +3532,43 @@ export function initVim(CM) {
         }
       }
     },
+    /**
+     * {Visual}CTRL-A / CTRL-X, and g CTRL-A / g CTRL-X (each further line with a number gets
+     * one more [count]). Only the selected text of each line is searched for a number.
+     */
+    incrementNumbersInSelection: function(cm, actionArgs, vim) {
+      var anchor = vim.sel.anchor, head = vim.sel.head;
+      var first = cursorMin(anchor, head), last = cursorMax(anchor, head);
+      var block = vim.visualBlock, linewise = vim.visualLine;
+      var blockFrom = Math.min(anchor.ch, head.ch), blockTo = Math.max(anchor.ch, head.ch);
+      var step = (actionArgs.increase ? 1 : -1) * (actionArgs.repeat || 1);
+      var amount = step;
+      exitVisualMode(cm, false);
+      cm.operation(function() {
+        for (var l = first.line; l <= last.line; l++) {
+          var text = cm.getLine(l);
+          var from = 0, to = text.length;
+          if (block) { from = blockFrom; to = Math.min(text.length, blockTo + 1); }
+          else if (!linewise) {
+            if (l == first.line) from = first.ch;
+            if (l == last.line) to = Math.min(text.length, last.ch + 1);
+          }
+          if (from >= to) continue;
+          var re = ctrlANumberRegex();
+          var match = re.exec(text.slice(from, to));
+          if (!match) continue;
+          var start = from + match.index;
+          cm.replaceRange(incrementedNumber(match, amount), new Pos(l, start), new Pos(l, start + match[0].length));
+          if (actionArgs.progressive) amount += step;
+        }
+      });
+      var col = block ? blockFrom : linewise ? 0 : first.ch;
+      cm.setCursor(new Pos(first.line, Math.min(col, Math.max(0, cm.getLine(first.line).length - 1))));
+    },
     incrementNumberToken: function(cm, actionArgs) {
       var cur = cm.getCursor();
       var lineStr = cm.getLine(cur.line);
-      var re = /(-?)(?:(0x)([\da-f]+)|(0b|0|)(\d+))/gi;
+      var re = ctrlANumberRegex();
       var match;
       var start;
       var end;
@@ -3544,18 +3581,8 @@ export function initVim(CM) {
       // @ts-ignore
       if (!actionArgs.backtrack && (end <= cur.ch))return;
       if (match) {
-        var baseStr = match[2] || match[4]
-        var digits = match[3] || match[5]
         var increment = actionArgs.increase ? 1 : -1;
-        var base = {'0b': 2, '0': 8, '': 10, '0x': 16}[baseStr.toLowerCase()];
-        var number = parseInt(match[1] + digits, base) + (increment * actionArgs.repeat);
-        numberStr = number.toString(base);
-        var zeroPadding = baseStr ? new Array(digits.length - numberStr.length + 1 + match[1].length).join('0') : ''
-        if (numberStr.charAt(0) === '-') {
-          numberStr = '-' + baseStr + zeroPadding + numberStr.substr(1);
-        } else {
-          numberStr = baseStr + zeroPadding + numberStr;
-        }
+        numberStr = incrementedNumber(match, increment * actionArgs.repeat);
         // @ts-ignore
         var from = new Pos(cur.line, start);
         // @ts-ignore
@@ -3585,6 +3612,27 @@ export function initVim(CM) {
       exitInsertMode(cm);
     }
   };
+
+  /** Number pattern for CTRL-A / CTRL-X following 'nrformats'. Groups: sign, 0x, hex digits, 0b|0|'', digits. */
+  function ctrlANumberRegex() {
+    var nf = String(getOption('nrformats') || '');
+    var hex = nf.indexOf('hex') != -1, octal = nf.indexOf('octal') != -1, bin = nf.indexOf('bin') != -1;
+    var prefixes = (bin ? '0b|' : '') + (octal ? '0|' : '');
+    return new RegExp('(-?)(?:' + (hex ? '(0x)([\\da-f]+)' : '()()(?!)') + '|(' + prefixes + ')(\\d+))', 'gi');
+  }
+  /** @arg {RegExpExecArray} match from ctrlANumberRegex() @arg {number} amount */
+  function incrementedNumber(match, amount) {
+    var baseStr = match[2] || match[4] || '';
+    var digits = match[3] || match[5] || '';
+    var base = {'0b': 2, '0': 8, '': 10, '0x': 16}[baseStr.toLowerCase()] || 10;
+    var number = parseInt(match[1] + digits, base) + amount;
+    var numberStr = Math.abs(number).toString(base);
+    // Keep the width of numbers written with leading zeros.
+    if (baseStr || (digits.length > 1 && digits.charAt(0) == '0')) {
+      while (numberStr.length < digits.length) numberStr = '0' + numberStr;
+    }
+    return (number < 0 ? '-' : '') + baseStr + numberStr;
+  }
 
   /** @arg {string } name  @arg {import("./types").ActionFn} fn */
   function defineAction(name, fn) {
@@ -5061,6 +5109,8 @@ export function initVim(CM) {
   // Search functions
   defineOption('pcre', false, 'boolean');
   defineOption('ignorecase', false, 'boolean', ['ic']);
+  // Number formats recognised by CTRL-A / CTRL-X, as in Vim ("" means decimal only).
+  defineOption('nrformats', 'bin,octal,hex', 'string', ['nf']);
   defineOption('smartcase', false, 'boolean', ['scs']);
   
   /**@type {SearchStateInterface} */

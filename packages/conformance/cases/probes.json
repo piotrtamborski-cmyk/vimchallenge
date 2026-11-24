@@ -1500,5 +1500,133 @@
         "aX"
       ]
     }
+  },
+  {
+    "id": "P074",
+    "source": "probe",
+    "title": "Ctrl-A on a number with leading zeros (decimal only)",
+    "keys": "<C-a>",
+    "initial": {
+      "lines": [
+        "x 007"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x 008"
+      ]
+    }
+  },
+  {
+    "id": "P075",
+    "source": "probe",
+    "title": "Ctrl-A on 0x10 with decimal-only nrformats",
+    "keys": "<C-a>",
+    "initial": {
+      "lines": [
+        "0x10"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P076",
+    "source": "probe",
+    "title": "Visual Ctrl-A on each line",
+    "keys": "Vj<C-a>",
+    "initial": {
+      "lines": [
+        "a 1",
+        "b 2"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a 2",
+        "b 3"
+      ]
+    }
+  },
+  {
+    "id": "P077",
+    "source": "probe",
+    "title": "g Ctrl-A with a count",
+    "keys": "VG2g<C-a>",
+    "initial": {
+      "lines": [
+        "0",
+        "0",
+        "0"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "2",
+        "4",
+        "6"
+      ]
+    }
+  },
+  {
+    "id": "P078",
+    "source": "probe",
+    "title": "Visual Ctrl-X in a block",
+    "keys": "<C-v>jl<C-x>",
+    "initial": {
+      "lines": [
+        "10 10",
+        "10 10"
+      ],
+      "cursor": [
+        1,
+        4
+      ]
+    },
+    "expected": {
+      "lines": [
+        "10 9",
+        "10 9"
+      ]
+    }
+  },
+  {
+    "id": "P079",
+    "source": "probe",
+    "title": "g Ctrl-A skips lines without a number",
+    "keys": "VGg<C-a>",
+    "initial": {
+      "lines": [
+        "1",
+        "x",
+        "1"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "2",
+        "x",
+        "3"
+      ]
+    }
   }
 ]

@@ -25,4 +25,6 @@ export function editorProfileExtensions(m: {
 export function applyVimProfile(Vim: { setOption(name: string, value: unknown): void }): void {
   // Vim regex syntax (\(, \+, \<) instead of JavaScript regex syntax.
   Vim.setOption('pcre', false);
+  // CTRL-A / CTRL-X work on decimal numbers only ("007" is seven, not octal).
+  Vim.setOption('nrformats', '');
 }
