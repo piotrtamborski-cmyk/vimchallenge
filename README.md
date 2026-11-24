@@ -33,3 +33,8 @@ the keys one at a time from a timer, so each key is handled exactly as if typed.
 text, mode, cursor, visual selection, registers and marks. The headless engine records the same snapshot,
 and the harness reports the first key after which the two differ. Columns are 1-based and count Unicode
 code points.
+
+## License
+
+[GNU Affero General Public License v3.0](LICENSE) (`AGPL-3.0-only`). If you run a modified version as a
+network service, you must offer its source code to its users.

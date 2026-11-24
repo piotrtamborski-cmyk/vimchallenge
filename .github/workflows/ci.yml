@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y vim-nox
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Conformance matrix is up to date
+        run: |
+          npm run -s conformance
+          git diff --exit-code packages/conformance/MATRIX.md || {
+            echo "::error::MATRIX.md changed — run 'npm run conformance' and commit the result"; exit 1; }
