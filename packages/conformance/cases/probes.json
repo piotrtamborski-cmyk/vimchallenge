@@ -971,5 +971,176 @@
         "X XX"
       ]
     }
+  },
+  {
+    "id": "P051",
+    "source": "probe",
+    "title": ":m to the top",
+    "keys": ":m0<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c"
+      ],
+      "cursor": [
+        3,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "c",
+        "a",
+        "b"
+      ]
+    }
+  },
+  {
+    "id": "P052",
+    "source": "probe",
+    "title": ":m below the last line",
+    "keys": ":m$<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "b",
+        "c",
+        "a"
+      ]
+    }
+  },
+  {
+    "id": "P053",
+    "source": "probe",
+    "title": ":m a range up",
+    "keys": ":3,4m0<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "c",
+        "d",
+        "a",
+        "b"
+      ]
+    }
+  },
+  {
+    "id": "P054",
+    "source": "probe",
+    "title": ":t the current line to the end",
+    "keys": ":t$<CR>",
+    "initial": {
+      "lines": [
+        "  a",
+        "b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  a",
+        "b",
+        "  a"
+      ]
+    }
+  },
+  {
+    "id": "P055",
+    "source": "probe",
+    "title": ":co with a relative address",
+    "keys": ":co+1<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "b",
+        "a",
+        "c"
+      ]
+    }
+  },
+  {
+    "id": "P056",
+    "source": "probe",
+    "title": ":m onto itself is a no-op",
+    "keys": ":m.<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "b",
+        "c"
+      ]
+    }
+  },
+  {
+    "id": "P057",
+    "source": "probe",
+    "title": "Ex address with a Vim pattern",
+    "keys": ":/\\<id\\>/d<CR>",
+    "initial": {
+      "lines": [
+        "x",
+        "id2",
+        "id",
+        "y"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x",
+        "id2",
+        "y"
+      ]
+    }
   }
 ]

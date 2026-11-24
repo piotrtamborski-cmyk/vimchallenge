@@ -307,6 +307,9 @@ export function initVim(CM) {
     { name: 'vglobal', shortName: 'v' },
     { name: 'delete', shortName: 'd' },
     { name: 'join', shortName: 'j' },
+    { name: 'copy', shortName: 'co' },
+    { name: 't' },
+    { name: 'move', shortName: 'm' },
     { name: 'normal', shortName: 'norm' },
     { name: 'global', shortName: 'g' }
   ];
@@ -5743,7 +5746,9 @@ export function initVim(CM) {
 
       inputStream.eatSpace();
       // Parse command name.
-      var commandMatch = inputStream.match(/^(\w+|!!|@@|[!#&*<=>@~])/);
+      // Built-in command names are letters only, so ":3t0" is "t" with address "0"; user commands
+      // start with an upper case letter and may contain digits.
+      var commandMatch = inputStream.match(/^([A-Z][A-Za-z0-9]*|[a-z]+|!!|@@|[!#&*<=>@~])/);
       if (commandMatch) {
         result.commandName = commandMatch[1];
       } else {
@@ -5798,14 +5803,16 @@ export function initVim(CM) {
           var queryString = "";
           var forward = !offsetMatch[1].endsWith("?");
           if (offsetMatch[1].length == 1) {
-            var queryMatch = inputStream.match(forward ? /^([^\/\\]|\\\/)*/ : /^([^\/\?]|\\\?)*/);
+            // Keep every escaped character (\< \( …), not only an escaped delimiter.
+            var queryMatch = inputStream.match(forward ? /^(\\.|[^\/\\])*/ : /^(\\.|[^?\\])*/);
             inputStream.match(forward ? /^\/?/ : /^\??/);
             queryString = queryMatch && queryMatch[0];
           }
           if (!queryString) {
             queryString = vimGlobalState.registerController.getRegister('/')?.toString() || "";
           }
-          var query = new RegExp(queryString);
+          var query = getOption('pcre') ? new RegExp(queryString) : parseQuery(queryString, false, true);
+          if (!query) throw new Error('E35: No previous regular expression');
           var cursor = cm.getSearchCursor(query, new Pos(line + (forward ? 1 : 0), 0));
           if (forward) {
             cursor.findNext(); 
@@ -6480,6 +6487,20 @@ export function initVim(CM) {
           head: new Pos(lineEnd + 1, 0) }
       ]);
     },
+    /** :[range]copy {address} and :t — copy lines below {address} (0: above the first line). */
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
+    copy: function(cm, params) {
+      copyOrMoveLines(cm, params, false);
+    },
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
+    t: function(cm, params) {
+      copyOrMoveLines(cm, params, false);
+    },
+    /** :[range]move {address} — move lines below {address}. */
+    /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
+    move: function(cm, params) {
+      copyOrMoveLines(cm, params, true);
+    },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     join: function(cm, params) {
       var line = params.selectionLine;
@@ -6555,6 +6576,59 @@ export function initVim(CM) {
   vimApi.defineEx("version", "ve", (cm) => {
     showConfirm(cm, "Codemirror-vim version: <DEV>");
   });
+
+  /**
+   * Shared by :copy, :t and :move. Like Vim, the cursor ends on the first non-blank of the last
+   * line that was copied or moved.
+   * @arg {CodeMirrorV} cm @arg {ExParams} params @arg {boolean} move
+   */
+  function copyOrMoveLines(cm, params, move) {
+    var line = params.selectionLine;
+    var lineEnd = isNaN(params.selectionLineEnd) ? line : params.selectionLineEnd;
+    if (lineEnd < line) { var tmp = line; line = lineEnd; lineEnd = tmp; }
+    var arg = trim(params.argString || '');
+    var dest;
+    if (arg) {
+      var stream = new CM.StringStream(arg);
+      dest = exCommandDispatcher.parseLineSpec_(cm, stream);
+      if (!stream.eol()) dest = undefined;
+    }
+    if (dest === undefined || dest < -1 || dest > cm.lastLine()) {
+      showConfirm(cm, 'E14: Invalid address');
+      return;
+    }
+    var count = lineEnd - line + 1;
+    var text = cm.getRange(new Pos(line, 0), new Pos(lineEnd, cm.getLine(lineEnd).length));
+    /** @arg {number} after */
+    function insertAfter(after) {
+      if (after < 0) cm.replaceRange(text + '\n', new Pos(0, 0));
+      else cm.replaceRange('\n' + text, new Pos(after, cm.getLine(after).length));
+    }
+    /** @arg {number} from @arg {number} to */
+    function deleteLines(from, to) {
+      if (to < cm.lastLine()) cm.replaceRange('', new Pos(from, 0), new Pos(to + 1, 0));
+      else cm.replaceRange('', new Pos(from - 1, cm.getLine(from - 1).length), new Pos(to, cm.getLine(to).length));
+    }
+    var last;
+    if (!move) {
+      insertAfter(dest);
+      last = dest + count;
+    } else if (dest >= line && dest < lineEnd) {
+      showConfirm(cm, 'E134: Cannot move a range of lines into itself');
+      return;
+    } else if (dest == lineEnd || dest == line - 1) {
+      last = lineEnd;
+    } else if (dest < line) {
+      insertAfter(dest);
+      deleteLines(line + count, lineEnd + count);
+      last = dest + count;
+    } else {
+      insertAfter(dest);
+      deleteLines(line, lineEnd);
+      last = dest;
+    }
+    cm.setCursor(new Pos(last, findFirstNonWhiteSpaceCharacter(cm.getLine(last))));
+  }
 
   /**
    * @arg {CodeMirrorV} cm CodeMirror instance we are in.
