@@ -1,4 +1,4 @@
-/** 1-based position; `col` counts Unicode code points in the line. */
+/** 1-based position; `col` counts characters like Vim's charcol(): code points, combining marks included in the preceding character. */
 export type Pos = [line: number, col: number];
 
 export type Mode =

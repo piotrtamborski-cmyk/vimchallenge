@@ -2423,7 +2423,21 @@ export function initVim(CM) {
     moveByCharacters: function(cm, head, motionArgs, vim, inputState) {
       var cur = head;
       var repeat = motionArgs.repeat;
-      var ch = motionArgs.forward ? cur.ch + repeat : cur.ch - repeat;
+      // Step by characters, keeping surrogate pairs and combining marks with their base (as Vim).
+      var text = cm.getLine(cur.line);
+      var ch = cur.ch;
+      for (var step = 0; step < repeat; step++) {
+        if (motionArgs.forward) {
+          if (ch >= text.length) { ch += repeat - step; break; }
+          ch += text.codePointAt(ch) > 0xffff ? 2 : 1;
+          while (ch < text.length && isCombiningMark(text, ch)) ch++;
+        } else {
+          if (ch <= 0) { ch -= repeat - step; break; }
+          ch--;
+          while (ch > 0 && (isCombiningMark(text, ch) ||
+              (text.charCodeAt(ch) >= 0xDC00 && text.charCodeAt(ch) <= 0xDFFF))) ch--;
+        }
+      }
       // Like Vim: h in the first column or l on the last character fails (without an operator).
       if (!inputState?.operator && !vim?.insertMode) {
         var lastCh = Math.max(0, cm.getLine(cur.line).length - (vim?.visualMode ? 0 : 1));
@@ -3652,6 +3666,10 @@ export function initVim(CM) {
    * Below are miscellaneous utility functions used by vim.js
    */
 
+  /** @arg {string} text @arg {number} ch */
+  function isCombiningMark(text, ch) {
+    return /\p{M}/u.test(text.charAt(ch));
+  }
   /**
    * Clips cursor to ensure that line is within the buffer's range
    * and is not inside surrogate pair
@@ -3668,6 +3686,17 @@ export function initVim(CM) {
     var text = cm.getLine(line);
     var maxCh = text.length - 1 + Number(!!includeLineBreak);
     var ch = Math.min(Math.max(0, cur.ch), maxCh);
+    // Like Vim, keep combining marks with their base character: never stop on one.
+    if (ch > 0 && ch < text.length && isCombiningMark(text, ch)) {
+      var markDir = oldCur && oldCur.line == line && oldCur.ch > ch ? -1 : 1;
+      var probe = ch;
+      while (probe > 0 && probe < text.length && isCombiningMark(text, probe)) probe += markDir;
+      if (markDir > 0 && probe <= maxCh) {
+        ch = probe;
+      } else {
+        while (ch > 0 && isCombiningMark(text, ch)) ch--;
+      }
+    }
     // prevent cursor from entering surrogate pair
     var charCode = text.charCodeAt(ch);
     if (0xDC00 <= charCode && charCode <= 0xDFFF) {

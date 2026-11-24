@@ -1832,5 +1832,57 @@
         "dXf"
       ]
     }
+  },
+  {
+    "id": "P090",
+    "source": "probe",
+    "title": "$ on a line ending with a combining accent",
+    "keys": "$",
+    "initial": {
+      "lines": [
+        "xé"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P091",
+    "source": "probe",
+    "title": "h back over a combining accent",
+    "keys": "h",
+    "initial": {
+      "lines": [
+        "éx"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P092",
+    "source": "probe",
+    "title": "X before a combining accent",
+    "keys": "X",
+    "initial": {
+      "lines": [
+        "éx"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x"
+      ]
+    }
   }
 ]

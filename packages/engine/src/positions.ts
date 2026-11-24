@@ -1,22 +1,38 @@
 import type { Pos } from './types.ts';
 
-/** Converts a 0-based UTF-16 offset in a line to a 1-based code point column. */
+/**
+ * Columns count characters the way Vim's charcol() does: one per code point, except that
+ * combining marks belong to the character before them ("é" written as e + U+0301 is one column).
+ * Task material is NFC, so this only matters for decomposed text.
+ */
+const COMBINING = /\p{M}/u;
+
+function stepFrom(text: string, i: number): number {
+  i += text.codePointAt(i)! > 0xffff ? 2 : 1;
+  while (i < text.length && COMBINING.test(String.fromCodePoint(text.codePointAt(i)!))) {
+    i += text.codePointAt(i)! > 0xffff ? 2 : 1;
+  }
+  return i;
+}
+
+/** Converts a 0-based UTF-16 offset in a line to a 1-based column. */
 export function toCol(lineText: string, ch: number): number {
   let col = 1;
-  for (let i = 0; i < ch && i < lineText.length; ) {
-    i += lineText.codePointAt(i)! > 0xffff ? 2 : 1;
+  let i = 0;
+  while (i < lineText.length) {
+    const next = stepFrom(lineText, i);
+    if (next > ch) break;
+    i = next;
     col++;
   }
   // Past the end of the line (insert mode at end of line).
   return col + Math.max(0, ch - lineText.length);
 }
 
-/** Converts a 1-based code point column to a 0-based UTF-16 offset in a line. */
+/** Converts a 1-based column to a 0-based UTF-16 offset in a line. */
 export function toCh(lineText: string, col: number): number {
   let ch = 0;
-  for (let c = 1; c < col && ch < lineText.length; c++) {
-    ch += lineText.codePointAt(ch)! > 0xffff ? 2 : 1;
-  }
+  for (let c = 1; c < col && ch < lineText.length; c++) ch = stepFrom(lineText, ch);
   return ch;
 }
 

@@ -30,6 +30,10 @@ describe('columns', () => {
     expect(toCh('a😀b', 3)).toBe(3);
     expect(toCol('gęś', 3)).toBe(4);
   });
+  it('counts a combining mark with its base character, like Vim', () => {
+    expect(toCol('e\u0301x', 2)).toBe(2); // on 'x'
+    expect(toCh('e\u0301x', 2)).toBe(2);
+  });
   it('allows the insert position after the last character', () => {
     expect(toCol('abc', 3)).toBe(4);
   });
