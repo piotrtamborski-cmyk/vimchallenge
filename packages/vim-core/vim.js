@@ -670,6 +670,10 @@ export function initVim(CM) {
       this.replaySearchQueries = [];
       this.onRecordingDone = undefined;
       this.lastInsertModeChanges = createInsertModeChanges();
+      /** Set when a command fails (Vim beeps); a running macro stops at that point. */
+      this.failed = false;
+      /** @type {Register | undefined} Content of the register being recorded, from before recording. */
+      this.registerBeforeRecording = undefined;
     }
     exitMacroRecordMode() {
       var macroModeState = vimGlobalState.macroModeState;
@@ -686,6 +690,11 @@ export function initVim(CM) {
     enterMacroRecordMode(cm, registerName) {
       var register = vimGlobalState.registerController.getRegister(registerName);
       if (register) {
+        // Vim writes the register when recording stops; until then @{reg} runs the old content.
+        var previous = new Register(register.keyBuffer.join(''), register.linewise, register.blockwise);
+        previous.insertModeChanges = register.insertModeChanges.slice();
+        previous.searchQueries = register.searchQueries.slice();
+        this.registerBeforeRecording = previous;
         register.clear();
         this.latestRegister = registerName;
         if (cm.openDialog) {
@@ -925,7 +934,7 @@ export function initVim(CM) {
       function handleMacroRecording() {
         var macroModeState = vimGlobalState.macroModeState;
         if (macroModeState.isRecording) {
-          if (key == 'q') {
+          if (key == 'q' && !vim.inputState.keyBuffer.length && !vim.inputState.operator) {
             macroModeState.exitMacroRecordMode();
             clearInputState(cm);
             return true;
@@ -1912,8 +1921,17 @@ export function initVim(CM) {
      * @arg {import("./types").exCommand | import("./types").keyToExCommand} command
      */
     processEx: function(cm, vim, command) {
+      /** Text the prompt starts with (a range for Visual mode or a count). */
+      var prefill = '';
       /**@arg {string} input*/
       function onPromptClose(input) {
+        // While recording a macro, keep what was typed on the command line (after any range
+        // the prompt started with), so that replaying the macro runs the same command.
+        var macroModeState = vimGlobalState.macroModeState;
+        if (macroModeState.isRecording && !macroModeState.isPlaying) {
+          var typed = prefill && input.indexOf(prefill) == 0 ? input.slice(prefill.length) : input;
+          logKey(macroModeState, typed.replace(/</g, '<lt>') + '<CR>');
+        }
         // Give the prompt some time to close so that if processCommand shows
         // an error, the elements don't overlap.
         vimGlobalState.exCommandHistoryController.pushInput(input);
@@ -1933,6 +1951,7 @@ export function initVim(CM) {
             (keyName == '<BS>' && input == '')) {
           vimGlobalState.exCommandHistoryController.pushInput(input);
           vimGlobalState.exCommandHistoryController.reset();
+          if (vimGlobalState.macroModeState.isRecording) logKey(vimGlobalState.macroModeState, '<Esc>');
           CM.e_stop(e);
           clearInputState(cm);
           clearSearchHighlight(cm);
@@ -1997,6 +2016,7 @@ export function initVim(CM) {
             promptOptions.selectValueOnOpen = false;
           }
         }
+        prefill = promptOptions.value || '';
         showPrompt(cm, promptOptions);
       }
     },
@@ -2248,6 +2268,7 @@ export function initVim(CM) {
       highlightSearchMatches(cm, query);
       var result = findNext(cm, prev/** prev */, query, motionArgs.repeat);
       if (!result) {
+        commandFailed();
         showConfirm(cm, 'No match found ' + query +
           (getOption('pcre') ? ' (set nopcre to use Vim regexps)' : ''));
       }
@@ -2395,10 +2416,18 @@ export function initVim(CM) {
       }
       return best;
     },
-    moveByCharacters: function(_cm, head, motionArgs) {
+    moveByCharacters: function(cm, head, motionArgs, vim, inputState) {
       var cur = head;
       var repeat = motionArgs.repeat;
       var ch = motionArgs.forward ? cur.ch + repeat : cur.ch - repeat;
+      // Like Vim: h in the first column or l on the last character fails (without an operator).
+      if (!inputState?.operator && !vim?.insertMode) {
+        var lastCh = Math.max(0, cm.getLine(cur.line).length - (vim?.visualMode ? 0 : 1));
+        if (motionArgs.forward ? cur.ch >= lastCh : cur.ch <= 0) {
+          commandFailed();
+          return null;
+        }
+      }
       return new Pos(cur.line, ch);
     },
     moveByLines: function(cm, head, motionArgs, vim) {
@@ -2432,10 +2461,10 @@ export function initVim(CM) {
       }
       // Vim go to line begin or line end when cursor at first/last line and
       // move to previous/next line is triggered.
-      if (line < first && cur.line == first){
-        return this.moveToStartOfLine(cm, head, motionArgs, vim);
-      } else if (line > last && cur.line == last){
-          return moveToEol(cm, head, motionArgs, vim, true);
+      // Like Vim: j on the last line (k on the first) fails without moving.
+      if ((line < first && cur.line == first) || (line > last && cur.line == last)) {
+        commandFailed();
+        return null;
       }
       if (motionArgs.toFirstChar){
         endCh=findFirstNonWhiteSpaceCharacter(cm.getLine(line));
@@ -2509,15 +2538,17 @@ export function initVim(CM) {
           motionArgs.selectedCharacter, head);
       var increment = motionArgs.forward ? -1 : 1;
       recordLastCharacterSearch(increment, motionArgs);
-      if (!curEnd) return null;
+      if (!curEnd) { commandFailed(); return null; }
       curEnd.ch += increment;
       return curEnd;
     },
     moveToCharacter: function(cm, head, motionArgs) {
       var repeat = motionArgs.repeat;
       recordLastCharacterSearch(0, motionArgs);
-      return moveToCharacter(cm, repeat, motionArgs.forward,
-          motionArgs.selectedCharacter, head) || head;
+      var found = moveToCharacter(cm, repeat, motionArgs.forward,
+          motionArgs.selectedCharacter, head);
+      if (!found) commandFailed();
+      return found;
     },
     moveToSymbol: function(cm, head, motionArgs) {
       var repeat = motionArgs.repeat;
@@ -3031,7 +3062,7 @@ export function initVim(CM) {
         macroModeState.latestRegister = registerName;
       }
       while(repeat--){
-        executeMacroRegister(cm, vim, macroModeState, registerName);
+        if (executeMacroRegister(cm, vim, macroModeState, registerName) === false) break;
       }
     },
     enterMacroRecordMode: function(cm, actionArgs) {
@@ -5349,7 +5380,7 @@ export function initVim(CM) {
    * @arg {import("./types").PromptOptions} options 
    */
   function showPrompt(cm, options) {
-    if (keyToKeyStack.length) {
+    if (keyToKeyStack.length || vimGlobalState.macroModeState.isPlaying) {
       if (!options.value) options.value = '';
       virtualPrompt = options;
       return;
@@ -6422,7 +6453,8 @@ export function initVim(CM) {
       }
       var startPos = clipCursorToContent(cm, new Pos(lineStart, 0));
       var cursor = cm.getSearchCursor(query, startPos);
-      doReplace(cm, confirm, global, lineStart, lineEnd, cursor, query, replacePart, params.callback);
+      doReplace(cm, confirm, global, lineStart, lineEnd, cursor, query, replacePart, params.callback,
+          !!flagsPart && flagsPart.indexOf('e') != -1);
     },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     startinsert: function(cm, params) {
@@ -6642,9 +6674,10 @@ export function initVim(CM) {
    * @arg {string|{expand: (groups: ArrayLike<string|undefined>) => string}} replaceWith Text to replace
    *     matches with (pcre: may contain $1, $2, …), or a compiled Vim substitute string.
    * @arg {function} [callback] A callback for when the replace is done.
+   * @arg {boolean} [noError] The 'e' flag: no match is not an error.
    */
   function doReplace(cm, confirm, global, lineStart, lineEnd, searchCursor, query,
-      replaceWith, callback) {
+      replaceWith, callback, noError) {
     // Set up all the functions.
     cm.state.vim.exMode = true;
     var done = false;
@@ -6780,6 +6813,8 @@ export function initVim(CM) {
     // Actually do replace.
     next();
     if (done) {
+      // E486 in Vim; the 'e' flag suppresses the error (and so does not stop a macro).
+      if (!noError) commandFailed();
       showConfirm(cm, 'No matches for ' + query +  (getOption('pcre') ? ' (set nopcre to use vim regexps)' : ''));
       return;
     }
@@ -6884,6 +6919,10 @@ export function initVim(CM) {
    */
   function executeMacroRegister(cm, vim, macroModeState, registerName) {
     var register = vimGlobalState.registerController.getRegister(registerName);
+    if (macroModeState.isRecording && registerName == macroModeState.latestRegister &&
+        macroModeState.registerBeforeRecording) {
+      register = macroModeState.registerBeforeRecording;
+    }
     if (registerName == ':') {
       // Read-only register containing last Ex command.
       if (register.keyBuffer[0]) {
@@ -6894,26 +6933,52 @@ export function initVim(CM) {
     }
     var keyBuffer = register.keyBuffer;
     var imc = 0;
+    if (macroDepth == 0) macroModeState.failed = false;
+    macroDepth++;
     macroModeState.isPlaying = true;
+    var savedQueries = macroModeState.replaySearchQueries;
     macroModeState.replaySearchQueries = register.searchQueries.slice(0);
-    for (var i = 0; i < keyBuffer.length; i++) {
-      var text = keyBuffer[i];
-      var match, key;
-      var keyRe = /<(?:[CSMA]-)*\w+>|./gi;
-      while ((match = keyRe.exec(text))) {
-        // Pull off one command key, which is either a single character
-        // or a special sequence wrapped in '<' and '>', e.g. '<Space>'.
-        key = match[0];
-        vimApi.handleKey(cm, key, 'macro');
-        if (vim.insertMode) {
-          var changes = register.insertModeChanges[imc++].changes;
-          vimGlobalState.macroModeState.lastInsertModeChanges.changes = changes;
-          repeatInsertModeChanges(cm, changes, 1);
-          exitInsertMode(cm);
+    try {
+      for (var i = 0; i < keyBuffer.length; i++) {
+        var text = keyBuffer[i];
+        var match, key;
+        var keyRe = /<(?:[CSMA]-)*\w+>|./gi;
+        while ((match = keyRe.exec(text))) {
+          // Pull off one command key, which is either a single character
+          // or a special sequence wrapped in '<' and '>', e.g. '<Space>'.
+          key = match[0];
+          // Keys typed on the : command line were recorded as text; feed them to the prompt.
+          if (virtualPrompt) sendKeyToPrompt(key);
+          else vimApi.handleKey(cm, key, 'macro');
+          if (macroModeState.failed) return false;
+          if (vim.insertMode) {
+            var changes = register.insertModeChanges[imc++].changes;
+            vimGlobalState.macroModeState.lastInsertModeChanges.changes = changes;
+            repeatInsertModeChanges(cm, changes, 1);
+            exitInsertMode(cm);
+          }
+        }
+      }
+      return true;
+    } finally {
+      macroDepth--;
+      macroModeState.replaySearchQueries = savedQueries;
+      if (macroDepth == 0) {
+        macroModeState.isPlaying = false;
+        // A macro that ends on an unfinished command line leaves it open, like a mapping does.
+        if (virtualPrompt) {
+          var promptOptions = virtualPrompt;
+          virtualPrompt = null;
+          showPrompt(cm, promptOptions);
         }
       }
     }
-    macroModeState.isPlaying = false;
+  }
+  var macroDepth = 0;
+
+  /** Marks the current command as failed, as when Vim beeps: a running macro stops. */
+  function commandFailed() {
+    vimGlobalState.macroModeState.failed = true;
   }
 
   /** @arg {MacroModeState} macroModeState @arg {any} key */

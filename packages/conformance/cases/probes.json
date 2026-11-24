@@ -1142,5 +1142,248 @@
         "y"
       ]
     }
+  },
+  {
+    "id": "P058",
+    "source": "probe",
+    "title": "q as an argument of f does not stop recording",
+    "keys": "qa0fqrXjq@a",
+    "initial": {
+      "lines": [
+        "aqb",
+        "aqb"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "aXb",
+        "aXb"
+      ]
+    }
+  },
+  {
+    "id": "P059",
+    "source": "probe",
+    "title": "Macro with an Ex command",
+    "keys": "qq:s/a/b/<CR>jq2@q",
+    "initial": {
+      "lines": [
+        "a1",
+        "a2",
+        "a3"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "b1",
+        "b2",
+        "b3"
+      ]
+    }
+  },
+  {
+    "id": "P060",
+    "source": "probe",
+    "title": "Recursive macro stops when j fails",
+    "keys": "qaqqarYj@aq@a",
+    "initial": {
+      "lines": [
+        "x",
+        "x",
+        "x",
+        "x"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Y",
+        "Y",
+        "Y",
+        "Y"
+      ]
+    }
+  },
+  {
+    "id": "P061",
+    "source": "probe",
+    "title": "Macro stops when f finds nothing",
+    "keys": "qa0f,r;jq5@a",
+    "initial": {
+      "lines": [
+        "a,b",
+        "c",
+        "d,e"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a;b",
+        "c",
+        "d,e"
+      ]
+    }
+  },
+  {
+    "id": "P062",
+    "source": "probe",
+    "title": "Macro stops when :s finds nothing",
+    "keys": "qq:s/a/X/<CR>jq3@q",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "a"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "X",
+        "b",
+        "a"
+      ]
+    }
+  },
+  {
+    "id": "P063",
+    "source": "probe",
+    "title": ":s///e does not stop a macro",
+    "keys": "qq:s/a/X/e<CR>jq3@q",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "a"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "X",
+        "b",
+        "X"
+      ]
+    }
+  },
+  {
+    "id": "P064",
+    "source": "probe",
+    "title": "j on the last line does not move",
+    "keys": "j",
+    "initial": {
+      "lines": [
+        "abc"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P065",
+    "source": "probe",
+    "title": "k on the first line does not move",
+    "keys": "k",
+    "initial": {
+      "lines": [
+        "abc",
+        "d"
+      ],
+      "cursor": [
+        1,
+        3
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P066",
+    "source": "probe",
+    "title": "l on the last character does not move",
+    "keys": "l",
+    "initial": {
+      "lines": [
+        "ab"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P067",
+    "source": "probe",
+    "title": "Macro with a search",
+    "keys": "qq/a<CR>rbq2@q",
+    "initial": {
+      "lines": [
+        "x a",
+        "x a",
+        "x a"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x b",
+        "x b",
+        "x b"
+      ]
+    }
+  },
+  {
+    "id": "P068",
+    "source": "probe",
+    "title": "Macro with a range on the command line",
+    "keys": "qqVj:s/a/b/<CR>jq@q",
+    "initial": {
+      "lines": [
+        "a",
+        "a",
+        "a",
+        "a"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "b",
+        "b",
+        "b",
+        "b"
+      ]
+    }
   }
 ]
