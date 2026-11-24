@@ -1,0 +1,24 @@
+{
+  "name": "vimchallenge",
+  "private": true,
+  "description": "Learn Vim techniques, practise them in a real editor and compete on the same tasks.",
+  "license": "AGPL-3.0-only",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "typecheck": "tsc -p packages/engine && tsc -p packages/conformance",
+    "test": "vitest run",
+    "conformance": "npm run -w @vimchallenge/conformance run --"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.1.1"
+  }
+}

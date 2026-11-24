@@ -1,0 +1,496 @@
+[
+  {
+    "id": "P001",
+    "source": "probe",
+    "title": "Each x is its own undo step",
+    "keys": "xxu",
+    "initial": {
+      "lines": [
+        "abc"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "bc"
+      ]
+    }
+  },
+  {
+    "id": "P002",
+    "source": "probe",
+    "title": "Two separate inserts undo separately",
+    "keys": "ix<Esc>iy<Esc>u",
+    "initial": {
+      "lines": [
+        "q"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "xq"
+      ]
+    }
+  },
+  {
+    "id": "P003",
+    "source": "probe",
+    "title": "Word-boundary regex with Polish letters",
+    "keys": ":s/\\<że\\>/to/g<CR>",
+    "initial": {
+      "lines": [
+        "że że działa"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "to to działa"
+      ]
+    }
+  },
+  {
+    "id": "P004",
+    "source": "probe",
+    "title": "\\k keyword class in a pattern",
+    "keys": ":s/\\<\\(\\k\\+\\)\\s\\+\\1\\>/\\1/<CR>",
+    "initial": {
+      "lines": [
+        "że że działa"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "że działa"
+      ]
+    }
+  },
+  {
+    "id": "P005",
+    "source": "probe",
+    "title": "ciw on a Polish word",
+    "keys": "ciwkot<Esc>",
+    "initial": {
+      "lines": [
+        "gęś ląd"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kot ląd"
+      ]
+    }
+  },
+  {
+    "id": "P006",
+    "source": "probe",
+    "title": "w over Polish letters",
+    "keys": "w",
+    "initial": {
+      "lines": [
+        "zażółć gęślą jaźń"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P007",
+    "source": "probe",
+    "title": "r with a Polish letter",
+    "keys": "rą",
+    "initial": {
+      "lines": [
+        "kot"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kąt"
+      ]
+    }
+  },
+  {
+    "id": "P008",
+    "source": "probe",
+    "title": "~ on a Polish letter",
+    "keys": "~",
+    "initial": {
+      "lines": [
+        "żaba"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Żaba"
+      ]
+    }
+  },
+  {
+    "id": "P009",
+    "source": "probe",
+    "title": "dw across Polish words",
+    "keys": "dw",
+    "initial": {
+      "lines": [
+        "łódź łąka"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "łąka"
+      ]
+    }
+  },
+  {
+    "id": "P010",
+    "source": "probe",
+    "title": "Search for a Polish word",
+    "keys": "/ląd<CR>",
+    "initial": {
+      "lines": [
+        "ala ma ląd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P011",
+    "source": "probe",
+    "title": "l over a combining accent",
+    "keys": "l",
+    "initial": {
+      "lines": [
+        "éx"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P012",
+    "source": "probe",
+    "title": "x on a letter with a combining accent",
+    "keys": "x",
+    "initial": {
+      "lines": [
+        "éx"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x"
+      ]
+    }
+  },
+  {
+    "id": "P013",
+    "source": "probe",
+    "title": "Dot repeats an append",
+    "keys": "A!<Esc>j.",
+    "initial": {
+      "lines": [
+        "a",
+        "b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a!",
+        "b!"
+      ]
+    }
+  },
+  {
+    "id": "P014",
+    "source": "probe",
+    "title": "Count before insert",
+    "keys": "3ia<Esc>",
+    "initial": {
+      "lines": [
+        ""
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "aaa"
+      ]
+    }
+  },
+  {
+    "id": "P015",
+    "source": "probe",
+    "title": "cw on a word acts like ce",
+    "keys": "cwX<Esc>",
+    "initial": {
+      "lines": [
+        "ab cd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "X cd"
+      ]
+    }
+  },
+  {
+    "id": "P016",
+    "source": "probe",
+    "title": "J after a period with nojoinspaces",
+    "keys": "J",
+    "initial": {
+      "lines": [
+        "koniec.",
+        "start"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "koniec. start"
+      ]
+    }
+  },
+  {
+    "id": "P017",
+    "source": "probe",
+    "title": ">> uses shiftwidth 2 with spaces",
+    "keys": ">>",
+    "initial": {
+      "lines": [
+        "a"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  a"
+      ]
+    }
+  },
+  {
+    "id": "P018",
+    "source": "probe",
+    "title": "gg respects startofline",
+    "keys": "gg",
+    "initial": {
+      "lines": [
+        "  a",
+        "b"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P019",
+    "source": "probe",
+    "title": "dd on the last line moves up",
+    "keys": "dd",
+    "initial": {
+      "lines": [
+        "  a",
+        "b"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  a"
+      ]
+    }
+  },
+  {
+    "id": "P020",
+    "source": "probe",
+    "title": "Paste over a selection swaps the register",
+    "keys": "yiwwviwp",
+    "initial": {
+      "lines": [
+        "a b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a a"
+      ]
+    }
+  },
+  {
+    "id": "P021",
+    "source": "probe",
+    "title": "ci\" searches forward on the line",
+    "keys": "ci\"Z<Esc>",
+    "initial": {
+      "lines": [
+        "x=\"ab\""
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x=\"Z\""
+      ]
+    }
+  },
+  {
+    "id": "P022",
+    "source": "probe",
+    "title": ":sort n",
+    "keys": ":sort n<CR>",
+    "initial": {
+      "lines": [
+        "10",
+        "9",
+        "100"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "9",
+        "10",
+        "100"
+      ]
+    }
+  },
+  {
+    "id": "P023",
+    "source": "probe",
+    "title": "Ctrl-A skips to the next number",
+    "keys": "<C-a>",
+    "initial": {
+      "lines": [
+        "id 7"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "id 8"
+      ]
+    }
+  },
+  {
+    "id": "P024",
+    "source": "probe",
+    "title": "Ctrl-A on a negative number",
+    "keys": "<C-a>",
+    "initial": {
+      "lines": [
+        "x -1"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x 0"
+      ]
+    }
+  },
+  {
+    "id": "P025",
+    "source": "probe",
+    "title": "Backspace in insert across a line break",
+    "keys": "i<BS><Esc>",
+    "initial": {
+      "lines": [
+        "ab",
+        "cd"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "abcd"
+      ]
+    }
+  }
+]

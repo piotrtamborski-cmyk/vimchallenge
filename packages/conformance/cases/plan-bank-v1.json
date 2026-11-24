@@ -1,0 +1,2188 @@
+[
+  {
+    "id": "V001",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 12,
+    "prompt": "Podmień literę `x` pod kursorem na `o`.",
+    "keys": "ro",
+    "initial": {
+      "lines": [
+        "kxt"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kot"
+      ]
+    }
+  },
+  {
+    "id": "V002",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 12,
+    "prompt": "Dopisz brakujące `k` przed pierwszym znakiem. Wróć do trybu Normal.",
+    "keys": "ik<Esc>",
+    "initial": {
+      "lines": [
+        "ot"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kot"
+      ],
+      "mode": "normal"
+    }
+  },
+  {
+    "id": "V003",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 15,
+    "prompt": "Zakończ wiersz wykrzyknikiem.",
+    "keys": "A!<Esc>",
+    "initial": {
+      "lines": [
+        "Gotowe"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Gotowe!"
+      ]
+    }
+  },
+  {
+    "id": "V004",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 12,
+    "prompt": "Usuń dodatkowe `s` w słowie.",
+    "keys": "x",
+    "initial": {
+      "lines": [
+        "lass"
+      ],
+      "cursor": [
+        1,
+        4
+      ]
+    },
+    "expected": {
+      "lines": [
+        "las"
+      ]
+    }
+  },
+  {
+    "id": "V005",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 12,
+    "prompt": "Ustaw kursor na literze `d`.",
+    "keys": "3l",
+    "initial": {
+      "lines": [
+        "abcde"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "abcde"
+      ],
+      "cursor": [
+        1,
+        4
+      ]
+    }
+  },
+  {
+    "id": "V006",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 12,
+    "prompt": "Zejdź o wiersz w dół, zachowując kolumnę.",
+    "keys": "j",
+    "initial": {
+      "lines": [
+        "kot",
+        "las"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kot",
+        "las"
+      ],
+      "cursor": [
+        2,
+        2
+      ]
+    }
+  },
+  {
+    "id": "V007",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 12,
+    "prompt": "Przejdź na ostatni znak wiersza.",
+    "keys": "$",
+    "initial": {
+      "lines": [
+        "ab cd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "ab cd"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    }
+  },
+  {
+    "id": "V008",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 18,
+    "prompt": "Przejdź na pierwszą literę po wcięciu.",
+    "keys": "^",
+    "initial": {
+      "lines": [
+        "  start"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  start"
+      ],
+      "cursor": [
+        1,
+        3
+      ]
+    }
+  },
+  {
+    "id": "V009",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 15,
+    "prompt": "Ustaw się na początku słowa `ma`.",
+    "keys": "w",
+    "initial": {
+      "lines": [
+        "las ma cień"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "las ma cień"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    }
+  },
+  {
+    "id": "V010",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 15,
+    "prompt": "Zatrzymaj kursor na ostatniej literze słowa `zielony`.",
+    "keys": "e",
+    "initial": {
+      "lines": [
+        "zielony las"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "zielony las"
+      ],
+      "cursor": [
+        1,
+        7
+      ]
+    }
+  },
+  {
+    "id": "V011",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 20,
+    "prompt": "Między nagłówkiem a stopką dopisz wiersz `opis`.",
+    "keys": "oopis<Esc>",
+    "initial": {
+      "lines": [
+        "tytuł",
+        "stop"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "tytuł",
+        "opis",
+        "stop"
+      ]
+    }
+  },
+  {
+    "id": "V012",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 15,
+    "prompt": "Usuń środkowy wiersz razem z jego końcem.",
+    "keys": "dd",
+    "initial": {
+      "lines": [
+        "A",
+        "zbędny",
+        "B"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B"
+      ]
+    }
+  },
+  {
+    "id": "V013",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 20,
+    "prompt": "Powiel wiersz `raz` bezpośrednio pod nim.",
+    "keys": "yyp",
+    "initial": {
+      "lines": [
+        "raz",
+        "dwa"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "raz",
+        "raz",
+        "dwa"
+      ]
+    }
+  },
+  {
+    "id": "V014",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 15,
+    "prompt": "Zacznij imię wielką literą.",
+    "keys": "~",
+    "initial": {
+      "lines": [
+        "ola"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Ola"
+      ]
+    }
+  },
+  {
+    "id": "V015",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 18,
+    "prompt": "Przejdź na dwukropek w bieżącym wierszu.",
+    "keys": "f:",
+    "initial": {
+      "lines": [
+        "tryb: test"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "tryb: test"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    }
+  },
+  {
+    "id": "V016",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 15,
+    "prompt": "Z końca dokumentu wróć na pierwszy znak pierwszego wiersza.",
+    "keys": "gg",
+    "initial": {
+      "lines": [
+        "A",
+        "B",
+        "C"
+      ],
+      "cursor": [
+        3,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B",
+        "C"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    }
+  },
+  {
+    "id": "V017",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 22,
+    "prompt": "Zmień całe słowo pod kursorem na `szybki`.",
+    "keys": "ciwszybki<Esc>",
+    "initial": {
+      "lines": [
+        "tryb wolny"
+      ],
+      "cursor": [
+        1,
+        8
+      ]
+    },
+    "expected": {
+      "lines": [
+        "tryb szybki"
+      ]
+    }
+  },
+  {
+    "id": "V018",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 20,
+    "prompt": "Usuń pierwszy wyraz wraz ze spacją, która go oddziela.",
+    "keys": "dw",
+    "initial": {
+      "lines": [
+        "mały kot śpi"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kot śpi"
+      ]
+    }
+  },
+  {
+    "id": "V019",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 20,
+    "prompt": "Od znaku `#` usuń wszystko do końca wiersza.",
+    "keys": "D",
+    "initial": {
+      "lines": [
+        "alpha#tmp"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "alpha"
+      ]
+    }
+  },
+  {
+    "id": "V020",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 22,
+    "prompt": "Usuń środkowe dwa wiersze.",
+    "keys": "2dd",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "d"
+      ]
+    }
+  },
+  {
+    "id": "V021",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 18,
+    "prompt": "Przeskocz z pierwszego na początek trzeciego słowa.",
+    "keys": "2w",
+    "initial": {
+      "lines": [
+        "id kod opis"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "id kod opis"
+      ],
+      "cursor": [
+        1,
+        8
+      ]
+    }
+  },
+  {
+    "id": "V022",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 22,
+    "prompt": "Scal dwa wiersze, oddzielając słowa jedną spacją.",
+    "keys": "J",
+    "initial": {
+      "lines": [
+        "krótki",
+        "opis"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "krótki opis"
+      ]
+    }
+  },
+  {
+    "id": "V023",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 24,
+    "prompt": "Znajdź `port` i zatrzymaj się na jego pierwszej literze.",
+    "keys": "/port<CR>",
+    "initial": {
+      "lines": [
+        "host",
+        "port=8",
+        "tryb"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "host",
+        "port=8",
+        "tryb"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    }
+  },
+  {
+    "id": "V024",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 26,
+    "prompt": "Przejdź do początku drugiego wystąpienia `kot`.",
+    "keys": "/kot<CR>n",
+    "initial": {
+      "lines": [
+        "x kot kot"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x kot kot"
+      ],
+      "cursor": [
+        1,
+        7
+      ]
+    }
+  },
+  {
+    "id": "V025",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 28,
+    "prompt": "Skopiuj tylko słowo `kolor` do rejestru `a`.",
+    "keys": "\"ayiw",
+    "initial": {
+      "lines": [
+        "kolor niebo"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kolor niebo"
+      ],
+      "registers": {
+        "a": {
+          "type": "char",
+          "text": "kolor"
+        }
+      }
+    }
+  },
+  {
+    "id": "V026",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 25,
+    "prompt": "Skopiuj pierwszy wiersz na koniec. Zachowaj oryginał.",
+    "keys": "yyjp",
+    "initial": {
+      "lines": [
+        "A",
+        "B"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B",
+        "A"
+      ]
+    }
+  },
+  {
+    "id": "V027",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 26,
+    "prompt": "Zaznacz znaki `kod` i oddaj aktywne zaznaczenie znakowe.",
+    "keys": "v2l",
+    "initial": {
+      "lines": [
+        "kod: 17"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kod: 17"
+      ],
+      "visual": {
+        "type": "visual",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          1,
+          3
+        ]
+      }
+    }
+  },
+  {
+    "id": "V028",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 28,
+    "prompt": "Wsuń pierwsze dwa wiersze o jeden poziom wcięcia.",
+    "keys": "Vj>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  a",
+        "  b",
+        "c"
+      ]
+    }
+  },
+  {
+    "id": "V029",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 24,
+    "prompt": "Usuń `!`, a potem odzyskaj go przez cofnięcie tej edycji.",
+    "keys": "xu",
+    "initial": {
+      "lines": [
+        "test!"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "test!"
+      ]
+    },
+    "semanticNotes": [
+      "Cofnięcie przywraca skasowany znak `!`."
+    ]
+  },
+  {
+    "id": "V030",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 20,
+    "prompt": "Zwiększ liczbę plików o jeden.",
+    "keys": "<C-a>",
+    "initial": {
+      "lines": [
+        "8 plików"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "9 plików"
+      ]
+    }
+  },
+  {
+    "id": "V031",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 22,
+    "prompt": "Dopisz `# ` tuż przed `host`, zachowując wcięcie.",
+    "keys": "I# <Esc>",
+    "initial": {
+      "lines": [
+        "  host"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  # host"
+      ]
+    }
+  },
+  {
+    "id": "V032",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 24,
+    "prompt": "Zmień drugie słowo na wielkie litery.",
+    "keys": "gUiw",
+    "initial": {
+      "lines": [
+        "tryb demo"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "tryb DEMO"
+      ]
+    }
+  },
+  {
+    "id": "V033",
+    "source": "plan-bank-v1",
+    "mvp": true,
+    "referenceSeconds": 40,
+    "prompt": "Najpierw przejdź na ostatni znak dokumentu. Następnie zmień przedostatnie słowo ostatniego zdania z `stary` na `nowy`.",
+    "keys": "G$bbciwnowy<Esc>",
+    "initial": {
+      "lines": [
+        "Plan na jutro.",
+        "To jest stary szkic."
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Plan na jutro.",
+        "To jest nowy szkic."
+      ]
+    },
+    "semanticNotes": [
+      "Kursor odwiedził `(2,20)` przed pierwszą edycją."
+    ]
+  },
+  {
+    "id": "V034",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 32,
+    "prompt": "Wymień zawartość cudzysłowu na `kot`. Zachowaj obydwa cudzysłowy.",
+    "keys": "ci\"kot<Esc>",
+    "initial": {
+      "lines": [
+        "msg=\"pies\""
+      ],
+      "cursor": [
+        1,
+        7
+      ]
+    },
+    "expected": {
+      "lines": [
+        "msg=\"kot\""
+      ]
+    }
+  },
+  {
+    "id": "V035",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 38,
+    "prompt": "Opróżnij tylko wewnętrzną parę nawiasów.",
+    "keys": "di(",
+    "initial": {
+      "lines": [
+        "f(a,(b,c))"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "f(a,())"
+      ]
+    }
+  },
+  {
+    "id": "V036",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 35,
+    "prompt": "Zastąp treść elementu HTML słowem `lis`. Zachowaj znacznik i jego zamknięcie.",
+    "keys": "citlis<Esc>",
+    "initial": {
+      "lines": [
+        "<b>kot</b>"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "<b>lis</b>"
+      ]
+    }
+  },
+  {
+    "id": "V037",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 35,
+    "prompt": "Zaznacz znakowo od `b` w `beta` po ostatnie `a` w `gamma` włącznie.",
+    "keys": "vwe",
+    "initial": {
+      "lines": [
+        "alfa beta gamma"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "alfa beta gamma"
+      ],
+      "visual": {
+        "type": "visual",
+        "from": [
+          1,
+          6
+        ],
+        "to": [
+          1,
+          15
+        ]
+      }
+    }
+  },
+  {
+    "id": "V038",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 35,
+    "prompt": "Odszukaj i usuń cały wiersz `DROP`.",
+    "keys": "/^DROP$<CR>dd",
+    "initial": {
+      "lines": [
+        "alpha",
+        "DROP",
+        "gamma"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "alpha",
+        "gamma"
+      ]
+    }
+  },
+  {
+    "id": "V039",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 42,
+    "prompt": "Zapamiętaj pozycję litery `e` w znaczniku `a`, odwiedź ostatni wiersz i wróć do zapamiętanej litery.",
+    "keys": "maG`a",
+    "initial": {
+      "lines": [
+        "cel",
+        "x",
+        "y"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "cel",
+        "x",
+        "y"
+      ],
+      "cursor": [
+        1,
+        2
+      ],
+      "marks": {
+        "a": [
+          1,
+          2
+        ]
+      }
+    },
+    "semanticNotes": [
+      "Po ustawieniu znacznika odwiedzono wiersz 3 przed powrotem."
+    ]
+  },
+  {
+    "id": "V040",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 30,
+    "prompt": "Przenieś wiersz `B` poniżej `C`.",
+    "keys": "ddp",
+    "initial": {
+      "lines": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "C",
+        "B",
+        "D"
+      ]
+    }
+  },
+  {
+    "id": "V041",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 40,
+    "prompt": "Zmień `red` na `blue` w obu wierszach. Przy drugim wystąpieniu powtórz ostatnią zmianę Vima.",
+    "keys": "/red<CR>ciwblue<Esc>n.",
+    "initial": {
+      "lines": [
+        "alpha red",
+        "beta red"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "alpha blue",
+        "beta blue"
+      ]
+    },
+    "semanticNotes": [
+      "Druga zamiana nastąpiła przez powtórzenie ostatniej zmiany."
+    ]
+  },
+  {
+    "id": "V042",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 38,
+    "prompt": "W każdym wierszu wymień wyłącznie pierwsze `old` na `new`.",
+    "keys": ":%s/old/new/<CR>",
+    "initial": {
+      "lines": [
+        "old old",
+        "old old"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "new old",
+        "new old"
+      ]
+    }
+  },
+  {
+    "id": "V043",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 35,
+    "prompt": "Usuń wiersze od 2 do 4 włącznie.",
+    "keys": ":2,4d<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "e"
+      ]
+    }
+  },
+  {
+    "id": "V044",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 35,
+    "prompt": "Usuń nawiasy kwadratowe wraz z ich zawartością. Sąsiednie litery mają się zetknąć.",
+    "keys": "da[",
+    "initial": {
+      "lines": [
+        "x[id]y"
+      ],
+      "cursor": [
+        1,
+        3
+      ]
+    },
+    "expected": {
+      "lines": [
+        "xy"
+      ]
+    }
+  },
+  {
+    "id": "V045",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 36,
+    "prompt": "Zachowaj pierwsze dwa pełne wiersze w rejestrze `b`, gotowe do wklejenia jako wiersze.",
+    "keys": "\"b2yy",
+    "initial": {
+      "lines": [
+        "red",
+        "blue",
+        "green"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "red",
+        "blue",
+        "green"
+      ],
+      "registers": {
+        "b": {
+          "type": "line",
+          "text": "red\nblue\n"
+        }
+      }
+    }
+  },
+  {
+    "id": "V046",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 35,
+    "prompt": "Odwróć wielkość każdej litery wyłącznie w pierwszym wierszu.",
+    "keys": "g~~",
+    "initial": {
+      "lines": [
+        "Id=AbC",
+        "XyZ"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "iD=aBc",
+        "XyZ"
+      ]
+    }
+  },
+  {
+    "id": "V047",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 32,
+    "prompt": "Z otwierającego nawiasu `call` przeskocz na odpowiadający mu nawias zamykający.",
+    "keys": "%",
+    "initial": {
+      "lines": [
+        "call(a, f(b))"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "call(a, f(b))"
+      ],
+      "cursor": [
+        1,
+        13
+      ]
+    }
+  },
+  {
+    "id": "V048",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 40,
+    "prompt": "Skopiuj wiersz nr 3 przed pierwszy wiersz. Zachowaj źródło.",
+    "keys": ":3t0<CR>",
+    "initial": {
+      "lines": [
+        "jeden",
+        "dwa",
+        "trzy"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "trzy",
+        "jeden",
+        "dwa",
+        "trzy"
+      ]
+    }
+  },
+  {
+    "id": "V049",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 48,
+    "prompt": "Zamień całe słowa `id` na `key`, zachowując `id2`.",
+    "keys": ":%s/\\<id\\>/key/g<CR>",
+    "initial": {
+      "lines": [
+        "id id2 id",
+        "id"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "key id2 key",
+        "key"
+      ]
+    }
+  },
+  {
+    "id": "V050",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 48,
+    "prompt": "Tylko w wierszach 2–3 zmień każde `a` na `x`.",
+    "keys": ":2,3s/a/x/g<CR>",
+    "initial": {
+      "lines": [
+        "aa",
+        "aa",
+        "aa",
+        "aa"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "aa",
+        "xx",
+        "xx",
+        "aa"
+      ]
+    }
+  },
+  {
+    "id": "V051",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 65,
+    "prompt": "Przekształć każdy rekord `nazwisko,imię` w `imię nazwisko`.",
+    "keys": ":%s/\\(\\w\\+\\),\\(\\w\\+\\)/\\2 \\1/<CR>",
+    "initial": {
+      "lines": [
+        "Nowak,Ada",
+        "Lis,Jan"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Ada Nowak",
+        "Jan Lis"
+      ]
+    }
+  },
+  {
+    "id": "V052",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 48,
+    "prompt": "Usuń wszystkie wpisy rozpoczynające się od `DBG `.",
+    "keys": ":g/^DBG /d<CR>",
+    "initial": {
+      "lines": [
+        "DBG a",
+        "INFO ok",
+        "DBG b",
+        "WARN wolno"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "INFO ok",
+        "WARN wolno"
+      ]
+    }
+  },
+  {
+    "id": "V053",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 50,
+    "prompt": "Zostaw tylko kompletne wiersze zaczynające się od `OK ` w pierwotnej kolejności.",
+    "keys": ":v/^OK /d<CR>",
+    "initial": {
+      "lines": [
+        "OK a",
+        "BAD b",
+        "OK c",
+        "SKIP d"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "OK a",
+        "OK c"
+      ]
+    }
+  },
+  {
+    "id": "V054",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 55,
+    "prompt": "Dodaj `# ` przed trzema wierszami jednym wstawieniem blokowym.",
+    "keys": "<C-v>2jI# <Esc>",
+    "initial": {
+      "lines": [
+        "host",
+        "port",
+        "mode"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "# host",
+        "# port",
+        "# mode"
+      ]
+    },
+    "semanticNotes": [
+      "Wstawienie pochodzi z jednego zaznaczenia blokowego wysokości 3."
+    ]
+  },
+  {
+    "id": "V055",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 50,
+    "prompt": "Usuń blokowo środkową kolumnę w trzech wierszach.",
+    "keys": "<C-v>2jx",
+    "initial": {
+      "lines": [
+        "a1z",
+        "b2y",
+        "c3x"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "az",
+        "by",
+        "cx"
+      ]
+    },
+    "semanticNotes": [
+      "Usunięto prostokąt o wymiarach 3 wiersze × 1 kolumna."
+    ]
+  },
+  {
+    "id": "V056",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 58,
+    "prompt": "Posortuj cztery wiersze danych rosnąco i usuń duplikaty, zachowując nagłówek i stopkę.",
+    "keys": ":2,5sort u<CR>",
+    "initial": {
+      "lines": [
+        "START",
+        "c",
+        "a",
+        "b",
+        "a",
+        "END"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "START",
+        "a",
+        "b",
+        "c",
+        "END"
+      ]
+    }
+  },
+  {
+    "id": "V057",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 50,
+    "prompt": "Przenieś wiersze `b`, `c` za `e`, zachowując ich kolejność.",
+    "keys": ":2,3m5<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "d",
+        "e",
+        "b",
+        "c",
+        "f"
+      ]
+    }
+  },
+  {
+    "id": "V058",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 55,
+    "prompt": "Zbierz w rejestrze `a` słowa z obu wierszy, w kolejności czytania, bez separatora.",
+    "keys": "\"ayiwj0\"Ayiw",
+    "initial": {
+      "lines": [
+        "red!",
+        "blue?"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "red!",
+        "blue?"
+      ],
+      "registers": {
+        "a": {
+          "type": "char",
+          "text": "redblue"
+        }
+      }
+    }
+  },
+  {
+    "id": "V059",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 58,
+    "prompt": "Skopiuj `keep` do rejestru bez nazwy. Usuń wiersz `trash` i zachowaj `keep` w tym rejestrze.",
+    "keys": "yiwj\"_dd",
+    "initial": {
+      "lines": [
+        "keep",
+        "trash",
+        "end"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "keep",
+        "end"
+      ],
+      "registers": {
+        "\"": {
+          "type": "char",
+          "text": "keep"
+        }
+      }
+    }
+  },
+  {
+    "id": "V060",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 65,
+    "prompt": "Nagraj w rejestrze `q` makro dopisujące `- ` na początku wiersza i użyj go na pozostałych wierszach.",
+    "keys": "qqI- <Esc>jq2@q",
+    "initial": {
+      "lines": [
+        "ena",
+        "dwa",
+        "tri"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "- ena",
+        "- dwa",
+        "- tri"
+      ]
+    },
+    "semanticNotes": [
+      "Makro w `q` nagrane w próbie i odtworzone na dwóch kolejnych wierszach."
+    ]
+  },
+  {
+    "id": "V061",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 45,
+    "prompt": "Dodaj wiersz `B`, cofnij dodanie, następnie odzyskaj je funkcją ponawiania.",
+    "keys": "oB<Esc>u<C-r>",
+    "initial": {
+      "lines": [
+        "A"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B"
+      ]
+    },
+    "semanticNotes": [
+      "W historii po dodaniu wiersza występują cofnięcie i ponowienie tej edycji."
+    ]
+  },
+  {
+    "id": "V062",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 62,
+    "prompt": "Ustaw znaczniki `a` i `b` na początkach wierszy 1 i 3. W zaznaczonym nimi obszarze zmień `x` na `y`.",
+    "keys": "ma2jmb:'a,'bs/x/y/g<CR>",
+    "initial": {
+      "lines": [
+        "x",
+        "x",
+        "x",
+        "x"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "y",
+        "y",
+        "y",
+        "x"
+      ],
+      "marks": {
+        "a": [
+          1,
+          1
+        ],
+        "b": [
+          3,
+          1
+        ]
+      }
+    }
+  },
+  {
+    "id": "V063",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 48,
+    "prompt": "Od końca dokumentu znajdź wstecz kolejno oba nagłówki `ERR`, kończąc na pierwszym.",
+    "keys": "?^ERR<CR>n",
+    "initial": {
+      "lines": [
+        "ERR one",
+        "OK",
+        "ERR two",
+        "END"
+      ],
+      "cursor": [
+        4,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "ERR one",
+        "OK",
+        "ERR two",
+        "END"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "semanticNotes": [
+      "Dwa trafienia wyszukiwania wstecz w kolejności 3 → 1."
+    ]
+  },
+  {
+    "id": "V064",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 45,
+    "prompt": "Scal trzy wiersze nazwy pakietu bez żadnych spacji. Zachowaj osobny wiersz `x`.",
+    "keys": "3gJ",
+    "initial": {
+      "lines": [
+        "pkg",
+        ".",
+        "name",
+        "x"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "pkg.name",
+        "x"
+      ]
+    }
+  },
+  {
+    "id": "V065",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 78,
+    "prompt": "W wierszach 2–4 zmień nazwę klucza `old` na `new`. Zachowaj wcięcie i wartość klucza `note`.",
+    "keys": ":2,4s/^\\(\\s*\\)old:/\\1new:/<CR>",
+    "initial": {
+      "lines": [
+        "old: root",
+        "  old: a",
+        "  note: old:",
+        "  old: b",
+        "old: tail"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "old: root",
+        "  new: a",
+        "  note: old:",
+        "  new: b",
+        "old: tail"
+      ]
+    }
+  },
+  {
+    "id": "V066",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 100,
+    "prompt": "Nagraj w `a` zamianę rekordu `imię:rola` na `rola (imię)`. Odtwórz makro na dwóch kolejnych rekordach.",
+    "keys": "qa:s/^\\([^:]*\\):\\(.*\\)$/\\2 (\\1)/<CR>j0q2@a",
+    "initial": {
+      "lines": [
+        "ela:dev",
+        "jan:ops",
+        "ola:ux",
+        "--"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "dev (ela)",
+        "ops (jan)",
+        "ux (ola)",
+        "--"
+      ]
+    },
+    "semanticNotes": [
+      "Makro nagrane w `a` i użyte do przetworzenia kolejnych dwóch rekordów."
+    ]
+  },
+  {
+    "id": "V067",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 75,
+    "prompt": "Obejmij nawiasami kwadratowymi ostatnie słowo w każdym wierszu typu `X`.",
+    "keys": ":g/^X /s/\\S\\+$/[&]/<CR>",
+    "initial": {
+      "lines": [
+        "X a",
+        "Y b",
+        "X c",
+        "X d"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "X [a]",
+        "Y b",
+        "X [c]",
+        "X [d]"
+      ]
+    }
+  },
+  {
+    "id": "V068",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 85,
+    "prompt": "Usuń końcowe spacje wyłącznie między `BEGIN` i `END`. Zachowaj puste wiersze i wcięcia.",
+    "keys": ":/^BEGIN$/,/^END$/s/\\s\\+$//e<CR>",
+    "initial": {
+      "lines": [
+        "top  ",
+        "BEGIN",
+        "  alfa  ",
+        " beta ",
+        "",
+        "END",
+        "end  "
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "top  ",
+        "BEGIN",
+        "  alfa",
+        " beta",
+        "",
+        "END",
+        "end  "
+      ]
+    }
+  },
+  {
+    "id": "V069",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 95,
+    "prompt": "Zamień miejscami wartości `staging` i `prod`. Zachowaj ich pierwotne wartości odpowiednio w rejestrach `a`, `b`.",
+    "keys": "f=l\"ayiwj0f=l\"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>",
+    "initial": {
+      "lines": [
+        "staging=blue",
+        "prod=green"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "staging=green",
+        "prod=blue"
+      ],
+      "registers": {
+        "a": {
+          "type": "char",
+          "text": "blue"
+        },
+        "b": {
+          "type": "char",
+          "text": "green"
+        }
+      }
+    }
+  },
+  {
+    "id": "V070",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 100,
+    "prompt": "Między nagłówkami skasuj komentarze rozpoczynające się od `#`, usuń duplikaty i posortuj pozostałe wiersze.",
+    "keys": ":/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>",
+    "initial": {
+      "lines": [
+        "head",
+        "BEGIN",
+        "b",
+        "#tmp",
+        "a",
+        "b",
+        "END",
+        "foot"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "head",
+        "BEGIN",
+        "a",
+        "b",
+        "END",
+        "foot"
+      ]
+    }
+  },
+  {
+    "id": "V071",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 85,
+    "prompt": "Używając kolumnowego zaznaczenia cyfr, nadaj wierszom kolejne numery od 1.",
+    "keys": "<C-v>2jg<C-a>",
+    "initial": {
+      "lines": [
+        "row 0: a",
+        "row 0: b",
+        "row 0: c"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "row 1: a",
+        "row 2: b",
+        "row 3: c"
+      ]
+    },
+    "semanticNotes": [
+      "Rosnąca numeracja powstała na zaznaczonym bloku cyfr."
+    ]
+  },
+  {
+    "id": "V072",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 80,
+    "prompt": "Zredukuj każdą parę identycznych, sąsiadujących słów do jednego wystąpienia.",
+    "keys": ":%s/\\<\\(\\k\\+\\)\\s\\+\\1\\>/\\1/g<CR>",
+    "initial": {
+      "lines": [
+        "to to test",
+        "że że działa",
+        "raz dwa"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "to test",
+        "że działa",
+        "raz dwa"
+      ]
+    }
+  },
+  {
+    "id": "V073",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 85,
+    "prompt": "Usuń komentarze rozpoczynające się od dwóch spacji i `#`, zachowaj `#` w wartościach i posortuj wpisy rosnąco.",
+    "keys": ":%s/  #.*$//e<CR>:%sort<CR>",
+    "initial": {
+      "lines": [
+        "z=a#b  #tag",
+        "b=2",
+        "a=1  #tag"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a=1",
+        "b=2",
+        "z=a#b"
+      ]
+    }
+  },
+  {
+    "id": "V074",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 90,
+    "prompt": "W wierszach o kluczu zaczynającym się od `flag_` zamień litery wartości na wielkie. Zachowaj komentarze.",
+    "keys": ":%s/^\\(flag_\\w\\+=\\)\\(\\w\\+\\)/\\1\\U\\2\\E/<CR>",
+    "initial": {
+      "lines": [
+        "flag_a=off # off",
+        "plain=off",
+        "flag_b=on"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "flag_a=OFF # off",
+        "plain=off",
+        "flag_b=ON"
+      ]
+    }
+  },
+  {
+    "id": "V075",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 88,
+    "prompt": "Dopisz na końcu kopie wierszy z prefiksem `@ `, usuwając prefiks tylko z kopii.",
+    "keys": ":g/^@ /t$<CR>:4,5s/^@ //<CR>",
+    "initial": {
+      "lines": [
+        "@ A",
+        "p",
+        "@ B"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "@ A",
+        "p",
+        "@ B",
+        "A",
+        "B"
+      ]
+    }
+  },
+  {
+    "id": "V076",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 82,
+    "prompt": "W trzech wierszach danych zastąp cyfry jednym prostokątnym zaznaczeniem i wpisz w ich miejsce `--`.",
+    "keys": "<C-v>2jlc--<Esc>",
+    "initial": {
+      "lines": [
+        "HEAD",
+        "A11:x",
+        "B22:y",
+        "C33:z",
+        "END"
+      ],
+      "cursor": [
+        2,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "HEAD",
+        "A--:x",
+        "B--:y",
+        "C--:z",
+        "END"
+      ]
+    },
+    "semanticNotes": [
+      "Jedna zmiana blokowa na prostokącie 3 × 2."
+    ]
+  },
+  {
+    "id": "V077",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 78,
+    "prompt": "Zaznacz start znacznikiem `a`. Popraw `(bad)` na `(ok)` w obu przypisaniach i wróć dokładnie do zaznaczonej litery.",
+    "keys": "ma:2,4s/(bad)/(ok)/<CR>`a",
+    "initial": {
+      "lines": [
+        "start",
+        "lhs=(bad)",
+        "mid",
+        "rhs=(bad)",
+        "end"
+      ],
+      "cursor": [
+        1,
+        3
+      ]
+    },
+    "expected": {
+      "lines": [
+        "start",
+        "lhs=(ok)",
+        "mid",
+        "rhs=(ok)",
+        "end"
+      ],
+      "cursor": [
+        1,
+        3
+      ],
+      "marks": {
+        "a": [
+          1,
+          3
+        ]
+      }
+    }
+  },
+  {
+    "id": "V078",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 105,
+    "prompt": "Nagraj w `a` makro zamieniające `klucz: wartość` na `klucz=wartość` i przechodzące do początku następnego wiersza. Zastosuj je do trzech rekordów. Sędzia sprawdzi makro także na nowym kluczu.",
+    "keys": "qa0f:r=lxj0q2@a",
+    "initial": {
+      "lines": [
+        "a: 1",
+        "port: 80",
+        "long_key: xyz",
+        "END"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a=1",
+        "port=80",
+        "long_key=xyz",
+        "END"
+      ]
+    },
+    "semanticNotes": [
+      "Zarejestrowano i odtworzono `a`.",
+      "W świeżym buforze jedno `@a` ma przekształcić `tryb: auto↵END` w `tryb=auto↵END` i skończyć w `(2,1)`."
+    ]
+  },
+  {
+    "id": "V079",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 82,
+    "prompt": "Posortuj wiersze zadań numerycznie według pierwszego pola, usuń identyczne duplikaty i zapisz operację `run` wielkimi literami.",
+    "keys": ":2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>",
+    "initial": {
+      "lines": [
+        "jobs",
+        "10 run",
+        "2 test",
+        "2 test",
+        "1 lint",
+        "end"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "jobs",
+        "1 lint",
+        "2 test",
+        "10 RUN",
+        "end"
+      ]
+    }
+  },
+  {
+    "id": "V080",
+    "source": "plan-bank-v1",
+    "mvp": false,
+    "referenceSeconds": 110,
+    "prompt": "Zrefaktoryzuj tylko blok `BEGIN`–`END`. Usuń wiersz diagnostyczny `DEBUG`, zmień każde pełne słowo `old` na `new` i cofnij wcięcie o jeden poziom.",
+    "keys": ":3,5g/^  DEBUG /d<CR>:3,4s/\\<old\\>/new/g<CR>:3,4s/^  //<CR>",
+    "initial": {
+      "lines": [
+        "mod old",
+        "BEGIN",
+        "  old(x)",
+        "  DEBUG old",
+        "  older(old)",
+        "END",
+        "old(x)"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "mod old",
+        "BEGIN",
+        "new(x)",
+        "older(new)",
+        "END",
+        "old(x)"
+      ]
+    }
+  }
+]

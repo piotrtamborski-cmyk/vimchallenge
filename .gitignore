@@ -1,0 +1,16 @@
+# dependencies
+node_modules
+
+# build and tooling output
+dist
+coverage
+*.tsbuildinfo
+*.log
+/packages/conformance/out/
+
+# environment — never commit secrets; templates are let back in explicitly
+.env*
+!.env.example
+
+# local planning notes — not published
+/plany/
