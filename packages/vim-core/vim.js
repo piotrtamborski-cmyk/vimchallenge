@@ -37,6 +37,8 @@
  */
 
 
+import { compileVimReplacement, escapeVimPattern, patternHasUppercase, translateVimPattern } from './regex.js';
+
 /** @arg {import("./types").CodeMirrorConstructor} CM */
 export function initVim(CM) {
 
@@ -1828,7 +1830,7 @@ export function initVim(CM) {
             (keyName == '<BS>' && query == '')) {
           vimGlobalState.searchHistoryController.pushInput(query);
           vimGlobalState.searchHistoryController.reset();
-          updateSearchQuery(cm, originalQuery?.source || "");
+          if (originalQuery) getSearchState(cm).setQuery(originalQuery);
           clearSearchHighlight(cm);
           cm.scrollTo(originalScrollPos.left, originalScrollPos.top);
           CM.e_stop(e);
@@ -1885,10 +1887,10 @@ export function initVim(CM) {
           }
           let query = cm.getLine(word.start.line).substring(word.start.ch,
               word.end.ch);
-          if (isKeyword && wholeWordOnly) {
-              query = '\\b' + query + '\\b';
+          if (getOption('pcre')) {
+            query = isKeyword && wholeWordOnly ? '\\b' + query + '\\b' : escapeRegex(query);
           } else {
-            query = escapeRegex(query);
+            query = isKeyword && wholeWordOnly ? '\\<' + escapeVimPattern(query) + '\\>' : escapeVimPattern(query);
           }
 
           // cachedCursor is used to save the old position of the cursor
@@ -5023,7 +5025,9 @@ export function initVim(CM) {
   }
 
   // Search functions
-  defineOption('pcre', true, 'boolean');
+  defineOption('pcre', false, 'boolean');
+  defineOption('ignorecase', false, 'boolean', ['ic']);
+  defineOption('smartcase', false, 'boolean', ['scs']);
   
   /**@type {SearchStateInterface} */
   class SearchState {
@@ -5105,6 +5109,11 @@ export function initVim(CM) {
   // Translates a search string from ex (vim) syntax into javascript form.
   /** @arg {string} str */
   function translateRegex(str) {
+    return translateVimPattern(str).source;
+  }
+  // Upstream translator, kept for reference; replaced by regex.js.
+  // eslint-disable-next-line no-unused-vars
+  function translateRegexUpstream(str) {
     // When these match, add a '\' if unescaped or remove one if escaped.
     var modes = {
       V: '|(){+?*.[$^', // verynomagic
@@ -5244,6 +5253,7 @@ export function initVim(CM) {
     var slashes = findUnescapedSlashes(query);
     var regexPart;
     var forceIgnoreCase;
+    var forceMatchCase = false;
     if (!slashes.length) {
       // Query looks like 'regexp'
       regexPart = query;
@@ -5252,12 +5262,22 @@ export function initVim(CM) {
       regexPart = query.substring(0, slashes[0]);
       var flagsPart = query.substring(slashes[0]);
       forceIgnoreCase = (flagsPart.indexOf('i') != -1);
+      forceMatchCase = (flagsPart.indexOf('I') != -1);
     }
     if (!regexPart) {
       return null;
     }
     if (!getOption('pcre')) {
-      regexPart = translateRegex(regexPart);
+      var lastSub = vimGlobalState.lastSubstituteReplacePart;
+      var translated = translateVimPattern(regexPart, {
+        lastSubstitute: lastSub && typeof lastSub == 'object' ? lastSub.template : undefined
+      });
+      var ic = !!getOption('ignorecase') &&
+          !(smartCase && getOption('smartcase') && patternHasUppercase(regexPart));
+      if (translated.ignoreCase !== undefined) ic = translated.ignoreCase;
+      if (forceIgnoreCase) ic = true;
+      if (forceMatchCase) ic = false;
+      return new RegExp(translated.source, ic ? 'imu' : 'mu');
     }
     if (smartCase) {
       ignoreCase = (/^[^A-Z]*$/).test(regexPart);
@@ -6324,7 +6344,15 @@ export function initVim(CM) {
           if (getOption('pcre')) {
             replacePart = unescapeRegexReplace(replacePart.replace(/([^\\])&/g,"$1$$&"));
           } else {
-            replacePart = translateRegexReplace(replacePart);
+            var previous = vimGlobalState.lastSubstituteReplacePart;
+            try {
+              replacePart = compileVimReplacement(replacePart, {
+                previous: previous && typeof previous == 'object' ? previous.template : undefined
+              });
+            } catch (e) {
+              showConfirm(cm, String(e && e.message || e));
+              return;
+            }
           }
           vimGlobalState.lastSubstituteReplacePart = replacePart;
         }
@@ -6537,8 +6565,8 @@ export function initVim(CM) {
    * TODO: find a way for typescript to understand that when match is found searchCursor.from() is not null
    * @arg {ReturnType<CodeMirror["getSearchCursor"]>|any} searchCursor Search cursor to use for finding matches.
    * @arg {RegExp} query Query for performing matches with.
-   * @arg {string} replaceWith Text to replace matches with. May contain $1,
-   *     $2, etc for replacing captured groups using JavaScript replace.
+   * @arg {string|{expand: (groups: ArrayLike<string|undefined>) => string}} replaceWith Text to replace
+   *     matches with (pcre: may contain $1, $2, …), or a compiled Vim substitute string.
    * @arg {function} [callback] A callback for when the replace is done.
    */
   function doReplace(cm, confirm, global, lineStart, lineEnd, searchCursor, query,
@@ -6563,7 +6591,15 @@ export function initVim(CM) {
     function replace() {
       var newText = '';
       var match = searchCursor.match || searchCursor.pos && searchCursor.pos.match;
-      if (match) {
+      if (match && typeof replaceWith == 'object') {
+        newText = replaceWith.expand(match);
+      } else if (typeof replaceWith == 'object') {
+        var range = cm.getRange(searchCursor.from(), searchCursor.to());
+        var expand = replaceWith.expand;
+        newText = range.replace(query, function() {
+          return expand(Array.prototype.slice.call(arguments, 0, -2));
+        });
+      } else if (match) {
         newText = replaceWith.replace(/\$(\d{1,3}|[$&])/g, function(_, x) {
           if (x == "$") return "$";
           if (x == '&') return match[0];
@@ -6599,6 +6635,13 @@ export function initVim(CM) {
       while(findNextValidMatch() &&
             isInRange(searchCursor.from(), lineStart, lineEnd)) {
         if (!global && searchCursor.from().line == modifiedLineNumber && !joined) {
+          continue;
+        }
+        // Like Vim: after a substitution on this line, an empty match at the end of the line
+        // is not replaced (:s/x*/-/g turns "abc" into "-a-b-c").
+        var from = searchCursor.from();
+        if (global && from.line == modifiedLineNumber && !joined &&
+            cursorEqual(from, searchCursor.to()) && from.ch == cm.getLine(from.line).length) {
           continue;
         }
         cm.scrollIntoView(searchCursor.from(), 30);

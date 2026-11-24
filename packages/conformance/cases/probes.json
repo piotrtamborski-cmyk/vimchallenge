@@ -492,5 +492,484 @@
         "abcd"
       ]
     }
+  },
+  {
+    "id": "P026",
+    "source": "probe",
+    "title": "Search is case-sensitive by default",
+    "keys": "/Kot<CR>",
+    "initial": {
+      "lines": [
+        "kot Kot"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P027",
+    "source": "probe",
+    "title": ":s is case-sensitive by default",
+    "keys": ":s/kot/X/<CR>",
+    "initial": {
+      "lines": [
+        "KOT kot"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "KOT X"
+      ]
+    }
+  },
+  {
+    "id": "P028",
+    "source": "probe",
+    "title": "\\c makes a search ignore case",
+    "keys": "/\\ckot<CR>",
+    "initial": {
+      "lines": [
+        "x KOT kot"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P029",
+    "source": "probe",
+    "title": "\\{,2} quantifier",
+    "keys": ":s/a\\{,2}/X/<CR>",
+    "initial": {
+      "lines": [
+        "aaab"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Xab"
+      ]
+    }
+  },
+  {
+    "id": "P030",
+    "source": "probe",
+    "title": "Very magic groups and swap",
+    "keys": ":s/\\v(\\w+)-(\\w+)/\\2-\\1/<CR>",
+    "initial": {
+      "lines": [
+        "ab-cd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "cd-ab"
+      ]
+    }
+  },
+  {
+    "id": "P031",
+    "source": "probe",
+    "title": "Lookbehind with \\@<=",
+    "keys": ":s/\\(\\d\\+\\)\\@<=px//<CR>",
+    "initial": {
+      "lines": [
+        "10px"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "10"
+      ]
+    }
+  },
+  {
+    "id": "P032",
+    "source": "probe",
+    "title": "\\zs sets the match start",
+    "keys": ":s/foo\\zsbar/X/<CR>",
+    "initial": {
+      "lines": [
+        "foobar bar"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "fooX bar"
+      ]
+    }
+  },
+  {
+    "id": "P033",
+    "source": "probe",
+    "title": "[^x] does not cross lines",
+    "keys": ":%s/[^x]\\+/Y/<CR>",
+    "initial": {
+      "lines": [
+        "ab",
+        "cd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Y",
+        "Y"
+      ]
+    }
+  },
+  {
+    "id": "P034",
+    "source": "probe",
+    "title": "\\r in the replacement splits the line",
+    "keys": ":s/a/\\r/<CR>",
+    "initial": {
+      "lines": [
+        "bab"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "b",
+        "b"
+      ]
+    }
+  },
+  {
+    "id": "P035",
+    "source": "probe",
+    "title": "\\u in the replacement",
+    "keys": ":s/\\(.\\)/\\u\\1/<CR>",
+    "initial": {
+      "lines": [
+        "kot"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Kot"
+      ]
+    }
+  },
+  {
+    "id": "P036",
+    "source": "probe",
+    "title": "\\L with & in the replacement",
+    "keys": ":s/\\w\\+/\\L&/<CR>",
+    "initial": {
+      "lines": [
+        "ABC def"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "abc def"
+      ]
+    }
+  },
+  {
+    "id": "P037",
+    "source": "probe",
+    "title": "Escaped dot",
+    "keys": ":s/\\./!/<CR>",
+    "initial": {
+      "lines": [
+        "a.b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a!b"
+      ]
+    }
+  },
+  {
+    "id": "P038",
+    "source": "probe",
+    "title": "Alternation with g flag",
+    "keys": ":s/a\\|b/X/g<CR>",
+    "initial": {
+      "lines": [
+        "abc"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "XXc"
+      ]
+    }
+  },
+  {
+    "id": "P039",
+    "source": "probe",
+    "title": "Empty matches with g flag",
+    "keys": ":s/x*/-/g<CR>",
+    "initial": {
+      "lines": [
+        "abc"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P040",
+    "source": "probe",
+    "title": "^ in the middle is literal",
+    "keys": ":s/a^b/X/<CR>",
+    "initial": {
+      "lines": [
+        "a^b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "X"
+      ]
+    }
+  },
+  {
+    "id": "P041",
+    "source": "probe",
+    "title": "$ in the middle is literal",
+    "keys": ":s/a$b/X/<CR>",
+    "initial": {
+      "lines": [
+        "a$b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "X"
+      ]
+    }
+  },
+  {
+    "id": "P042",
+    "source": "probe",
+    "title": "Non-capturing group repeated",
+    "keys": ":s/\\%(ab\\)\\+/X/<CR>",
+    "initial": {
+      "lines": [
+        "ababc"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Xc"
+      ]
+    }
+  },
+  {
+    "id": "P043",
+    "source": "probe",
+    "title": "Word start on Polish letters",
+    "keys": ":s/\\<ż/Ż/g<CR>",
+    "initial": {
+      "lines": [
+        "żaba żuk"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Żaba Żuk"
+      ]
+    }
+  },
+  {
+    "id": "P044",
+    "source": "probe",
+    "title": "Very nomagic",
+    "keys": ":s/\\Vx.y/Z/<CR>",
+    "initial": {
+      "lines": [
+        "xay x.y"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "xay Z"
+      ]
+    }
+  },
+  {
+    "id": "P045",
+    "source": "probe",
+    "title": "Lazy quantifier",
+    "keys": ":s/a\\{-1,}/X/<CR>",
+    "initial": {
+      "lines": [
+        "aaa"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Xaa"
+      ]
+    }
+  },
+  {
+    "id": "P046",
+    "source": "probe",
+    "title": "* searches the whole word",
+    "keys": "*",
+    "initial": {
+      "lines": [
+        "id id2 id"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P047",
+    "source": "probe",
+    "title": "* on a word with a dot nearby",
+    "keys": "*",
+    "initial": {
+      "lines": [
+        "a.b x a.b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P048",
+    "source": "probe",
+    "title": "Search then n with case",
+    "keys": "/ab<CR>n",
+    "initial": {
+      "lines": [
+        "Ab ab AB ab"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P049",
+    "source": "probe",
+    "title": ":s with i flag ignores case",
+    "keys": ":s/kot/x/i<CR>",
+    "initial": {
+      "lines": [
+        "KOT"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x"
+      ]
+    }
+  },
+  {
+    "id": "P050",
+    "source": "probe",
+    "title": "~ in the replacement repeats the previous one",
+    "keys": ":s/a/X/<CR>:s/b/~~/<CR>",
+    "initial": {
+      "lines": [
+        "a b"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "X XX"
+      ]
+    }
   }
 ]
