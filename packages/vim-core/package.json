@@ -1,0 +1,23 @@
+{
+  "name": "@replit/codemirror-vim-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Vendored fork of @replit/codemirror-vim-core 0.1.0 with fixes for vimchallenge (MIT, see LICENSE)",
+  "license": "MIT",
+  "type": "module",
+  "main": "./vim.js",
+  "types": "./main.d.ts",
+  "exports": {
+    ".": {
+      "types": "./main.d.ts",
+      "default": "./vim.js"
+    },
+    "./test/vim_test.js": "./test/vim_test.js"
+  },
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/replit/codemirror-vim.git",
+    "directory": "packages/codemirror-vim-core"
+  }
+}
