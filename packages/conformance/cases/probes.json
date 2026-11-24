@@ -1628,5 +1628,143 @@
         "3"
       ]
     }
+  },
+  {
+    "id": "P080",
+    "source": "probe",
+    "title": "dit in nested tags",
+    "keys": "dit",
+    "initial": {
+      "lines": [
+        "<a><b>x</b>y</a>"
+      ],
+      "cursor": [
+        1,
+        7
+      ]
+    },
+    "expected": {
+      "lines": [
+        "<a><b></b>y</a>"
+      ]
+    }
+  },
+  {
+    "id": "P081",
+    "source": "probe",
+    "title": "dat on the open tag",
+    "keys": "dat",
+    "initial": {
+      "lines": [
+        "<p><b>x</b></p>"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "<p></p>"
+      ]
+    }
+  },
+  {
+    "id": "P082",
+    "source": "probe",
+    "title": "cit with attributes",
+    "keys": "citnew<Esc>",
+    "initial": {
+      "lines": [
+        "<a href=\"#\">old</a>"
+      ],
+      "cursor": [
+        1,
+        13
+      ]
+    },
+    "expected": {
+      "lines": [
+        "<a href=\"#\">new</a>"
+      ]
+    }
+  },
+  {
+    "id": "P083",
+    "source": "probe",
+    "title": "yit across lines",
+    "keys": "yitP",
+    "initial": {
+      "lines": [
+        "<ul>",
+        "<li>a</li>",
+        "</ul>"
+      ],
+      "cursor": [
+        2,
+        5
+      ]
+    },
+    "expected": {}
+  },
+  {
+    "id": "P084",
+    "source": "probe",
+    "title": "P of a single character",
+    "keys": "ylP",
+    "initial": {
+      "lines": [
+        "ab"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "abb"
+      ]
+    }
+  },
+  {
+    "id": "P085",
+    "source": "probe",
+    "title": "P of a word",
+    "keys": "yiwP",
+    "initial": {
+      "lines": [
+        "ab cd"
+      ],
+      "cursor": [
+        1,
+        4
+      ]
+    },
+    "expected": {
+      "lines": [
+        "ab cdcd"
+      ]
+    }
+  },
+  {
+    "id": "P086",
+    "source": "probe",
+    "title": "p of a word",
+    "keys": "yiwp",
+    "initial": {
+      "lines": [
+        "ab cd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "aabb cd"
+      ]
+    }
   }
 ]

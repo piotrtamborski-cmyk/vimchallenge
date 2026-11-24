@@ -3433,7 +3433,10 @@ export function initVim(CM) {
           } else {
             curPosFinal = copyCursor(cur);
             if (!/\n/.test(text)) {
-              curPosFinal.ch += text.length - (actionArgs.after ? 1 : 0);
+              // Like Vim (p and P alike): on the last character of the pasted text.
+              // `cur` already points at the insertion position.
+              var lastChar = Array.from(text).pop() || '';
+              curPosFinal.ch += text.length - lastChar.length;
             }
           }
         }
@@ -4202,20 +4205,46 @@ export function initVim(CM) {
    * @arg {boolean} [inclusive]
    */
   function expandTagUnderCursor(cm, head, inclusive) {
-    var cur = head;
-    if (!CM.findMatchingTag || !CM.findEnclosingTag) {
-      return { start: cur, end: cur };
+    // Like Vim, match tags in the text itself (no syntax tree needed, works in plain text).
+    var pair = findEnclosingTagPair(cm.getValue(), cm.indexFromPos(head));
+    if (!pair) {
+      commandFailed();
+      return { start: head, end: head };
     }
-
-    var tags = CM.findMatchingTag(cm, head) || CM.findEnclosingTag(cm, head);
-    if (!tags || !tags.open || !tags.close) {
-      return { start: cur, end: cur };
-    }
-
     if (inclusive) {
-      return { start: tags.open.from, end: tags.close.to };
+      return { start: cm.posFromIndex(pair.open.start), end: cm.posFromIndex(pair.close.end) };
     }
-    return { start: tags.open.to, end: tags.close.from };
+    return { start: cm.posFromIndex(pair.open.end), end: cm.posFromIndex(pair.close.start) };
+  }
+
+  /**
+   * Innermost <tag …>…</tag> pair around `offset` (a cursor on either tag belongs to that pair).
+   * Self-closing tags and tags without a partner are ignored.
+   * @arg {string} text @arg {number} offset
+   */
+  function findEnclosingTagPair(text, offset) {
+    var re = /<(\/?)([A-Za-z][^\s>\/]*)[^>]*?(\/?)>/g;
+    /** @type {{name: string, start: number, end: number}[]} */
+    var stack = [];
+    /** @type {{open: {start: number, end: number}, close: {start: number, end: number}} | null} */
+    var best = null;
+    var m;
+    while ((m = re.exec(text))) {
+      var tag = { name: m[2].toLowerCase(), start: m.index, end: m.index + m[0].length };
+      if (m[3]) continue; // <br/>
+      if (!m[1]) { stack.push(tag); continue; }
+      for (var i = stack.length - 1; i >= 0; i--) {
+        if (stack[i].name != tag.name) continue;
+        var open = stack[i];
+        stack.length = i;
+        if (open.start <= offset && offset < tag.end &&
+            (!best || open.start >= best.open.start)) {
+          best = { open: open, close: tag };
+        }
+        break;
+      }
+    }
+    return best;
   }
 
   /** @arg {CodeMirror} cm @arg {Pos} oldCur @arg {Pos} newCur */
