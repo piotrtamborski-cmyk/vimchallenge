@@ -3095,6 +3095,9 @@ export function initVim(CM) {
       var sel = vim.sel;
       var head = actionArgs.head || cm.getCursor('head');
       var height = cm.listSelections().length;
+      /** Block I / A: Vim leaves the cursor at the block's top-left corner after <Esc>. */
+      /** @type {Pos | undefined} */
+      var blockTopLeft;
       if (insertAt == 'eol') {
         head = new Pos(head.line, lineLength(cm, head.line));
       } else if (insertAt == 'bol') {
@@ -3119,6 +3122,7 @@ export function initVim(CM) {
               Math.min(sel.head.line, sel.anchor.line),
               Math.min(sel.head.ch, sel.anchor.ch));
           height = Math.abs(sel.head.line - sel.anchor.line) + 1;
+          blockTopLeft = copyCursor(head);
         }
       } else if (insertAt == 'endOfSelectedArea') {
           if (!vim.visualMode)
@@ -3134,6 +3138,7 @@ export function initVim(CM) {
               Math.min(sel.head.line, sel.anchor.line),
               Math.max(sel.head.ch, sel.anchor.ch) + 1);
           height = Math.abs(sel.head.line - sel.anchor.line) + 1;
+          blockTopLeft = new Pos(head.line, Math.min(sel.head.ch, sel.anchor.ch));
         }
       } else if (insertAt == 'inplace') {
         if (vim.visualMode){
@@ -3163,6 +3168,7 @@ export function initVim(CM) {
       if (vim.visualMode) {
         exitVisualMode(cm);
       }
+      vim.blockInsertStart = blockTopLeft;
       selectForInsert(cm, head, height);
     },
     toggleVisualMode: function(cm, actionArgs, vim) {
@@ -6953,7 +6959,11 @@ export function initVim(CM) {
     }
     delete vim.insertModeRepeat;
     vim.insertMode = false;
-    if (!keepCursor) {
+    var blockStart = vim.blockInsertStart;
+    vim.blockInsertStart = undefined;
+    if (blockStart && !keepCursor) {
+      cm.setCursor(clipCursorToContent(cm, blockStart));
+    } else if (!keepCursor) {
       cm.setCursor(cm.getCursor().line, cm.getCursor().ch-1);
     }
     cm.setOption('keyMap', 'vim');

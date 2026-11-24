@@ -1766,5 +1766,71 @@
         "aabb cd"
       ]
     }
+  },
+  {
+    "id": "P087",
+    "source": "probe",
+    "title": "Block append with A",
+    "keys": "<C-v>jA!<Esc>",
+    "initial": {
+      "lines": [
+        "ab",
+        "cd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a!b",
+        "c!d"
+      ]
+    }
+  },
+  {
+    "id": "P088",
+    "source": "probe",
+    "title": "Block insert in the middle",
+    "keys": "<C-v>jI-<Esc>",
+    "initial": {
+      "lines": [
+        "abc",
+        "def"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a-bc",
+        "d-ef"
+      ]
+    }
+  },
+  {
+    "id": "P089",
+    "source": "probe",
+    "title": "Block change",
+    "keys": "<C-v>jcX<Esc>",
+    "initial": {
+      "lines": [
+        "abc",
+        "def"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "aXc",
+        "dXf"
+      ]
+    }
   }
 ]
