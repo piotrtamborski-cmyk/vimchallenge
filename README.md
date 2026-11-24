@@ -32,8 +32,8 @@ npm run conformance -- V033    # selected cases, report in packages/conformance/
 `packages/conformance/vim/driver.vim` starts Vim with no user config, applies the editor profile and feeds
 the keys one at a time from a timer, so each key is handled exactly as if typed. After every key it records
 text, mode, cursor, visual selection, registers and marks. The headless engine records the same snapshot,
-and the harness reports the first key after which the two differ. Columns are 1-based and count Unicode
-code points.
+and the harness reports the first key after which the two differ. Columns are 1-based and count characters
+like Vim's `charcol()`: one per code point, with combining marks counted as part of the preceding character.
 
 ## License
 
