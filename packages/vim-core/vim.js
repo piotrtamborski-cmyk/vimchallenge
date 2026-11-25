@@ -2193,6 +2193,9 @@ export function initVim(CM) {
             curEnd = tmp;
           }
           linewise = motionArgs.linewise || operatorArgs.linewise;
+          // Start of the motion before it is widened to whole lines: a yank leaves the cursor here,
+          // as Vim does (`yiw` from inside a word, `yb`, `yk` keeping the column, `yip`).
+          operatorArgs.motionStart = copyCursor(curStart);
           if (linewise) {
             // Expand selection to entire line.
             expandSelectionToLine(cm, curStart, curEnd);
@@ -2955,7 +2958,7 @@ export function initVim(CM) {
       var text = cm.getSelection();
       var endPos = vim.visualMode
         ? cursorMin(vim.sel.anchor, vim.sel.head, ranges[0].head, ranges[0].anchor)
-        : oldAnchor;
+        : args.motionStart || oldAnchor;
       vimGlobalState.registerController.pushText(
           args.registerName, 'yank',
           text, args.linewise, vim.visualBlock);
