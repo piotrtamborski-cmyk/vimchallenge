@@ -32,6 +32,18 @@ function normalizeSpecial(token: string): string {
   return token;
 }
 
+const TOKEN_SPECIAL = /^<(CR|Esc|BS|Tab|Space|Del|Up|Down|Left|Right|C-[a-z[\]\\^_@])>$/;
+
+/**
+ * True for one token of an action log as `parseKeys` and the browser produce it: a special key in
+ * normal form (`<C-v>`, not `<C-V>`; `<` itself, not `<lt>`) or one character that is not a space
+ * (`<Space>`), a control character or half of a surrogate pair.
+ */
+export function isToken(token: string): boolean {
+  if (TOKEN_SPECIAL.test(token)) return true;
+  return [...token].length === 1 && token !== ' ' && !/\p{Cc}|\p{Cs}/u.test(token);
+}
+
 /** Text that a token inserts when the editor treats it as typed input. */
 export function tokenText(token: string): string | undefined {
   if (token === '<Space>') return ' ';

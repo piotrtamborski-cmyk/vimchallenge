@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { decideKey, textTokens, type KeyLike } from '../src/browser-keys.ts';
+import { isToken } from '../src/keys.ts';
 
 const key = (k: string, mods: Partial<KeyLike> = {}): KeyLike => ({
   key: k, code: '', ctrlKey: false, altKey: false, metaKey: false, shiftKey: false, ...mods,
@@ -48,5 +49,25 @@ describe('decideKey', () => {
 describe('textTokens', () => {
   it('turns text into typed tokens', () => {
     expect(textTokens('a b\r\nć\t')).toEqual(['a', '<Space>', 'b', '<CR>', 'ć', '<Tab>']);
+  });
+  it('drops control characters the judge would refuse', () => {
+    expect(textTokens('a\u0000b\u000bc\u0085')).toEqual(['a', 'b', 'c']);
+  });
+});
+
+describe('the judge accepts every token the browser logs', () => {
+  it('for keys', () => {
+    const keys = [
+      key('x'), key('ą'), key('😀'), key(' '), key('Escape'), key('Enter'), key('Backspace'), key('Tab'),
+      key('Delete'), key('ArrowLeft'), key('v', { ctrlKey: true }), key('V', { ctrlKey: true }), key('[', { ctrlKey: true }),
+      key('ф', { ctrlKey: true, code: 'KeyA' }), key('ą', { ctrlKey: true, altKey: true }),
+    ];
+    for (const k of keys) {
+      const d = decideKey(k);
+      expect(d.kind === 'token' && isToken(d.token), `${k.key}`).toBe(true);
+    }
+  });
+  it('for text', () => {
+    expect(textTokens('Zażółć gęślą jaźń!\r\n\t<>').every(isToken)).toBe(true);
   });
 });

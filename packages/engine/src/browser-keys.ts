@@ -40,9 +40,9 @@ export function charToken(ch: string): string {
   return ch;
 }
 
-/** Tokens of pasted or committed text, as if it was typed. */
+/** Tokens of pasted or committed text, as if it was typed. Control characters other than line breaks and tabs are dropped. */
 export function textTokens(text: string): string[] {
-  return [...text.replace(/\r\n?/g, '\n')].map(charToken);
+  return [...text.replace(/\r\n?/g, '\n')].filter((ch) => ch === '\n' || ch === '\t' || !/\p{Cc}/u.test(ch)).map(charToken);
 }
 
 export function decideKey(e: KeyLike): KeyDecision {

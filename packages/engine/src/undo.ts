@@ -92,7 +92,10 @@ function install(m: Mods): void {
  */
 class ChangeStart {
   private min: number | undefined;
-  constructor(private cm: any) {}
+  private cm: any;
+  constructor(cm: any) {
+    this.cm = cm;
+  }
   record() {
     const start = this.cm.curOp?.$changeStart;
     if (typeof start === 'number') this.min = this.min === undefined ? start : Math.min(this.min, start);

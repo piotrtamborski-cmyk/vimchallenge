@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseKeys, tokenText } from '../src/keys.ts';
+import { isToken, parseKeys, tokenText } from '../src/keys.ts';
 import { toCh, toCol } from '../src/positions.ts';
 
 describe('parseKeys', () => {
@@ -21,6 +21,20 @@ describe('parseKeys', () => {
     expect(tokenText('<Space>')).toBe(' ');
     expect(tokenText('<Esc>')).toBeUndefined();
     expect(tokenText('ż')).toBe('ż');
+  });
+});
+
+describe('isToken', () => {
+  it('accepts tokens in normal form', () => {
+    for (const t of ['x', '<', 'ą', '😀', '<Esc>', '<CR>', '<Space>', '<C-v>', '<C-[>', '<C-\\>'])
+      expect(isToken(t), t).toBe(true);
+  });
+  it('accepts every token parseKeys makes', () => {
+    expect(parseKeys('ciw<lt>x> <C-V><Esc>:s/\\<a\\>/b/<CR>').every(isToken)).toBe(true);
+  });
+  it('refuses anything else', () => {
+    for (const t of ['', 'xu', ' ', '\n', '\u0000', '\ud83d', '<esc>', '<C-V>', '<lt>', '<F1>', '<Home>'])
+      expect(isToken(t), JSON.stringify(t)).toBe(false);
   });
 });
 

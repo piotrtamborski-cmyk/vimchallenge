@@ -102,7 +102,18 @@ export function createSession(
   const wrap = options.wrapFeed ?? ((run: () => void) => run());
   const [line, col] = initial.cursor;
   wrap(() => cm.setCursor({ line: line - 1, ch: toCh(initial.lines[line - 1] ?? '', col) }));
-  const trail: Step[] = [{ snapshot: snapshotOf(cm, Vim) }];
+  // Snapshots share one lines array while the document is unchanged (CodeMirror's Text is
+  // immutable), so a long trail costs memory per edit, not per key.
+  let linesDoc = view.state.doc;
+  let lines = linesDoc.toString().split('\n');
+  const currentLines = () => {
+    if (view.state.doc !== linesDoc) {
+      linesDoc = view.state.doc;
+      lines = linesDoc.toString().split('\n');
+    }
+    return lines;
+  };
+  const trail: Step[] = [{ snapshot: snapshotOf(cm, Vim, currentLines()) }];
 
   function insertText(text: string) {
     view.dispatch(view.state.replaceSelection(text), { userEvent: 'input.type', scrollIntoView: true });
@@ -157,13 +168,13 @@ export function createSession(
       try {
         wrap(() => feedKey(token));
       } finally {
-        const snapshot = snapshotOf(cm, Vim);
+        const snapshot = snapshotOf(cm, Vim, currentLines());
         const change = classifyChange(trail[trail.length - 1]!.snapshot.lines, snapshot.lines, move);
         trail.push(change ? { token, change, snapshot } : { token, snapshot });
       }
     },
     snapshot() {
-      return snapshotOf(cm, Vim);
+      return snapshotOf(cm, Vim, currentLines());
     },
     trail: () => trail,
     inPrompt() {
@@ -189,14 +200,13 @@ function toPos(cm: CM, p: { line: number; ch: number }): Pos {
   return [p.line + 1, toCol(cm.getLine(p.line) ?? '', p.ch)];
 }
 
-function snapshotOf(cm: CM, Vim: any): Snapshot {
+function snapshotOf(cm: CM, Vim: any, lines: string[]): Snapshot {
   const vs = cm.state.vim;
   let mode: Mode = 'normal';
   if (promptInput(cm)) mode = 'cmdline';
   else if (vs.insertMode) mode = cm.state.overwrite ? 'replace' : 'insert';
   else if (vs.visualMode) mode = vs.visualBlock ? 'visual-block' : vs.visualLine ? 'visual-line' : 'visual';
 
-  const lines: string[] = cm.getValue().split('\n');
   const snap: Snapshot = {
     lines,
     mode,

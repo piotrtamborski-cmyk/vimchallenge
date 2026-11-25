@@ -1,0 +1,18 @@
+{
+  "name": "@vimchallenge/judge",
+  "version": "0.0.0",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "start": "node src/start.ts",
+    "bench": "node src/bench.ts"
+  },
+  "dependencies": {
+    "@vimchallenge/engine": "*",
+    "@vimchallenge/tasks": "*"
+  }
+}

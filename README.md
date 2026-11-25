@@ -12,6 +12,7 @@ version of the web app with 22 training tasks.
 |---|---|
 | `apps/web` | The web app (Next.js): home page, task list and task pages with the Vim editor. |
 | `packages/tasks` | Published tasks (`tasks.json`): prompt, initial state, goals and one solution. CI replays every task in Vim. |
+| `packages/judge` | The server-side judge: a pool of worker threads that replay a key log in the headless engine under time, memory and size limits, and a small HTTP service in front of it. |
 | `packages/engine` | The editing engine: CodeMirror 6 + [`@replit/codemirror-vim`](https://github.com/replit/codemirror-vim), the shared editor profile, key notation, positions and goal checks. `@vimchallenge/engine/browser` is the editor in the page; `@vimchallenge/engine/headless` runs the same session in Node (jsdom) for the server-side judge. |
 | `packages/vim-core` | Vendored fork of `@replit/codemirror-vim-core` (MIT) with the fixes found by conformance. npm links it in place of the published package. |
 | `packages/conformance` | Replays every case key by key in reference Vim and in the headless engine and writes [`MATRIX.md`](packages/conformance/MATRIX.md); types every case into the browser editor in Chromium and checks that the judge reproduces it. |
@@ -19,12 +20,13 @@ version of the web app with 22 training tasks.
 
 ## Requirements
 
-Node 22+, Vim 9.1 on `PATH` (the reference for conformance) and Chromium or Chrome for the browser check
+Node 22.18+ (it runs the TypeScript sources directly), Vim 9.1 on `PATH` (the reference for conformance) and Chromium or Chrome for the browser check
 (found in `/usr/bin`, or set `CHROMIUM_PATH`).
 
 ```bash
 npm install
 npm run dev                    # web app on http://localhost:3000
+npm run judge                  # judge service on http://127.0.0.1:3101 (PORT, HOST, JUDGE_WORKERS)
 npm run typecheck
 npm test
 npm run conformance            # all cases, rewrites packages/conformance/MATRIX.md
@@ -50,6 +52,22 @@ character before the first edit". The editor records a trail — the state after
 whether the key edited the text, undid or redid — and `checkGoals` judges the whole trail. The
 reference Vim runner classifies keys the same way from `undotree()`, and conformance requires both
 engines to agree on every undo and redo.
+
+## Judge service
+
+`POST /v1/judge` with `{"task": "undo-a-change", "version": 1, "keys": ["x", "u"]}` replays the key log —
+tokens exactly as the browser editor records them — from the task's initial state and returns
+`{"verdict": "passed" | "failed" | "rejected", "failures": [...], "reason": ..., "timing": {...}}` along with
+the judge and profile versions. A run that breaks a limit in `packages/judge/src/limits.ts` (keys, text
+size, time, worker heap) is `rejected` with the reason; a request that cannot be judged gets 400 (not key
+tokens), 404 (unknown task), 409 (the task changed since the run started), 413, 415 or 503 (all workers busy).
+`GET /healthz` reports the pool.
+
+Each worker thread holds one engine and judges one run at a time from a fresh session; a run over the
+time limit is stopped by terminating its worker, which is replaced. The service stores nothing and logs
+only the task, the verdict and the time, never the keys. It listens on localhost; the public route sits in
+front of it. `npm run -w @vimchallenge/judge bench` measures latency (on the development machine: p95 about
+110 ms with 2 workers and 8 clients; the service takes about 250 MB with 2 workers).
 
 ## Browser editor and judge
 

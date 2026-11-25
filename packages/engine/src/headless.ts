@@ -59,6 +59,8 @@ export interface HeadlessSession {
 
 export async function createHeadlessSession(initial: InitialState): Promise<HeadlessSession> {
   const m = await load();
+  // A key vim-core throws on is part of the run (see replay); do not print its stack trace.
+  (m.vim.Vim as unknown as { suppressErrorLogging: boolean }).suppressErrorLogging = true;
   live?.destroy();
   const parent = dom!.window.document.createElement('div');
   dom!.window.document.body.append(parent);
@@ -81,8 +83,13 @@ export async function createHeadlessSession(initial: InitialState): Promise<Head
 /**
  * Replays a key log from the initial state and returns the trail the judge scores (see
  * `checkGoals`). A key the engine throws on stays in the trail, as it did in the browser.
+ * `keepGoing` sees every step and can end the replay early (the judge's limits).
  */
-export async function replay(initial: InitialState, tokens: string[]): Promise<Step[]> {
+export async function replay(
+  initial: InitialState,
+  tokens: readonly string[],
+  keepGoing: (step: Step) => boolean = () => true,
+): Promise<Step[]> {
   const session = await createHeadlessSession(initial);
   try {
     for (const token of tokens) {
@@ -91,6 +98,8 @@ export async function replay(initial: InitialState, tokens: string[]): Promise<S
       } catch {
         // The browser reported this key to the player and went on; so does the judge.
       }
+      const trail = session.trail();
+      if (!keepGoing(trail[trail.length - 1]!)) break;
     }
     return [...session.trail()];
   } finally {
