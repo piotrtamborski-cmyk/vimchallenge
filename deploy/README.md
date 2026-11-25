@@ -5,8 +5,8 @@ will be added here when it is deployed. Commands run as root unless they say oth
 
 ## Judge
 
-`packages/judge` listens on `127.0.0.1:3101` and stores nothing. Nothing outside the host reaches it
-yet, so it needs no tunnel route; the web app on the same host will call it.
+`packages/judge` listens on `127.0.0.1:3101` and stores nothing. It needs no tunnel route: the web app on
+the same host calls it (its `POST /api/judge` forwards to `JUDGE_URL`, default `http://127.0.0.1:3101`).
 
 Files in `deploy/judge/`:
 

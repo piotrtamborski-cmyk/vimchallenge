@@ -4,6 +4,7 @@ import { checkGoals, type GoalFailure, type Pos, type Snapshot, type Step, type 
 import type { BrowserEditor } from '@vimchallenge/engine/browser';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { confirmOnServer, type ServerCheck } from '@/lib/server-check';
 import { CodeText, Prompt } from './Prompt';
 
 const MODE_LABEL: Record<string, string> = {
@@ -54,6 +55,15 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
   const [result, setResult] = useState<Result | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [hint, setHint] = useState(false);
+  const [server, setServer] = useState<ServerCheck | null>(null);
+  const serverRequest = useRef<AbortController | null>(null);
+
+  /** Forgets the server's answer about an earlier state of the run. */
+  const resetServer = useCallback(() => {
+    serverRequest.current?.abort();
+    serverRequest.current = null;
+    setServer(null);
+  }, []);
 
   const check = useCallback(
     (trail?: readonly Step[]) => {
@@ -62,8 +72,18 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
       // The whole run is judged: some tasks require steps on the way (an undo, a visit to the end).
       const failures = checkGoals(trail ?? ed.trail(), task.expected);
       setResult({ passed: failures.length === 0, failures, keys: ed.log().length });
+      resetServer();
+      if (failures.length) return;
+      // A solve is confirmed by the server's judge, which replays the same key log.
+      const request = new AbortController();
+      serverRequest.current = request;
+      setServer({ state: 'checking' });
+      confirmOnServer(task, [...ed.log()], request.signal).then(
+        (answer) => !request.signal.aborted && setServer(answer),
+        () => {},
+      );
     },
-    [task],
+    [task, resetServer],
   );
 
   useEffect(() => {
@@ -80,6 +100,7 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
           setKeys([...ed!.log()]);
           setNotice(null);
           setResult(null);
+          resetServer();
         },
         onSubmit: (trail) => check(trail),
         onRejected: setNotice,
@@ -92,12 +113,14 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
       cancelled = true;
       ed?.destroy();
       editor.current = null;
+      resetServer();
     };
-  }, [task, attempt, autofocus, check]);
+  }, [task, attempt, autofocus, check, resetServer]);
 
   const restart = () => {
     setResult(null);
     setNotice(null);
+    resetServer();
     setAttempt((n) => n + 1);
   };
 
@@ -160,14 +183,17 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
         <div role="status" className="min-h-6">
           {notice && <p className="text-bad">{notice}</p>}
           {result?.passed && (
-            <p className="font-semibold text-good">
-              Solved in {result.keys} {result.keys === 1 ? 'key' : 'keys'}.{' '}
-              {nextHref && (
-                <Link href={nextHref} className="underline">
-                  Next task →
-                </Link>
-              )}
-            </p>
+            <div className="space-y-1">
+              <p className="font-semibold text-good">
+                Solved in {result.keys} {result.keys === 1 ? 'key' : 'keys'}.{' '}
+                {nextHref && (
+                  <Link href={nextHref} className="underline">
+                    Next task →
+                  </Link>
+                )}
+              </p>
+              {server && <ServerStatus check={server} />}
+            </div>
           )}
           {result && !result.passed && (
             <div className="space-y-2">
@@ -186,6 +212,15 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
       </div>
     </section>
   );
+}
+
+/** What the server's judge said about a solve. */
+function ServerStatus({ check }: { check: ServerCheck }) {
+  if (check.state === 'checking') return <p className="text-sm text-muted">Confirming on the server…</p>;
+  if (check.state === 'confirmed')
+    return <p className="text-sm text-muted">Confirmed by the server, which replayed your keys. Nothing is stored.</p>;
+  if (check.state === 'not-confirmed') return <p className="text-sm text-bad">The server did not confirm this solve. {check.detail}</p>;
+  return <p className="text-sm text-muted">Not confirmed on the server. {check.detail}</p>;
 }
 
 function TextDiff({ want, got }: { want: string[]; got: string[] }) {

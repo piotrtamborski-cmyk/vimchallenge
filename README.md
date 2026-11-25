@@ -27,7 +27,8 @@ Node 22.18+ (it runs the TypeScript sources directly), Vim 9.1 on `PATH` (the re
 ```bash
 npm install
 npm run dev                    # web app on http://localhost:3000
-npm run judge                  # judge service on http://127.0.0.1:3101 (PORT, HOST, JUDGE_WORKERS)
+npm run judge                  # judge service on http://127.0.0.1:3101 (PORT, HOST, JUDGE_WORKERS);
+                               # run it next to `npm run dev` so the task page can confirm solves
 npm run typecheck
 npm test
 npm run conformance            # all cases, rewrites packages/conformance/MATRIX.md
@@ -63,6 +64,12 @@ the judge and profile versions. A run that breaks a limit in `packages/judge/src
 size, time, worker heap) is `rejected` with the reason; a request that cannot be judged gets 400 (not key
 tokens), 404 (unknown task), 409 (the task changed since the run started), 413, 415 or 503 (all workers busy).
 `GET /healthz` reports the pool.
+
+The task page judges a run in the browser and, once it is solved, asks the server to confirm it:
+`POST /api/judge` in the web app forwards the run to the judge at `JUDGE_URL` (default
+`http://127.0.0.1:3101`) and the page shows whether the server agreed. Only solved runs are sent, and
+neither the web app nor the judge stores them. Without a running judge the page says the server check is
+not available; the solve still counts in training.
 
 Each worker thread holds one engine and judges one run at a time from a fresh session; a run over the
 time limit is stopped by terminating its worker, which is replaced. The service stores nothing and logs
