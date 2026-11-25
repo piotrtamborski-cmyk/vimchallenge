@@ -12,7 +12,7 @@ import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { build } from 'esbuild';
 import { chromium, type Page } from 'playwright-core';
-import { parseKeys, sameValue, type InitialState, type Snapshot } from '@vimchallenge/engine';
+import { parseKeys, sameValue, type Change, type InitialState, type Snapshot, type Step } from '@vimchallenge/engine';
 import { loadCases, root } from './cases.ts';
 import { runCm } from './cm-run.ts';
 
@@ -129,10 +129,15 @@ function check(s: BrowserState, want: { log: string[]; lines?: string[]; mode?: 
 
 interface BrowserState {
   snapshot: Snapshot;
+  /** What the last key did to the text (see classifyChange). */
+  change: Change | null;
   log: string[];
   rejected: string[];
   focused: boolean;
 }
+
+/** What the judge scores after a key: the state and what the key did. */
+const judged = (s: BrowserState | Step) => ({ snapshot: s.snapshot, change: s.change ?? null });
 
 interface Outcome {
   id: string;
@@ -179,13 +184,13 @@ async function main() {
     if (judge.error) fail(`judge error at key ${judge.error.step}: ${judge.error.message}`);
     else if (outcome.ok) {
       for (let i = 0; i < states.length; i++) {
-        if (!sameValue(states[i]!.snapshot, judge.snapshots[i])) {
-          fail(`after key ${i} (${tokens[i - 1] ?? 'start'}): browser ${JSON.stringify(states[i]!.snapshot)} judge ${JSON.stringify(judge.snapshots[i])}`);
+        if (!sameValue(judged(states[i]!), judged(judge.trail[i]!))) {
+          fail(`after key ${i} (${tokens[i - 1] ?? 'start'}): browser ${JSON.stringify(judged(states[i]!))} judge ${JSON.stringify(judged(judge.trail[i]!))}`);
           break;
         }
       }
-    } else if (!sameValue(last.snapshot, judge.snapshots.at(-1))) {
-      outcome.problem += `; final state differs: browser ${JSON.stringify(last.snapshot)} judge ${JSON.stringify(judge.snapshots.at(-1))}`;
+    } else if (!sameValue(judged(last), judged(judge.trail.at(-1)!))) {
+      outcome.problem += `; final state differs: browser ${JSON.stringify(judged(last))} judge ${JSON.stringify(judged(judge.trail.at(-1)!))}`;
     }
     outcomes.push(outcome);
     if (!outcome.ok) console.log(`${c.id.padEnd(5)} ❌ ${outcome.problem}`);
@@ -196,8 +201,8 @@ async function main() {
     const state: BrowserState = await page.evaluate(() => (window as any).vc.state());
     const judge = await runCm(sc.initial, state.log);
     const problems = sc.expect(state);
-    if (!sameValue(state.snapshot, judge.snapshots.at(-1)))
-      problems.push(`judge disagrees: browser ${JSON.stringify(state.snapshot)} judge ${JSON.stringify(judge.snapshots.at(-1))}`);
+    if (!sameValue(judged(state), judged(judge.trail.at(-1)!)))
+      problems.push(`judge disagrees: browser ${JSON.stringify(judged(state))} judge ${JSON.stringify(judged(judge.trail.at(-1)!))}`);
     const outcome: Outcome = problems.length ? { id: sc.id, ok: false, problem: problems.join('; ') } : { id: sc.id, ok: true };
     outcomes.push(outcome);
     if (!outcome.ok) console.log(`${sc.id} ❌ ${outcome.problem}`);

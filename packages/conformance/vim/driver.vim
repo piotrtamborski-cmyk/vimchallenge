@@ -86,21 +86,28 @@ function! s:Snap() abort
   return snap
 endfunction
 
+" The initial text must not be an undo step: `u` at the start does nothing, as in the engine.
+set undolevels=-1
 call setline(1, s:case.initial.lines)
+set undolevels=1000
 call setcursorcharpos(s:case.initial.cursor[0], s:case.initial.cursor[1])
 let s:keys = map(copy(s:case.tokens), {_, k -> s:Key(k)})
 let s:i = 0
 let s:snaps = []
+" Position in the undo tree after every key, [seq_cur, seq_last]; src/vim-ref.ts turns it into undo/redo.
+let s:history = []
 
 function! s:Tick(timer) abort
   call add(s:snaps, s:Snap())
+  let u = undotree()
+  call add(s:history, [u.seq_cur, u.seq_last])
   if s:i < len(s:keys)
     call feedkeys(s:keys[s:i], 't')
     let s:i += 1
     return
   endif
   call timer_stop(a:timer)
-  call writefile([json_encode({'version': v:version, 'patch': s:Patch(), 'snapshots': s:snaps})], $VC_OUT)
+  call writefile([json_encode({'version': v:version, 'patch': s:Patch(), 'snapshots': s:snaps, 'history': s:history})], $VC_OUT)
   qall!
 endfunction
 

@@ -4,13 +4,23 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { InitialState, Snapshot } from '@vimchallenge/engine';
+import { classifyChange, type HistoryMove, type InitialState, type Snapshot, type Step } from '@vimchallenge/engine';
 
 const DRIVER = fileURLToPath(new URL('../vim/driver.vim', import.meta.url));
 
 export interface VimRun {
   version: string;
-  snapshots: Snapshot[];
+  /** The initial state, then one step per key, classified like the engine does (see `classifyChange`). */
+  trail: Step[];
+}
+
+/**
+ * Undo or redo between two positions in Vim's undo tree. A new change raises seq_last; without
+ * one, seq_cur going down is an undo and going up a redo.
+ */
+function historyMove([cur0, last0]: [number, number], [cur1, last1]: [number, number]): HistoryMove {
+  if (last1 > last0) return undefined;
+  return cur1 < cur0 ? 'undo' : cur1 > cur0 ? 'redo' : undefined;
 }
 
 export async function runVim(initial: InitialState, tokens: string[], timeoutMs = 10_000): Promise<VimRun> {
@@ -40,9 +50,20 @@ export async function runVim(initial: InitialState, tokens: string[], timeoutMs 
         else reject(new Error(`vim exited with ${code}: ${stderr.trim()}`));
       });
     });
-    const out = JSON.parse(await readFile(outPath, 'utf8')) as { version: number; patch: number; snapshots: Snapshot[] };
+    const out = JSON.parse(await readFile(outPath, 'utf8')) as {
+      version: number;
+      patch: number;
+      snapshots: Snapshot[];
+      history: [number, number][];
+    };
+    const trail: Step[] = out.snapshots.map((snapshot, i) => {
+      if (i === 0) return { snapshot };
+      const move = historyMove(out.history[i - 1]!, out.history[i]!);
+      const change = classifyChange(out.snapshots[i - 1]!.lines, snapshot.lines, move);
+      return change ? { token: tokens[i - 1], change, snapshot } : { token: tokens[i - 1], snapshot };
+    });
     const major = Math.floor(out.version / 100);
-    return { version: `${major}.${out.version % 100}.${out.patch}`, snapshots: out.snapshots };
+    return { version: `${major}.${out.version % 100}.${out.patch}`, trail };
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

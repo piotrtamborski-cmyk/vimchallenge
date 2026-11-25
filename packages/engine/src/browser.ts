@@ -12,7 +12,7 @@ import * as view from '@codemirror/view';
 import * as vim from '@replit/codemirror-vim';
 import { decideKey, textTokens } from './browser-keys.ts';
 import { createSession, type EngineModules } from './session.ts';
-import type { InitialState, Snapshot } from './types.ts';
+import type { InitialState, Snapshot, Step } from './types.ts';
 
 const modules: EngineModules = { state, view, commands, language, vim };
 
@@ -22,9 +22,9 @@ export interface EditorOptions {
   allowPaste?: boolean;
   autofocus?: boolean;
   /** After every key the engine handled. */
-  onKey?: (token: string, snapshot: Snapshot) => void;
+  onKey?: (step: Step) => void;
   /** Alt+Enter: submit in the current mode, e.g. with an active selection. */
-  onSubmit?: (snapshot: Snapshot) => void;
+  onSubmit?: (trail: readonly Step[]) => void;
   /** Input the editor refused or the engine could not handle. */
   onRejected?: (message: string) => void;
 }
@@ -33,6 +33,8 @@ export interface BrowserEditor {
   snapshot(): Snapshot;
   /** Every token fed so far, in order. */
   log(): readonly string[];
+  /** The initial state, then the state after every key and what the key did (see `checkGoals`). */
+  trail(): readonly Step[];
   focus(): void;
   destroy(): void;
 }
@@ -83,7 +85,8 @@ export function mountEditor(parent: HTMLElement, options: EditorOptions): Browse
       // The judge replays the same token and hits the same error, so the log stays valid.
       options.onRejected?.(`${token}: ${(err as Error).message}`);
     }
-    options.onKey?.(token, session.snapshot());
+    const trail = session.trail();
+    options.onKey?.(trail[trail.length - 1]!);
   }
 
   const stop = (e: Event) => {
@@ -98,7 +101,7 @@ export function mountEditor(parent: HTMLElement, options: EditorOptions): Browse
     if (e.isComposing || e.keyCode === 229 || e.key === 'Dead' || e.key === 'Process' || e.key === 'Unidentified') return;
     if (e.key === 'Enter' && e.altKey && !e.ctrlKey && !e.metaKey) {
       stop(e);
-      options.onSubmit?.(session.snapshot());
+      options.onSubmit?.(session.trail());
       return;
     }
     const decision = decideKey(e);
@@ -176,6 +179,7 @@ export function mountEditor(parent: HTMLElement, options: EditorOptions): Browse
   const editor: BrowserEditor = {
     snapshot: () => session.snapshot(),
     log: () => log,
+    trail: () => session.trail(),
     focus: focusTarget,
     destroy() {
       for (const [type, fn] of listeners) dom.removeEventListener(type, fn as EventListener, true);

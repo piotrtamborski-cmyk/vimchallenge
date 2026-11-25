@@ -6,11 +6,11 @@
  *   npm run conformance -- V033 P001 # selected cases
  */
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { parseKeys, PROFILE_VERSION, type Snapshot } from '@vimchallenge/engine';
+import { parseKeys, PROFILE_VERSION } from '@vimchallenge/engine';
 import { loadCases, repoRoot, root, type Case } from './cases.ts';
 import { runCm } from './cm-run.ts';
 import { finalDifferences, goalFailures, stepDifferences, type Difference } from './compare.ts';
-import { runVim } from './vim-ref.ts';
+import { runVim, type VimRun } from './vim-ref.ts';
 
 type Status = 'match' | 'display-only' | 'diverge' | 'engine-error' | 'card-error' | 'vim-error';
 
@@ -29,6 +29,8 @@ interface Result {
   error?: string;
   cmMs: number;
   semanticNotes?: string[];
+  /** Labels of the step goals, in order. */
+  steps?: string[];
 }
 
 /** Installed version of a dependency (read from node_modules: not every package exports package.json). */
@@ -43,35 +45,40 @@ function macroRegisters(tokens: string[]): Set<string> {
 
 async function runCase(c: Case): Promise<{ result: Result; vimVersion?: string }> {
   const tokens = parseKeys(c.keys);
-  const base = { id: c.id, mvp: Boolean(c.mvp), keys: c.keys, semanticNotes: c.semanticNotes };
-  let vim: { version: string; snapshots: Snapshot[] };
+  const base = { id: c.id, mvp: Boolean(c.mvp), keys: c.keys, semanticNotes: c.semanticNotes, steps: c.expected.steps?.map((g) => g.label) };
+  let vim: VimRun;
   try {
     vim = await runVim(c.initial, tokens);
   } catch (e) {
     return { result: { ...base, status: 'vim-error', differences: [], finalDifferences: [], vimGoalFailures: [], cmGoalFailures: [], error: (e as Error).message, cmMs: 0 } };
   }
   const cm = await runCm(c.initial, tokens);
-  const vimFinal = vim.snapshots.at(-1)!;
-  const vimGoalFailures = goalFailures(vimFinal, c.expected);
-  const cmGoalFailures = cm.error ? [] : goalFailures(cm.snapshots.at(-1)!, c.expected);
+  const vimFinal = vim.trail.at(-1)!.snapshot;
+  const vimGoalFailures = goalFailures(vim.trail, c.expected);
+  const cmGoalFailures = cm.error ? [] : goalFailures(cm.trail, c.expected);
   const result: Result = { ...base, status: 'match', differences: [], finalDifferences: [], vimGoalFailures, cmGoalFailures, cmMs: cm.ms };
 
-  for (let i = 0; i < cm.snapshots.length; i++) {
-    const diffs = stepDifferences(vim.snapshots[i]!, cm.snapshots[i]!, tokens[i - 1]);
-    if (diffs.length) {
+  // First key after which the engines differ, and first key only one of them treats as an undo or
+  // redo: that decides step goals, so it is a real difference even when the result is the same.
+  let changeStep: { step: number; differences: Difference[] } | undefined;
+  for (let i = 0; i < cm.trail.length; i++) {
+    const diffs = stepDifferences(vim.trail[i]!, cm.trail[i]!);
+    if (diffs.length && result.status === 'match')
       Object.assign(result, { status: 'diverge', step: i, token: tokens[i - 1], differences: diffs });
-      break;
-    }
+    if (!changeStep && diffs.some((d) => d.field === 'change')) changeStep = { step: i, differences: diffs };
   }
   if (cm.error) {
     if (result.status === 'match')
       Object.assign(result, { status: 'engine-error', step: cm.error.step, token: tokens[cm.error.step - 1] });
     result.error = cm.error.message;
   } else {
-    result.finalDifferences = finalDifferences(vimFinal, cm.snapshots.at(-1)!, macroRegisters(tokens));
+    result.finalDifferences = finalDifferences(vimFinal, cm.trail.at(-1)!.snapshot, macroRegisters(tokens));
     if (result.status === 'match' && result.finalDifferences.length)
       Object.assign(result, { status: 'diverge', step: tokens.length, token: tokens.at(-1), differences: result.finalDifferences });
-    else if (result.status === 'diverge' && !result.finalDifferences.length) result.status = 'display-only';
+    else if (result.status === 'diverge' && !result.finalDifferences.length) {
+      if (changeStep) Object.assign(result, { step: changeStep.step, token: tokens[changeStep.step - 1], differences: changeStep.differences });
+      else result.status = 'display-only';
+    }
   }
   if (result.status === 'match' && vimGoalFailures.length) result.status = 'card-error';
   return { result, vimVersion: vim.version };
@@ -130,7 +137,7 @@ async function main() {
       '',
       `Reference Vim ${versions.vim} · @replit/codemirror-vim ${versions.codemirrorVim} · vim-core ${versions.vimCore} (vendored fork in packages/vim-core) · @codemirror/view ${versions.codemirrorView} · editor profile v${versions.profile}`,
       '',
-      'Each case is replayed key by key in reference Vim and in the headless browser engine. After every key the text, mode and cursor must be equal; at the end visual selection, named registers and marks are compared too. Registers recorded with `q` are not compared (engine-specific key codes). Semantic goals (e.g. "cursor visited the end before the first edit") are listed but not judged yet.',
+      'Each case is replayed key by key in reference Vim and in the headless browser engine. After every key the text, mode and cursor must be equal; at the end visual selection, named registers and marks are compared too. Registers recorded with `q` are not compared (engine-specific key codes). After every key both engines must also agree on whether the key was an undo or a redo. Step goals (`expected.steps`, e.g. "cursor visited the end before the first edit") are judged on both runs; other semantic goals are listed but not judged yet.',
       '',
       `**${counts.match} match · ${counts['display-only']} same result but differ while typing · ${counts.diverge} differ in the result · ${counts['engine-error']} engine errors · ${counts['card-error']} card goal fails in Vim · ${counts['vim-error']} Vim run failed** — of ${results.length} cases.`,
       '',
@@ -144,7 +151,8 @@ async function main() {
         detail += `<br>**Final state:** ${fmt(r.finalDifferences)}`;
       const goals = r.vimGoalFailures.length ? `<br>Vim misses card goal: ${r.vimGoalFailures.join('; ')}` : '';
       const notes = r.semanticNotes?.length ? `<br>_Semantic goal not judged yet: ${r.semanticNotes.join(' ')}_` : '';
-      lines.push(`| ${r.id} | ${r.mvp ? 'MVP' : ''} | ${LABEL[r.status]} | ${keysWithMark(r.keys, r.status === 'match' ? undefined : r.step)} | ${detail}${goals}${notes} |`);
+      const steps = r.steps?.length ? `<br>Steps judged: ${r.steps.map((l) => l.replaceAll('|', '\\|')).join(' → ')}` : '';
+      lines.push(`| ${r.id} | ${r.mvp ? 'MVP' : ''} | ${LABEL[r.status]} | ${keysWithMark(r.keys, r.status === 'match' ? undefined : r.step)} | ${detail}${goals}${steps}${notes} |`);
     }
     await writeFile(`${root}MATRIX.md`, lines.join('\n') + '\n');
   }

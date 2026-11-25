@@ -1,10 +1,10 @@
 'use client';
 
-import { checkGoals, type GoalFailure, type Pos, type Snapshot, type Task } from '@vimchallenge/engine';
+import { checkGoals, type GoalFailure, type Pos, type Snapshot, type Step, type StepGoal, type Task } from '@vimchallenge/engine';
 import type { BrowserEditor } from '@vimchallenge/engine/browser';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Prompt } from './Prompt';
+import { CodeText, Prompt } from './Prompt';
 
 const MODE_LABEL: Record<string, string> = {
   normal: 'NORMAL',
@@ -27,6 +27,7 @@ interface Result {
 /** One sentence per unmet goal, in the player's terms. */
 function describe(f: GoalFailure): string {
   if (f.field === 'text') return 'The text does not match the goal yet.';
+  if (f.field === 'steps') return (f.want as StepGoal).label;
   if (f.field === 'cursor') return `The cursor should be on ${at(f.want as Pos)}; it is on ${at(f.got as Pos)}.`;
   if (f.field === 'mode') return `Finish in ${modeLabel(String(f.want))} mode; you are in ${modeLabel(String(f.got))} mode.`;
   if (f.field === 'visual') {
@@ -55,10 +56,11 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
   const [hint, setHint] = useState(false);
 
   const check = useCallback(
-    (state?: Snapshot) => {
+    (trail?: readonly Step[]) => {
       const ed = editor.current;
       if (!ed) return;
-      const failures = checkGoals(state ?? ed.snapshot(), task.expected);
+      // The whole run is judged: some tasks require steps on the way (an undo, a visit to the end).
+      const failures = checkGoals(trail ?? ed.trail(), task.expected);
       setResult({ passed: failures.length === 0, failures, keys: ed.log().length });
     },
     [task],
@@ -73,13 +75,13 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
       ed = mountEditor(host.current, {
         initial: task.initial,
         autofocus: autofocus || attempt > 0,
-        onKey(_token, state) {
-          setSnapshot(state);
+        onKey(step) {
+          setSnapshot(step.snapshot);
           setKeys([...ed!.log()]);
           setNotice(null);
           setResult(null);
         },
-        onSubmit: (state) => check(state),
+        onSubmit: (trail) => check(trail),
         onRejected: setNotice,
       });
       editor.current = ed;
@@ -172,7 +174,9 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
               <p className="font-semibold text-bad">Not yet.</p>
               <ul className="list-inside list-disc space-y-1">
                 {result.failures.map((f) => (
-                  <li key={f.field}>{describe(f)}</li>
+                  <li key={f.field}>
+                    <CodeText text={describe(f)} />
+                  </li>
                 ))}
               </ul>
               {result.failures.some((f) => f.field === 'text') && <TextDiff want={task.expected.lines!} got={snapshot?.lines ?? []} />}

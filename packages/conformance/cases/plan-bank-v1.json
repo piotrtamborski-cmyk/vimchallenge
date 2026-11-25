@@ -727,11 +727,26 @@
     "expected": {
       "lines": [
         "test!"
+      ],
+      "steps": [
+        {
+          "label": "Usuń `!`",
+          "lines": [
+            "test"
+          ]
+        },
+        {
+          "label": "Cofnij usunięcie",
+          "change": "undo",
+          "from": [
+            "test"
+          ],
+          "lines": [
+            "test!"
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "Cofnięcie przywraca skasowany znak `!`."
-    ]
+    }
   },
   {
     "id": "V030",
@@ -820,11 +835,18 @@
       "lines": [
         "Plan na jutro.",
         "To jest nowy szkic."
+      ],
+      "steps": [
+        {
+          "label": "Odwiedź ostatni znak dokumentu przed pierwszą edycją",
+          "cursor": [
+            2,
+            20
+          ],
+          "beforeFirstEdit": true
+        }
       ]
-    },
-    "semanticNotes": [
-      "Kursor odwiedził `(2,20)` przed pierwszą edycją."
-    ]
+    }
   },
   {
     "id": "V034",
@@ -1585,11 +1607,39 @@
       "lines": [
         "A",
         "B"
+      ],
+      "steps": [
+        {
+          "label": "Dodaj wiersz `B`",
+          "lines": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "label": "Cofnij dodanie",
+          "change": "undo",
+          "from": [
+            "A",
+            "B"
+          ],
+          "lines": [
+            "A"
+          ]
+        },
+        {
+          "label": "Ponów dodanie",
+          "change": "redo",
+          "from": [
+            "A"
+          ],
+          "lines": [
+            "A",
+            "B"
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "W historii po dodaniu wiersza występują cofnięcie i ponowienie tej edycji."
-    ]
+    }
   },
   {
     "id": "V062",

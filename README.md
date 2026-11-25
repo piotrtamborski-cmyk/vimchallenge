@@ -41,6 +41,16 @@ text, mode, cursor, visual selection, registers and marks. The headless engine r
 and the harness reports the first key after which the two differ. Columns are 1-based and count characters
 like Vim's `charcol()`: one per code point, with combining marks counted as part of the preceding character.
 
+## Judging
+
+A task declares goals for the final state (text, cursor, mode, selection, registers, marks) and,
+when the way matters, step goals in `expected.steps`: steps that must occur in order, each matched
+on one key, for example "an undo turned `test` back into `test!`" or "the cursor was on the last
+character before the first edit". The editor records a trail — the state after every key and
+whether the key edited the text, undid or redid — and `checkGoals` judges the whole trail. The
+reference Vim runner classifies keys the same way from `undotree()`, and conformance requires both
+engines to agree on every undo and redo.
+
 ## Browser editor and judge
 
 The browser never lets CodeMirror or vim-core react to DOM events directly. Each key press becomes one

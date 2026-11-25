@@ -7,7 +7,7 @@
  */
 import { JSDOM } from 'jsdom';
 import { createSession, type EngineModules, type Session } from './session.ts';
-import type { InitialState, Snapshot } from './types.ts';
+import type { InitialState, Snapshot, Step } from './types.ts';
 
 let dom: JSDOM | undefined;
 let mods: Promise<EngineModules> | undefined;
@@ -53,6 +53,7 @@ async function load(): Promise<EngineModules> {
 export interface HeadlessSession {
   feed(token: string): void;
   snapshot(): Snapshot;
+  trail(): readonly Step[];
   destroy(): void;
 }
 
@@ -66,6 +67,7 @@ export async function createHeadlessSession(initial: InitialState): Promise<Head
   const headless: HeadlessSession = {
     feed: (token) => session.feed(token),
     snapshot: () => session.snapshot(),
+    trail: () => session.trail(),
     destroy() {
       session.destroy();
       parent.remove();
@@ -76,12 +78,21 @@ export async function createHeadlessSession(initial: InitialState): Promise<Head
   return headless;
 }
 
-/** Replays a key log from the initial state and returns the final state (what the judge scores). */
-export async function replay(initial: InitialState, tokens: string[]): Promise<Snapshot> {
+/**
+ * Replays a key log from the initial state and returns the trail the judge scores (see
+ * `checkGoals`). A key the engine throws on stays in the trail, as it did in the browser.
+ */
+export async function replay(initial: InitialState, tokens: string[]): Promise<Step[]> {
   const session = await createHeadlessSession(initial);
   try {
-    for (const token of tokens) session.feed(token);
-    return session.snapshot();
+    for (const token of tokens) {
+      try {
+        session.feed(token);
+      } catch {
+        // The browser reported this key to the player and went on; so does the judge.
+      }
+    }
+    return [...session.trail()];
   } finally {
     session.destroy();
   }

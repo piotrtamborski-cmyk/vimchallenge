@@ -12,8 +12,10 @@ Object.assign(window, {
       editor = mountEditor(document.getElementById('editor')!, { initial, onRejected: (m) => rejected.push(m) });
     },
     state() {
+      const step = editor!.trail().at(-1)!;
       return {
-        snapshot: editor!.snapshot(),
+        snapshot: step.snapshot,
+        change: step.change ?? null,
         log: [...editor!.log()],
         rejected: [...rejected],
         focused: document.activeElement?.closest('.cm-editor') != null,

@@ -1,4 +1,4 @@
-import { checkGoals, sameValue, type Expected, type Pos, type Snapshot } from '@vimchallenge/engine';
+import { checkGoals, sameValue, type Change, type Expected, type Pos, type Snapshot, type Step, type StepGoal } from '@vimchallenge/engine';
 
 export interface Difference {
   field: string;
@@ -10,8 +10,21 @@ export interface Difference {
 const same = sameValue;
 const posEq = (a: Pos | undefined, b: Pos | undefined) => same(a, b);
 
-/** Fields a person can see after each key: text, mode and (outside the command line) cursor. */
-export function stepDifferences(vim: Snapshot, cm: Snapshot, token?: string): Difference[] {
+/**
+ * After each key: what a person can see — text, mode and (outside the command line) cursor — and
+ * whether the key was an undo or a redo, which step goals are judged on. An `edit` follows from
+ * the text, which is compared already (after this key or the one before).
+ */
+export function stepDifferences(vim: Step, cm: Step): Difference[] {
+  const out = visibleDifferences(vim.snapshot, cm.snapshot, vim.token);
+  if (historyMove(vim.change) !== historyMove(cm.change))
+    out.push({ field: 'change', vim: vim.change ?? null, cm: cm.change ?? null });
+  return out;
+}
+
+const historyMove = (c: Change | undefined) => (c === 'undo' || c === 'redo' ? c : null);
+
+function visibleDifferences(vim: Snapshot, cm: Snapshot, token?: string): Difference[] {
   const out: Difference[] = [];
   if (!same(vim.lines, cm.lines)) out.push({ field: 'text', vim: vim.lines, cm: cm.lines });
   // While waiting for the character after `r`, Vim reports Replace mode (for the cursor shape).
@@ -24,7 +37,7 @@ export function stepDifferences(vim: Snapshot, cm: Snapshot, token?: string): Di
 
 /** Full comparison of the final state. Registers recorded with `q` hold engine-specific key codes and are skipped. */
 export function finalDifferences(vim: Snapshot, cm: Snapshot, macroRegisters: Set<string>): Difference[] {
-  const out = stepDifferences(vim, cm);
+  const out = visibleDifferences(vim, cm);
   if (!same(vim.visual, cm.visual)) out.push({ field: 'visual', vim: vim.visual, cm: cm.visual });
   const regNames = new Set([...Object.keys(vim.registers), ...Object.keys(cm.registers)]);
   for (const r of [...regNames].sort()) {
@@ -40,8 +53,11 @@ export function finalDifferences(vim: Snapshot, cm: Snapshot, macroRegisters: Se
 }
 
 /** Goal failures as one line each, for the matrix. */
-export function goalFailures(s: Snapshot, e: Expected): string[] {
-  return checkGoals(s, e).map((f) =>
-    f.field === 'visual' ? `visual ${s.mode} ${JSON.stringify(s.visual)}` : `${f.field} ${JSON.stringify(f.got)}`,
+export function goalFailures(trail: readonly Step[], e: Expected): string[] {
+  const s = trail[trail.length - 1]!.snapshot;
+  return checkGoals(trail, e).map((f) =>
+    f.field === 'visual' ? `visual ${s.mode} ${JSON.stringify(s.visual)}`
+    : f.field === 'steps' ? `step missing: ${(f.want as StepGoal).label}`
+    : `${f.field} ${JSON.stringify(f.got)}`,
   );
 }

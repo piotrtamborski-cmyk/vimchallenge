@@ -8,10 +8,11 @@
  */
 import type { Extension } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
+import { classifyChange } from './goals.ts';
 import { tokenText } from './keys.ts';
 import { toCh, toCol } from './positions.ts';
 import { applyVimProfile, editorProfileExtensions } from './profile.ts';
-import type { InitialState, Mode, Pos, RegisterValue, Snapshot } from './types.ts';
+import type { HistoryMove, InitialState, Mode, Pos, RegisterValue, Snapshot, Step } from './types.ts';
 
 export type EngineModules = {
   state: typeof import('@codemirror/state');
@@ -23,9 +24,11 @@ export type EngineModules = {
 
 export interface Session {
   readonly view: EditorView;
-  /** Feeds one token (see keys.ts). */
+  /** Feeds one token (see keys.ts) and adds it to the trail, also when the engine throws on it. */
   feed(token: string): void;
   snapshot(): Snapshot;
+  /** The initial state, then one step per fed token. */
+  trail(): readonly Step[];
   /** True when the `:` or `/` command line is open. */
   inPrompt(): boolean;
   /** True in Normal mode with no partly typed command (no count, operator or register). */
@@ -71,11 +74,20 @@ export function createSession(
   (Vim as any).resetVimGlobalState_();
   applyVimProfile(Vim);
 
+  // Undo and redo of the current key, seen in the transactions the history dispatches.
+  let move: HistoryMove;
+  const historyMoves = EditorView.updateListener.of((update) => {
+    for (const tr of update.transactions) {
+      if (tr.isUserEvent('undo')) move = 'undo';
+      else if (tr.isUserEvent('redo')) move = 'redo';
+    }
+  });
+
   const view = new EditorView({
     parent,
     state: EditorState.create({
       doc: initial.lines.join('\n'),
-      extensions: [vim(), ...editorProfileExtensions(m), ...(options.extensions ?? [])],
+      extensions: [vim(), ...editorProfileExtensions(m), historyMoves, ...(options.extensions ?? [])],
     }),
   });
   const cm: CM = getCM(view);
@@ -90,6 +102,7 @@ export function createSession(
   const wrap = options.wrapFeed ?? ((run: () => void) => run());
   const [line, col] = initial.cursor;
   wrap(() => cm.setCursor({ line: line - 1, ch: toCh(initial.lines[line - 1] ?? '', col) }));
+  const trail: Step[] = [{ snapshot: snapshotOf(cm, Vim) }];
 
   function insertText(text: string) {
     view.dispatch(view.state.replaceSelection(text), { userEvent: 'input.type', scrollIntoView: true });
@@ -140,11 +153,19 @@ export function createSession(
   return {
     view,
     feed(token) {
-      wrap(() => feedKey(token));
+      move = undefined;
+      try {
+        wrap(() => feedKey(token));
+      } finally {
+        const snapshot = snapshotOf(cm, Vim);
+        const change = classifyChange(trail[trail.length - 1]!.snapshot.lines, snapshot.lines, move);
+        trail.push(change ? { token, change, snapshot } : { token, snapshot });
+      }
     },
     snapshot() {
       return snapshotOf(cm, Vim);
     },
+    trail: () => trail,
     inPrompt() {
       return promptInput(cm) !== null;
     },

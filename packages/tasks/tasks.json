@@ -581,5 +581,81 @@
       }
     },
     "referenceSeconds": 12
+  },
+  {
+    "id": "undo-a-change",
+    "version": 1,
+    "plan": "V029",
+    "title": "Undo a change",
+    "prompt": "Delete the `!`, then get it back by undoing that change.",
+    "keys": "xu",
+    "initial": {
+      "lines": [
+        "test!"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "test!"
+      ],
+      "steps": [
+        {
+          "label": "Delete the `!`.",
+          "lines": [
+            "test"
+          ]
+        },
+        {
+          "label": "Undo the deletion to get the `!` back.",
+          "change": "undo",
+          "from": [
+            "test"
+          ],
+          "lines": [
+            "test!"
+          ]
+        }
+      ]
+    },
+    "referenceSeconds": 24
+  },
+  {
+    "id": "visit-the-end-first",
+    "version": 1,
+    "plan": "V033",
+    "title": "Visit the end first",
+    "prompt": "First move to the last character of the document. Then change the second-to-last word of the last sentence from `old` to `new`.",
+    "keys": "G$bbciwnew<Esc>",
+    "initial": {
+      "lines": [
+        "Plan for tomorrow.",
+        "This is the old draft."
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Plan for tomorrow.",
+        "This is the new draft."
+      ],
+      "steps": [
+        {
+          "label": "Move to the last character of the document before your first edit.",
+          "cursor": [
+            2,
+            22
+          ],
+          "beforeFirstEdit": true
+        }
+      ]
+    },
+    "referenceSeconds": 40
   }
 ]
