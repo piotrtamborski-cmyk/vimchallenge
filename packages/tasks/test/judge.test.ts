@@ -5,7 +5,7 @@
 import { checkGoals, parseKeys, type GoalFailure } from '@vimchallenge/engine';
 import { replay } from '@vimchallenge/engine/headless';
 import { describe, expect, it } from 'vitest';
-import { taskById, tasks } from '../src/index.ts';
+import { onText, taskById, tasks, textCount } from '../src/index.ts';
 
 async function judge(id: string, keys: string): Promise<GoalFailure[]> {
   const task = taskById(id)!;
@@ -16,8 +16,10 @@ const missingStep = (failures: GoalFailure[]) =>
   failures.map((f) => (f.field === 'steps' ? (f.want as { label: string }).label : `${f.field} failed`));
 
 describe('published solutions', () => {
-  it.each(tasks.map((t) => [t.id, t.keys]))('%s: %s passes', async (id, keys) => {
-    expect(await judge(id, keys)).toEqual([]);
+  const texts = tasks.flatMap((t) => Array.from({ length: textCount(t) }, (_, i) => [t.id, i + 1, onText(t, i + 1)!.keys] as const));
+  it.each(texts)('%s, text %i: %s passes', async (id, n, keys) => {
+    const task = onText(taskById(id)!, n)!;
+    expect(checkGoals(await replay(task.initial, parseKeys(keys)), task.expected)).toEqual([]);
   });
 });
 

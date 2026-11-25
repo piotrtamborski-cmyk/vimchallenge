@@ -8,7 +8,7 @@
  */
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { PROFILE_VERSION } from '@vimchallenge/engine';
-import { taskById } from '@vimchallenge/tasks';
+import { onText, taskById, textCount } from '@vimchallenge/tasks';
 import { JUDGE_VERSION } from './limits.ts';
 import { PoolBusyError, type JudgePool } from './pool.ts';
 import { parseRequest } from './request.ts';
@@ -69,9 +69,11 @@ export function createJudgeServer(pool: JudgePool, options: ServerOptions = {}):
     if (!task) throw new HttpError(404, `no task "${request.task}"`);
     if (task.version !== request.version)
       throw new HttpError(409, `task "${task.id}" is at version ${task.version}`, { version: task.version });
+    const text = onText(task, request.text);
+    if (!text) throw new HttpError(404, `task "${task.id}" has ${textCount(task)} texts`);
     let outcome;
     try {
-      outcome = await pool.judge({ initial: task.initial, expected: task.expected, keys: request.keys });
+      outcome = await pool.judge({ initial: text.initial, expected: text.expected, keys: request.keys });
     } catch (err) {
       if (err instanceof PoolBusyError) throw new HttpError(503, err.message, { retryAfter: 1 });
       throw err;
@@ -82,6 +84,7 @@ export function createJudgeServer(pool: JudgePool, options: ServerOptions = {}):
       ...verdict,
       task: task.id,
       version: task.version,
+      text: request.text,
       keys: request.keys.length,
       judge: { version: JUDGE_VERSION, profile: PROFILE_VERSION },
       timing: { queueMs: Math.round(queueMs), judgeMs: Math.round(judgeMs) },

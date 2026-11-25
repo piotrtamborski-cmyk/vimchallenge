@@ -58,7 +58,7 @@ describe('POST /api/judge', { timeout: 30_000 }, () => {
 describe('confirmOnServer', () => {
   afterEach(() => vi.unstubAllGlobals());
   const answer = (status: number, body: unknown) => vi.stubGlobal('fetch', async () => Response.json(body, { status }));
-  const confirm = () => confirmOnServer({ id: 'undo-a-change', version: 1 }, ['x', 'u'], new AbortController().signal);
+  const confirm = () => confirmOnServer({ id: 'undo-a-change', version: 1 }, 1, ['x', 'u'], new AbortController().signal);
 
   it('reads every answer of the judge', async () => {
     answer(200, { verdict: 'passed' });

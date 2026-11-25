@@ -20,6 +20,44 @@
         "cat"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Replace the `q` under the cursor with `o`.",
+        "keys": "ro",
+        "initial": {
+          "lines": [
+            "dqg"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "dog"
+          ]
+        }
+      },
+      {
+        "prompt": "Replace the `i` under the cursor with `u`.",
+        "keys": "ru",
+        "initial": {
+          "lines": [
+            "bis stop"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "bus stop"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 12
   },
   {
@@ -44,6 +82,46 @@
       ],
       "mode": "normal"
     },
+    "variants": [
+      {
+        "prompt": "Insert the missing `b` before the first letter, then go back to Normal mode.",
+        "keys": "ib<Esc>",
+        "initial": {
+          "lines": [
+            "ook"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "book"
+          ],
+          "mode": "normal"
+        }
+      },
+      {
+        "prompt": "Insert the missing `s` before the first letter, then go back to Normal mode.",
+        "keys": "is<Esc>",
+        "initial": {
+          "lines": [
+            "tar light"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "star light"
+          ],
+          "mode": "normal"
+        }
+      }
+    ],
     "referenceSeconds": 12
   },
   {
@@ -67,6 +145,44 @@
         "Done!"
       ]
     },
+    "variants": [
+      {
+        "prompt": "End the line with a question mark.",
+        "keys": "A?<Esc>",
+        "initial": {
+          "lines": [
+            "Ready"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "Ready?"
+          ]
+        }
+      },
+      {
+        "prompt": "End the line with a full stop.",
+        "keys": "A.<Esc>",
+        "initial": {
+          "lines": [
+            "It works"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        },
+        "expected": {
+          "lines": [
+            "It works."
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 15
   },
   {
@@ -90,6 +206,44 @@
         "kiss"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Delete the extra `l`.",
+        "keys": "x",
+        "initial": {
+          "lines": [
+            "helllo"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        },
+        "expected": {
+          "lines": [
+            "hello"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the extra `e`.",
+        "keys": "x",
+        "initial": {
+          "lines": [
+            "treee top"
+          ],
+          "cursor": [
+            1,
+            5
+          ]
+        },
+        "expected": {
+          "lines": [
+            "tree top"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -117,6 +271,52 @@
         4
       ]
     },
+    "variants": [
+      {
+        "prompt": "Put the cursor on the digit `5`.",
+        "keys": "4l",
+        "initial": {
+          "lines": [
+            "12345"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "12345"
+          ],
+          "cursor": [
+            1,
+            5
+          ]
+        }
+      },
+      {
+        "prompt": "Put the cursor on the letter `k`.",
+        "keys": "2l",
+        "initial": {
+          "lines": [
+            "ijklm"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "ijklm"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -146,6 +346,58 @@
         2
       ]
     },
+    "variants": [
+      {
+        "prompt": "Move one line down, keeping the column.",
+        "keys": "j",
+        "initial": {
+          "lines": [
+            "sun",
+            "sky"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        },
+        "expected": {
+          "lines": [
+            "sun",
+            "sky"
+          ],
+          "cursor": [
+            2,
+            3
+          ]
+        }
+      },
+      {
+        "prompt": "Move one line down, keeping the column.",
+        "keys": "j",
+        "initial": {
+          "lines": [
+            "ab",
+            "cd",
+            "ef"
+          ],
+          "cursor": [
+            2,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "ab",
+            "cd",
+            "ef"
+          ],
+          "cursor": [
+            3,
+            1
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -173,6 +425,52 @@
         5
       ]
     },
+    "variants": [
+      {
+        "prompt": "Go to the last character of the line.",
+        "keys": "$",
+        "initial": {
+          "lines": [
+            "one two three"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "one two three"
+          ],
+          "cursor": [
+            1,
+            13
+          ]
+        }
+      },
+      {
+        "prompt": "Go to the last character of the line.",
+        "keys": "$",
+        "initial": {
+          "lines": [
+            "x = 42;"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        },
+        "expected": {
+          "lines": [
+            "x = 42;"
+          ],
+          "cursor": [
+            1,
+            7
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -200,6 +498,52 @@
         3
       ]
     },
+    "variants": [
+      {
+        "prompt": "Go to the first letter after the indent.",
+        "keys": "^",
+        "initial": {
+          "lines": [
+            "    return"
+          ],
+          "cursor": [
+            1,
+            9
+          ]
+        },
+        "expected": {
+          "lines": [
+            "    return"
+          ],
+          "cursor": [
+            1,
+            5
+          ]
+        }
+      },
+      {
+        "prompt": "Go to the first character after the indent.",
+        "keys": "^",
+        "initial": {
+          "lines": [
+            "  - item"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        },
+        "expected": {
+          "lines": [
+            "  - item"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -227,6 +571,52 @@
         6
       ]
     },
+    "variants": [
+      {
+        "prompt": "Move to the start of the word `rouge`.",
+        "keys": "w",
+        "initial": {
+          "lines": [
+            "vin rouge"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "vin rouge"
+          ],
+          "cursor": [
+            1,
+            5
+          ]
+        }
+      },
+      {
+        "prompt": "Move to the start of the word `is`.",
+        "keys": "w",
+        "initial": {
+          "lines": [
+            "jalapeño is hot"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "jalapeño is hot"
+          ],
+          "cursor": [
+            1,
+            10
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -254,6 +644,52 @@
         5
       ]
     },
+    "variants": [
+      {
+        "prompt": "Stop on the last letter of the word `über`.",
+        "keys": "e",
+        "initial": {
+          "lines": [
+            "über alles"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "über alles"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        }
+      },
+      {
+        "prompt": "Stop on the last letter of the word `quick`.",
+        "keys": "e",
+        "initial": {
+          "lines": [
+            "quick fox"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "quick fox"
+          ],
+          "cursor": [
+            1,
+            5
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -280,6 +716,50 @@
         "footer"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Between `start` and `end`, add the line `middle`.",
+        "keys": "omiddle<Esc>",
+        "initial": {
+          "lines": [
+            "start",
+            "end"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "start",
+            "middle",
+            "end"
+          ]
+        }
+      },
+      {
+        "prompt": "Add the line `two` below `one`.",
+        "keys": "otwo<Esc>",
+        "initial": {
+          "lines": [
+            "one",
+            "three"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        },
+        "expected": {
+          "lines": [
+            "one",
+            "two",
+            "three"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 15
   },
   {
@@ -306,6 +786,48 @@
         "B"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Delete the line `oops`, including its line break.",
+        "keys": "dd",
+        "initial": {
+          "lines": [
+            "first",
+            "oops",
+            "last"
+          ],
+          "cursor": [
+            2,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "first",
+            "last"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the first line, including its line break.",
+        "keys": "dd",
+        "initial": {
+          "lines": [
+            "draft",
+            "final"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "final"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -332,6 +854,50 @@
         "two"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Duplicate the line `row` directly below it.",
+        "keys": "yyp",
+        "initial": {
+          "lines": [
+            "head",
+            "row",
+            "foot"
+          ],
+          "cursor": [
+            2,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "head",
+            "row",
+            "row",
+            "foot"
+          ]
+        }
+      },
+      {
+        "prompt": "Duplicate the line `- [ ] todo` directly below it.",
+        "keys": "yyp",
+        "initial": {
+          "lines": [
+            "- [ ] todo"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        },
+        "expected": {
+          "lines": [
+            "- [ ] todo",
+            "- [ ] todo"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 12
   },
   {
@@ -355,6 +921,44 @@
         "Émile"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Start the name with a capital letter.",
+        "keys": "~",
+        "initial": {
+          "lines": [
+            "ångström"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "Ångström"
+          ]
+        }
+      },
+      {
+        "prompt": "Start the sentence with a capital letter.",
+        "keys": "~",
+        "initial": {
+          "lines": [
+            "hello world"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "Hello world"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -382,6 +986,52 @@
         5
       ]
     },
+    "variants": [
+      {
+        "prompt": "Jump to the equals sign in this line.",
+        "keys": "f=",
+        "initial": {
+          "lines": [
+            "size = 10"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "size = 10"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        }
+      },
+      {
+        "prompt": "Jump to the comma in this line.",
+        "keys": "f,",
+        "initial": {
+          "lines": [
+            "red, green"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "red, green"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -413,6 +1063,62 @@
         1
       ]
     },
+    "variants": [
+      {
+        "prompt": "From the last line, go back to the first character of the first line.",
+        "keys": "gg",
+        "initial": {
+          "lines": [
+            "one",
+            "two",
+            "three",
+            "four"
+          ],
+          "cursor": [
+            4,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "one",
+            "two",
+            "three",
+            "four"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        }
+      },
+      {
+        "prompt": "Go back to the first character of the first line.",
+        "keys": "gg",
+        "initial": {
+          "lines": [
+            "# Title",
+            "",
+            "text"
+          ],
+          "cursor": [
+            3,
+            3
+          ]
+        },
+        "expected": {
+          "lines": [
+            "# Title",
+            "",
+            "text"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
   },
   {
@@ -436,6 +1142,44 @@
         "mode fast"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Change the whole word under the cursor to `warm`.",
+        "keys": "ciwwarm<Esc>",
+        "initial": {
+          "lines": [
+            "cold tea"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        },
+        "expected": {
+          "lines": [
+            "warm tea"
+          ]
+        }
+      },
+      {
+        "prompt": "Change the whole word under the cursor to `left`.",
+        "keys": "ciwleft<Esc>",
+        "initial": {
+          "lines": [
+            "turn right now"
+          ],
+          "cursor": [
+            1,
+            8
+          ]
+        },
+        "expected": {
+          "lines": [
+            "turn left now"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 15
   },
   {
@@ -459,7 +1203,106 @@
         "cat sleeps"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Delete the first word together with the space after it.",
+        "keys": "dw",
+        "initial": {
+          "lines": [
+            "very big dog"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "big dog"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the word `really` together with the space after it.",
+        "keys": "dw",
+        "initial": {
+          "lines": [
+            "it really works"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        },
+        "expected": {
+          "lines": [
+            "it works"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 10
+  },
+  {
+    "id": "delete-to-end-of-line",
+    "version": 1,
+    "plan": "V019",
+    "title": "Delete to the end of the line",
+    "prompt": "Delete everything from the `#` to the end of the line.",
+    "keys": "D",
+    "initial": {
+      "lines": [
+        "alpha#tmp"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "alpha"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Delete everything from the `;` to the end of the line.",
+        "keys": "D",
+        "initial": {
+          "lines": [
+            "x = 1; // old"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        },
+        "expected": {
+          "lines": [
+            "x = 1"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete everything from the `(` to the end of the line.",
+        "keys": "D",
+        "initial": {
+          "lines": [
+            "print(debug)"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        },
+        "expected": {
+          "lines": [
+            "print"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 20
   },
   {
     "id": "delete-two-lines",
@@ -486,7 +1329,188 @@
         "d"
       ]
     },
+    "variants": [
+      {
+        "prompt": "Delete the two middle lines.",
+        "keys": "2dd",
+        "initial": {
+          "lines": [
+            "top",
+            "x",
+            "y",
+            "bottom"
+          ],
+          "cursor": [
+            2,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "top",
+            "bottom"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the first two lines.",
+        "keys": "2dd",
+        "initial": {
+          "lines": [
+            "tmp 1",
+            "tmp 2",
+            "keep"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "keep"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 12
+  },
+  {
+    "id": "jump-two-words",
+    "version": 1,
+    "plan": "V021",
+    "title": "Skip words with a count",
+    "prompt": "Jump from the first word to the start of the third.",
+    "keys": "2w",
+    "initial": {
+      "lines": [
+        "id code note"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "id code note"
+      ],
+      "cursor": [
+        1,
+        9
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Jump from the first word to the start of the third.",
+        "keys": "2w",
+        "initial": {
+          "lines": [
+            "get the cup"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "get the cup"
+          ],
+          "cursor": [
+            1,
+            9
+          ]
+        }
+      },
+      {
+        "prompt": "Jump from the first word to the start of the fourth.",
+        "keys": "3w",
+        "initial": {
+          "lines": [
+            "a b c d"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a b c d"
+          ],
+          "cursor": [
+            1,
+            7
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 18
+  },
+  {
+    "id": "join-lines",
+    "version": 1,
+    "plan": "V022",
+    "title": "Join two lines",
+    "prompt": "Join the two lines into one, with a single space between the words.",
+    "keys": "J",
+    "initial": {
+      "lines": [
+        "short",
+        "note"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "short note"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Join the two lines into one, with a single space between the words.",
+        "keys": "J",
+        "initial": {
+          "lines": [
+            "good",
+            "morning"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "good morning"
+          ]
+        }
+      },
+      {
+        "prompt": "Join the two lines into one, with a single space between them.",
+        "keys": "J",
+        "initial": {
+          "lines": [
+            "key:",
+            "value"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "key: value"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 22
   },
   {
     "id": "search",
@@ -517,7 +1541,136 @@
         1
       ]
     },
+    "variants": [
+      {
+        "prompt": "Find `user` and stop on its first letter.",
+        "keys": "/user<CR>",
+        "initial": {
+          "lines": [
+            "host=a",
+            "path=/",
+            "user=me"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "host=a",
+            "path=/",
+            "user=me"
+          ],
+          "cursor": [
+            3,
+            1
+          ]
+        }
+      },
+      {
+        "prompt": "Find `mode` and stop on its first letter.",
+        "keys": "/mode<CR>",
+        "initial": {
+          "lines": [
+            "# config",
+            "debug mode on"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "# config",
+            "debug mode on"
+          ],
+          "cursor": [
+            2,
+            7
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 12
+  },
+  {
+    "id": "next-match",
+    "version": 1,
+    "plan": "V024",
+    "title": "Next match",
+    "prompt": "Move to the start of the second `cat`.",
+    "keys": "/cat<CR>n",
+    "initial": {
+      "lines": [
+        "x cat cat"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "x cat cat"
+      ],
+      "cursor": [
+        1,
+        7
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Move to the start of the second `ab`.",
+        "keys": "/ab<CR>n",
+        "initial": {
+          "lines": [
+            "xx ab ab ab"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "xx ab ab ab"
+          ],
+          "cursor": [
+            1,
+            7
+          ]
+        }
+      },
+      {
+        "prompt": "Move to the start of the second `log`.",
+        "keys": "/log<CR>n",
+        "initial": {
+          "lines": [
+            "start",
+            "log one",
+            "log two"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "start",
+            "log one",
+            "log two"
+          ],
+          "cursor": [
+            3,
+            1
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 26
   },
   {
     "id": "yank-into-a-register",
@@ -546,7 +1699,129 @@
         }
       }
     },
+    "variants": [
+      {
+        "prompt": "Copy just the word `token` into register `a`.",
+        "keys": "\"ayiw",
+        "initial": {
+          "lines": [
+            "token=abc"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "token=abc"
+          ],
+          "registers": {
+            "a": {
+              "type": "char",
+              "text": "token"
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Copy just the word `blue` into register `c`.",
+        "keys": "\"cyiw",
+        "initial": {
+          "lines": [
+            "sky blue"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        },
+        "expected": {
+          "lines": [
+            "sky blue"
+          ],
+          "registers": {
+            "c": {
+              "type": "char",
+              "text": "blue"
+            }
+          }
+        }
+      }
+    ],
     "referenceSeconds": 15
+  },
+  {
+    "id": "copy-a-line",
+    "version": 1,
+    "plan": "V026",
+    "title": "Copy a line",
+    "prompt": "Copy the first line to the end. Keep the original.",
+    "keys": "yyjp",
+    "initial": {
+      "lines": [
+        "A",
+        "B"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B",
+        "A"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Copy the first line to the end. Keep the original.",
+        "keys": "yyjp",
+        "initial": {
+          "lines": [
+            "header",
+            "body"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "header",
+            "body",
+            "header"
+          ]
+        }
+      },
+      {
+        "prompt": "Copy the first line below the last one. Keep the original.",
+        "keys": "yyGp",
+        "initial": {
+          "lines": [
+            "x",
+            "y",
+            "z"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "x",
+            "y",
+            "z",
+            "x"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 25
   },
   {
     "id": "select-characters",
@@ -580,7 +1855,140 @@
         ]
       }
     },
+    "variants": [
+      {
+        "prompt": "Select the characters `name` and submit while the selection is still active (Alt+Enter or Check).",
+        "keys": "v3l",
+        "initial": {
+          "lines": [
+            "name=Al"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "name=Al"
+          ],
+          "visual": {
+            "type": "visual",
+            "from": [
+              1,
+              1
+            ],
+            "to": [
+              1,
+              4
+            ]
+          }
+        }
+      },
+      {
+        "prompt": "Select the characters `42` and submit while the selection is still active (Alt+Enter or Check).",
+        "keys": "vl",
+        "initial": {
+          "lines": [
+            "id 42 ok"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        },
+        "expected": {
+          "lines": [
+            "id 42 ok"
+          ],
+          "visual": {
+            "type": "visual",
+            "from": [
+              1,
+              4
+            ],
+            "to": [
+              1,
+              5
+            ]
+          }
+        }
+      }
+    ],
     "referenceSeconds": 12
+  },
+  {
+    "id": "indent-lines",
+    "version": 1,
+    "plan": "V028",
+    "title": "Indent a selection",
+    "prompt": "Indent the first two lines by one level.",
+    "keys": "Vj>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  a",
+        "  b",
+        "c"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Indent the last two lines by one level.",
+        "keys": "Vj>",
+        "initial": {
+          "lines": [
+            "if x:",
+            "y",
+            "z"
+          ],
+          "cursor": [
+            2,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "if x:",
+            "  y",
+            "  z"
+          ]
+        }
+      },
+      {
+        "prompt": "Indent all three lines by one level.",
+        "keys": "Vjj>",
+        "initial": {
+          "lines": [
+            "a",
+            "b",
+            "c"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "  a",
+            "  b",
+            "  c"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 28
   },
   {
     "id": "undo-a-change",
@@ -621,6 +2029,202 @@
         }
       ]
     },
+    "variants": [
+      {
+        "prompt": "Delete the `?`, then get it back by undoing that change.",
+        "keys": "xu",
+        "initial": {
+          "lines": [
+            "why?"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        },
+        "expected": {
+          "lines": [
+            "why?"
+          ],
+          "steps": [
+            {
+              "label": "Delete the `?`.",
+              "lines": [
+                "why"
+              ]
+            },
+            {
+              "label": "Undo the deletion to get the `?` back.",
+              "change": "undo",
+              "from": [
+                "why"
+              ],
+              "lines": [
+                "why?"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the word `not`, then get it back by undoing that change.",
+        "keys": "dwu",
+        "initial": {
+          "lines": [
+            "do not stop"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        },
+        "expected": {
+          "lines": [
+            "do not stop"
+          ],
+          "steps": [
+            {
+              "label": "Delete the word `not`.",
+              "lines": [
+                "do stop"
+              ]
+            },
+            {
+              "label": "Undo the deletion to get `not` back.",
+              "change": "undo",
+              "from": [
+                "do stop"
+              ],
+              "lines": [
+                "do not stop"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 24
+  },
+  {
+    "id": "increment-a-number",
+    "version": 1,
+    "plan": "V030",
+    "title": "Add one to a number",
+    "prompt": "Increase the number of files by one.",
+    "keys": "<C-a>",
+    "initial": {
+      "lines": [
+        "8 files"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "9 files"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Increase the version number by one.",
+        "keys": "<C-a>",
+        "initial": {
+          "lines": [
+            "version 1"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "version 2"
+          ]
+        }
+      },
+      {
+        "prompt": "Increase the count to 10.",
+        "keys": "<C-a>",
+        "initial": {
+          "lines": [
+            "count: 9"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "count: 10"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 20
+  },
+  {
+    "id": "uppercase-a-word",
+    "version": 1,
+    "plan": "V032",
+    "title": "Uppercase a word",
+    "prompt": "Change the second word to capital letters.",
+    "keys": "gUiw",
+    "initial": {
+      "lines": [
+        "mode demo"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "mode DEMO"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Change the first word to capital letters.",
+        "keys": "gUiw",
+        "initial": {
+          "lines": [
+            "todo fix this"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "TODO fix this"
+          ]
+        }
+      },
+      {
+        "prompt": "Change the word under the cursor to capital letters.",
+        "keys": "gUiw",
+        "initial": {
+          "lines": [
+            "see note"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        },
+        "expected": {
+          "lines": [
+            "see NOTE"
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 24
   },
   {
@@ -656,6 +2260,890 @@
         }
       ]
     },
+    "variants": [
+      {
+        "prompt": "First move to the last character of the document. Then change the second-to-last word of the last sentence from `red` to `green`.",
+        "keys": "G$bbciwgreen<Esc>",
+        "initial": {
+          "lines": [
+            "Shopping list.",
+            "Buy some red apples."
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "Shopping list.",
+            "Buy some green apples."
+          ],
+          "steps": [
+            {
+              "label": "Move to the last character of the document before your first edit.",
+              "cursor": [
+                2,
+                20
+              ],
+              "beforeFirstEdit": true
+            }
+          ]
+        }
+      },
+      {
+        "prompt": "First move to the last character of the document. Then change the second-to-last word of the last sentence from `five` to `six`.",
+        "keys": "G$bbciwsix<Esc>",
+        "initial": {
+          "lines": [
+            "Notes",
+            "We meet at five today."
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "Notes",
+            "We meet at six today."
+          ],
+          "steps": [
+            {
+              "label": "Move to the last character of the document before your first edit.",
+              "cursor": [
+                2,
+                22
+              ],
+              "beforeFirstEdit": true
+            }
+          ]
+        }
+      }
+    ],
     "referenceSeconds": 40
+  },
+  {
+    "id": "change-inside-quotes",
+    "version": 1,
+    "plan": "V034",
+    "title": "Inside quotes",
+    "prompt": "Replace the text inside the quotes with `cat`. Keep both quotes.",
+    "keys": "ci\"cat<Esc>",
+    "initial": {
+      "lines": [
+        "msg=\"dog\""
+      ],
+      "cursor": [
+        1,
+        7
+      ]
+    },
+    "expected": {
+      "lines": [
+        "msg=\"cat\""
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Replace the text inside the quotes with `en`. Keep both quotes.",
+        "keys": "ci\"en<Esc>",
+        "initial": {
+          "lines": [
+            "lang=\"pl\""
+          ],
+          "cursor": [
+            1,
+            7
+          ]
+        },
+        "expected": {
+          "lines": [
+            "lang=\"en\""
+          ]
+        }
+      },
+      {
+        "prompt": "Replace the text inside the quotes with `ok`. Keep both quotes.",
+        "keys": "ci\"ok<Esc>",
+        "initial": {
+          "lines": [
+            "say(\"not yet\")"
+          ],
+          "cursor": [
+            1,
+            7
+          ]
+        },
+        "expected": {
+          "lines": [
+            "say(\"ok\")"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 32
+  },
+  {
+    "id": "empty-inner-parentheses",
+    "version": 1,
+    "plan": "V035",
+    "title": "Inside parentheses",
+    "prompt": "Empty only the inner pair of parentheses.",
+    "keys": "di(",
+    "initial": {
+      "lines": [
+        "f(a,(b,c))"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "f(a,())"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Empty only the inner pair of parentheses.",
+        "keys": "di(",
+        "initial": {
+          "lines": [
+            "max(1,(2+3))"
+          ],
+          "cursor": [
+            1,
+            8
+          ]
+        },
+        "expected": {
+          "lines": [
+            "max(1,())"
+          ]
+        }
+      },
+      {
+        "prompt": "Empty the parentheses.",
+        "keys": "di(",
+        "initial": {
+          "lines": [
+            "call(x, y)"
+          ],
+          "cursor": [
+            1,
+            7
+          ]
+        },
+        "expected": {
+          "lines": [
+            "call()"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 38
+  },
+  {
+    "id": "change-tag-content",
+    "version": 1,
+    "plan": "V036",
+    "title": "Inside a tag",
+    "prompt": "Replace the content of the HTML element with `fox`. Keep both tags.",
+    "keys": "citfox<Esc>",
+    "initial": {
+      "lines": [
+        "<b>cat</b>"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "<b>fox</b>"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Replace the content of the HTML element with `Hi`. Keep both tags.",
+        "keys": "citHi<Esc>",
+        "initial": {
+          "lines": [
+            "<p>Hello</p>"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        },
+        "expected": {
+          "lines": [
+            "<p>Hi</p>"
+          ]
+        }
+      },
+      {
+        "prompt": "Replace the text of the link with `docs`. Keep both tags.",
+        "keys": "citdocs<Esc>",
+        "initial": {
+          "lines": [
+            "<a href=\"/x\">here</a>"
+          ],
+          "cursor": [
+            1,
+            15
+          ]
+        },
+        "expected": {
+          "lines": [
+            "<a href=\"/x\">docs</a>"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 35
+  },
+  {
+    "id": "select-words",
+    "version": 1,
+    "plan": "V037",
+    "title": "Select to the end of a word",
+    "prompt": "Select characters from the `b` in `beta` to the last `a` in `gamma`, inclusive.",
+    "keys": "vwe",
+    "initial": {
+      "lines": [
+        "alpha beta gamma"
+      ],
+      "cursor": [
+        1,
+        7
+      ]
+    },
+    "expected": {
+      "lines": [
+        "alpha beta gamma"
+      ],
+      "visual": {
+        "type": "visual",
+        "from": [
+          1,
+          7
+        ],
+        "to": [
+          1,
+          16
+        ]
+      }
+    },
+    "variants": [
+      {
+        "prompt": "Select characters from the `q` in `quick` to the last letter of `brown`, inclusive, and submit while the selection is still active (Alt+Enter or Check).",
+        "keys": "vwe",
+        "initial": {
+          "lines": [
+            "the quick brown fox"
+          ],
+          "cursor": [
+            1,
+            5
+          ]
+        },
+        "expected": {
+          "lines": [
+            "the quick brown fox"
+          ],
+          "visual": {
+            "type": "visual",
+            "from": [
+              1,
+              5
+            ],
+            "to": [
+              1,
+              15
+            ]
+          }
+        }
+      },
+      {
+        "prompt": "Select characters from the `o` in `one` to the last letter of `two`, inclusive, and submit while the selection is still active (Alt+Enter or Check).",
+        "keys": "vwe",
+        "initial": {
+          "lines": [
+            "one two three"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "one two three"
+          ],
+          "visual": {
+            "type": "visual",
+            "from": [
+              1,
+              1
+            ],
+            "to": [
+              1,
+              7
+            ]
+          }
+        }
+      }
+    ],
+    "referenceSeconds": 35
+  },
+  {
+    "id": "move-a-line",
+    "version": 1,
+    "plan": "V040",
+    "title": "Move a line",
+    "prompt": "Move the line `B` below `C`.",
+    "keys": "ddp",
+    "initial": {
+      "lines": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "C",
+        "B",
+        "D"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Move the line `2` below `3`.",
+        "keys": "ddp",
+        "initial": {
+          "lines": [
+            "1",
+            "2",
+            "3"
+          ],
+          "cursor": [
+            2,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "1",
+            "3",
+            "2"
+          ]
+        }
+      },
+      {
+        "prompt": "Move the line `beta` below `alpha`.",
+        "keys": "ddp",
+        "initial": {
+          "lines": [
+            "beta",
+            "alpha",
+            "gamma"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "alpha",
+            "beta",
+            "gamma"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 30
+  },
+  {
+    "id": "yank-lines-into-a-register",
+    "version": 1,
+    "plan": "V045",
+    "title": "Lines in a register",
+    "prompt": "Put the first two whole lines into register `b`, ready to paste as lines.",
+    "keys": "\"b2yy",
+    "initial": {
+      "lines": [
+        "red",
+        "blue",
+        "green"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "red",
+        "blue",
+        "green"
+      ],
+      "registers": {
+        "b": {
+          "type": "line",
+          "text": "red\nblue\n"
+        }
+      }
+    },
+    "variants": [
+      {
+        "prompt": "Put the last two whole lines into register `b`, ready to paste as lines.",
+        "keys": "\"b2yy",
+        "initial": {
+          "lines": [
+            "one",
+            "two",
+            "three"
+          ],
+          "cursor": [
+            2,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "one",
+            "two",
+            "three"
+          ],
+          "registers": {
+            "b": {
+              "type": "line",
+              "text": "two\nthree\n"
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Put the first three whole lines into register `x`, ready to paste as lines.",
+        "keys": "\"x3yy",
+        "initial": {
+          "lines": [
+            "a",
+            "b",
+            "c",
+            "d"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a",
+            "b",
+            "c",
+            "d"
+          ],
+          "registers": {
+            "x": {
+              "type": "line",
+              "text": "a\nb\nc\n"
+            }
+          }
+        }
+      }
+    ],
+    "referenceSeconds": 36
+  },
+  {
+    "id": "toggle-case-of-a-line",
+    "version": 1,
+    "plan": "V046",
+    "title": "Switch case in a line",
+    "prompt": "Switch the case of every letter in the first line only.",
+    "keys": "g~~",
+    "initial": {
+      "lines": [
+        "Id=AbC",
+        "XyZ"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "iD=aBc",
+        "XyZ"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Switch the case of every letter in the second line only.",
+        "keys": "g~~",
+        "initial": {
+          "lines": [
+            "Keep",
+            "sHOUT"
+          ],
+          "cursor": [
+            2,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "Keep",
+            "Shout"
+          ]
+        }
+      },
+      {
+        "prompt": "Switch the case of every letter in the line.",
+        "keys": "g~~",
+        "initial": {
+          "lines": [
+            "Hello, World 2"
+          ],
+          "cursor": [
+            1,
+            5
+          ]
+        },
+        "expected": {
+          "lines": [
+            "hELLO, wORLD 2"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 35
+  },
+  {
+    "id": "delete-without-losing-a-yank",
+    "version": 1,
+    "plan": "V059",
+    "title": "Delete into the black hole",
+    "prompt": "Copy `keep` into the unnamed register. Then delete the line `trash` and still have `keep` in that register.",
+    "keys": "yiwj\"_dd",
+    "initial": {
+      "lines": [
+        "keep",
+        "trash",
+        "end"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "keep",
+        "end"
+      ],
+      "registers": {
+        "\"": {
+          "type": "char",
+          "text": "keep"
+        }
+      }
+    },
+    "variants": [
+      {
+        "prompt": "Copy `save` into the unnamed register. Then delete the line `junk` and still have `save` in that register.",
+        "keys": "yiwj\"_dd",
+        "initial": {
+          "lines": [
+            "save",
+            "junk"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "save"
+          ],
+          "registers": {
+            "\"": {
+              "type": "char",
+              "text": "save"
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Copy `id` into the unnamed register. Then delete the line `temp` and still have `id` in that register.",
+        "keys": "yiwjj\"_dd",
+        "initial": {
+          "lines": [
+            "id",
+            "x",
+            "temp"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "id",
+            "x"
+          ],
+          "registers": {
+            "\"": {
+              "type": "char",
+              "text": "id"
+            }
+          }
+        }
+      }
+    ],
+    "referenceSeconds": 58
+  },
+  {
+    "id": "undo-and-redo",
+    "version": 1,
+    "plan": "V061",
+    "title": "Undo and redo",
+    "prompt": "Add the line `B`, undo that, then bring it back with redo.",
+    "keys": "oB<Esc>u<C-r>",
+    "initial": {
+      "lines": [
+        "A"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B"
+      ],
+      "steps": [
+        {
+          "label": "Add the line `B`.",
+          "lines": [
+            "A",
+            "B"
+          ]
+        },
+        {
+          "label": "Undo adding it.",
+          "change": "undo",
+          "from": [
+            "A",
+            "B"
+          ],
+          "lines": [
+            "A"
+          ]
+        },
+        {
+          "label": "Bring it back with redo.",
+          "change": "redo",
+          "from": [
+            "A"
+          ],
+          "lines": [
+            "A",
+            "B"
+          ]
+        }
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Add the line `end`, undo that, then bring it back with redo.",
+        "keys": "oend<Esc>u<C-r>",
+        "initial": {
+          "lines": [
+            "start"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "start",
+            "end"
+          ],
+          "steps": [
+            {
+              "label": "Add the line `end`.",
+              "lines": [
+                "start",
+                "end"
+              ]
+            },
+            {
+              "label": "Undo adding it.",
+              "change": "undo",
+              "from": [
+                "start",
+                "end"
+              ],
+              "lines": [
+                "start"
+              ]
+            },
+            {
+              "label": "Bring it back with redo.",
+              "change": "redo",
+              "from": [
+                "start"
+              ],
+              "lines": [
+                "start",
+                "end"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the line `x`, undo that, then delete it again with redo.",
+        "keys": "ddu<C-r>",
+        "initial": {
+          "lines": [
+            "x",
+            "y"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "y"
+          ],
+          "steps": [
+            {
+              "label": "Delete the line `x`.",
+              "lines": [
+                "y"
+              ]
+            },
+            {
+              "label": "Undo the deletion.",
+              "change": "undo",
+              "from": [
+                "y"
+              ],
+              "lines": [
+                "x",
+                "y"
+              ]
+            },
+            {
+              "label": "Delete it again with redo.",
+              "change": "redo",
+              "from": [
+                "x",
+                "y"
+              ],
+              "lines": [
+                "y"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 45
+  },
+  {
+    "id": "join-without-spaces",
+    "version": 1,
+    "plan": "V064",
+    "title": "Join without spaces",
+    "prompt": "Join the three lines of the package name without any spaces. Keep the line `x` on its own.",
+    "keys": "3gJ",
+    "initial": {
+      "lines": [
+        "pkg",
+        ".",
+        "name",
+        "x"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "pkg.name",
+        "x"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Join the two lines of the number without any spaces.",
+        "keys": "gJ",
+        "initial": {
+          "lines": [
+            "12",
+            "345"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "12345"
+          ]
+        }
+      },
+      {
+        "prompt": "Join the three parts of the address without any spaces. Keep the line `end` on its own.",
+        "keys": "3gJ",
+        "initial": {
+          "lines": [
+            "user",
+            "@",
+            "example.com",
+            "end"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "user@example.com",
+            "end"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 45
   }
 ]

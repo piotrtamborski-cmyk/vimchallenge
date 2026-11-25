@@ -47,7 +47,19 @@ function describe(f: GoalFailure): string {
 /** Key log in Vim notation, e.g. `ciwfast<Esc>`. */
 const notation = (keys: readonly string[]) => keys.map((k) => (k === '<' ? '<lt>' : k)).join('');
 
-export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; nextHref?: string; autofocus?: boolean }) {
+interface TaskPlayerProps {
+  /** The task on the text being played (see `onText`). */
+  task: Task;
+  /** Which text of the task this is, how many it has, and where the next one is. */
+  text?: { n: number; count: number; nextHref: string };
+  /** Where "next" leads after a solve: the next task, exercise or lesson. */
+  next?: { href: string; label: string };
+  /** The lesson that teaches this task, offered when an attempt fails. */
+  lesson?: { title: string; href: string };
+  autofocus?: boolean;
+}
+
+export function TaskPlayer({ task, text, next, lesson, autofocus = true }: TaskPlayerProps) {
   const host = useRef<HTMLDivElement>(null);
   const editor = useRef<BrowserEditor | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -80,12 +92,12 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
       const request = new AbortController();
       serverRequest.current = request;
       setServer({ state: 'checking' });
-      confirmOnServer(task, [...ed.log()], request.signal).then(
+      confirmOnServer(task, text?.n ?? 1, [...ed.log()], request.signal).then(
         (answer) => !request.signal.aborted && setServer(answer),
         () => {},
       );
     },
-    [task, resetServer],
+    [task, text?.n, resetServer],
   );
 
   useEffect(() => {
@@ -133,6 +145,11 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
         <h1 id={`task-${task.id}`} className="text-2xl font-semibold">
           {task.title}
         </h1>
+        {text && text.count > 1 && (
+          <p className="text-sm text-muted">
+            Text {text.n} of {text.count}
+          </p>
+        )}
         <Prompt text={task.prompt} className="text-lg leading-relaxed" />
         <div className="flex flex-wrap gap-2 text-sm">
           <button type="button" onClick={() => setHint((h) => !h)} className="rounded border border-line px-3 py-1.5 hover:bg-line/40" aria-expanded={hint}>
@@ -189,12 +206,19 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
             <div className="space-y-1">
               <p className="font-semibold text-good">
                 Solved in {result.keys} {result.keys === 1 ? 'key' : 'keys'}.{' '}
-                {nextHref && (
-                  <Link href={nextHref} className="underline">
-                    Next task →
+                {next && (
+                  <Link href={next.href} className="underline">
+                    {next.label}
                   </Link>
                 )}
               </p>
+              {text && text.count > 1 && (
+                <p>
+                  <Link href={text.nextHref} className="underline">
+                    Practise on new text →
+                  </Link>
+                </p>
+              )}
               {server && <ServerStatus check={server} />}
             </div>
           )}
@@ -209,6 +233,15 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
                 ))}
               </ul>
               {result.failures.some((f) => f.field === 'text') && <TextDiff want={task.expected.lines!} got={snapshot?.lines ?? []} />}
+              {lesson && (
+                <p className="text-sm">
+                  Stuck? The lesson{' '}
+                  <Link href={lesson.href} className="underline">
+                    {lesson.title}
+                  </Link>{' '}
+                  explains the keys for this.
+                </p>
+              )}
             </div>
           )}
         </div>

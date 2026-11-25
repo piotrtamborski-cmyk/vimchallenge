@@ -27,6 +27,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Link href="/" className="font-mono text-lg font-semibold">
               vimchallenge
             </Link>
+            <Link href="/lessons" className="text-muted hover:text-ink">
+              Lessons
+            </Link>
             <Link href="/tasks" className="text-muted hover:text-ink">
               Tasks
             </Link>

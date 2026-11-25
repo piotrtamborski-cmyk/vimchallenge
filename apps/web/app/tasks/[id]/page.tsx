@@ -1,19 +1,31 @@
-import { nextTask, taskById } from '@vimchallenge/tasks';
+import { lessonsForTask, nextTask, onText, taskById, textCount } from '@vimchallenge/tasks';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { TaskPlayer } from '@/components/TaskPlayer';
 
-type Props = { params: Promise<{ id: string }> };
+type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ text?: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const task = taskById((await params).id);
   return { title: task?.title ?? 'Task not found' };
 }
 
-export default async function TaskPage({ params }: Props) {
+export default async function TaskPage({ params, searchParams }: Props) {
   const { id } = await params;
-  const task = taskById(id);
-  if (!task) notFound();
+  const n = Number((await searchParams).text ?? 1);
+  const base = taskById(id);
+  const task = base && onText(base, n);
+  if (!base || !task) notFound();
+  const count = textCount(base);
   const next = nextTask(id);
-  return <TaskPlayer key={task.id} task={task} nextHref={next ? `/tasks/${next.id}` : undefined} />;
+  const lesson = lessonsForTask(id)[0];
+  return (
+    <TaskPlayer
+      key={`${task.id}:${n}`}
+      task={task}
+      text={{ n, count, nextHref: `/tasks/${id}?text=${(n % count) + 1}` }}
+      next={next ? { href: `/tasks/${next.id}`, label: 'Next task →' } : undefined}
+      lesson={lesson ? { title: lesson.title, href: `/lessons/${lesson.id}` } : undefined}
+    />
+  );
 }

@@ -3,15 +3,16 @@
 Learn a Vim technique, use it in a real editor, then prove it in a contest — all three modes run on the
 same versioned tasks and the same judging rules.
 
-Early stage: the editor engine, the conformance harnesses that check it against real Vim, and the first
-version of the web app with 22 training tasks.
+Early stage: the editor engine, the conformance harnesses that check it against real Vim, and the web app
+with 12 lessons and 42 training tasks on three texts each, judged in the browser and confirmed by the
+server's judge.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `apps/web` | The web app (Next.js): home page, task list and task pages with the Vim editor. |
-| `packages/tasks` | Published tasks (`tasks.json`): prompt, initial state, goals and one solution. CI replays every task in Vim. |
+| `apps/web` | The web app (Next.js): home page, lessons, task list and task pages with the Vim editor. |
+| `packages/tasks` | Published tasks (`tasks.json`: prompt, initial state, goals and one solution, plus `variants` — the same technique on other texts, for "practise on new text") and lessons (`lessons.json`: explanation, keys and the tasks that practise them). Tests check every card's shape and that each task belongs to a lesson; CI replays every task in Vim. |
 | `packages/judge` | The server-side judge: a pool of worker threads that replay a key log in the headless engine under time, memory and size limits, and a small HTTP service in front of it. |
 | `deploy` | Running on a server: [`deploy/README.md`](deploy/README.md), systemd units and sandbox for the web app and the judge, release and rollback scripts. |
 | `packages/engine` | The editing engine: CodeMirror 6 + [`@replit/codemirror-vim`](https://github.com/replit/codemirror-vim), the shared editor profile, key notation, positions and goal checks. `@vimchallenge/engine/browser` is the editor in the page; `@vimchallenge/engine/headless` runs the same session in Node (jsdom) for the server-side judge. |
@@ -57,7 +58,8 @@ engines to agree on every undo and redo.
 
 ## Judge service
 
-`POST /v1/judge` with `{"task": "undo-a-change", "version": 1, "keys": ["x", "u"]}` replays the key log —
+`POST /v1/judge` with `{"task": "undo-a-change", "version": 1, "text": 1, "keys": ["x", "u"]}` (`text` picks the
+task's text: 1 is the task as published, 2 and up its variants; default 1) replays the key log —
 tokens exactly as the browser editor records them — from the task's initial state and returns
 `{"verdict": "passed" | "failed" | "rejected", "failures": [...], "reason": ..., "timing": {...}}` along with
 the judge and profile versions. A run that breaks a limit in `packages/judge/src/limits.ts` (keys, text

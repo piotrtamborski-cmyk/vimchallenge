@@ -21,7 +21,7 @@ describe('judge pool', { timeout: 30_000 }, () => {
   afterAll(() => Promise.all(pools.map((p) => p.close())));
 
   it('judges every published task, two workers at a time', async () => {
-    const p = pool({ workers: 2 });
+    const p = pool({ workers: 2, maxQueue: tasks.length });
     const outcomes = await Promise.all(tasks.map((t) => p.judge({ initial: t.initial, expected: t.expected, keys: parseKeys(t.keys) })));
     expect(outcomes.map((o) => o.verdict)).toEqual(tasks.map(() => 'passed'));
   });

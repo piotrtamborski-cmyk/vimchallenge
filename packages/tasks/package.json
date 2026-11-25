@@ -6,7 +6,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./tasks.json": "./tasks.json"
+    "./tasks.json": "./tasks.json",
+    "./lessons.json": "./lessons.json"
   },
   "dependencies": {
     "@vimchallenge/engine": "*"

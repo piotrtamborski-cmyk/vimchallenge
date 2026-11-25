@@ -6,7 +6,7 @@ Reference Vim 9.1.16 · @replit/codemirror-vim 6.4.0 · vim-core 0.1.0 (vendored
 
 Each case is replayed key by key in reference Vim and in the headless browser engine. After every key the text, mode and cursor must be equal; at the end visual selection, named registers and marks are compared too. Registers recorded with `q` are not compared (engine-specific key codes). After every key both engines must also agree on whether the key was an undo or a redo. Step goals (`expected.steps`, e.g. "cursor visited the end before the first edit") are judged on both runs; other semantic goals are listed but not judged yet.
 
-**200 match · 5 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 205 cases.
+**311 match · 5 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 316 cases.
 
 | Case | MVP | Result | Keys (first differing key in bold) | Difference: Vim → browser engine |
 |---|---|---|---|---|
@@ -191,27 +191,138 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | P099 |  | ✅ match | `oB<Esc>u<C-r>` |  |
 | P100 |  | ✅ match | `jOB<Esc>u<C-r>` |  |
 | P101 |  | ✅ match | `:4d<CR>u` |  |
+| P102 |  | ✅ match | `yiw` |  |
+| P103 |  | ✅ match | `yb` |  |
+| P104 |  | ✅ match | `yaw` |  |
+| P105 |  | ✅ match | `y$` |  |
+| P106 |  | ✅ match | `yk` |  |
+| P107 |  | ✅ match | `yj` |  |
+| P108 |  | ✅ match | `yip` |  |
+| P109 |  | ✅ match | `yi(` |  |
+| P110 |  | ✅ match | `y0` |  |
 | replace-a-letter | MVP | ✅ match | `ra` |  |
+| replace-a-letter@2 | MVP | ✅ match | `ro` |  |
+| replace-a-letter@3 | MVP | ✅ match | `ru` |  |
 | insert-before | MVP | ✅ match | `ic<Esc>` |  |
+| insert-before@2 | MVP | ✅ match | `ib<Esc>` |  |
+| insert-before@3 | MVP | ✅ match | `is<Esc>` |  |
 | append-to-a-line | MVP | ✅ match | `A!<Esc>` |  |
+| append-to-a-line@2 | MVP | ✅ match | `A?<Esc>` |  |
+| append-to-a-line@3 | MVP | ✅ match | `A.<Esc>` |  |
 | delete-a-character | MVP | ✅ match | `x` |  |
+| delete-a-character@2 | MVP | ✅ match | `x` |  |
+| delete-a-character@3 | MVP | ✅ match | `x` |  |
 | move-with-a-count | MVP | ✅ match | `3l` |  |
+| move-with-a-count@2 | MVP | ✅ match | `4l` |  |
+| move-with-a-count@3 | MVP | ✅ match | `2l` |  |
 | one-line-down | MVP | ✅ match | `j` |  |
+| one-line-down@2 | MVP | ✅ match | `j` |  |
+| one-line-down@3 | MVP | ✅ match | `j` |  |
 | end-of-line | MVP | ✅ match | `$` |  |
+| end-of-line@2 | MVP | ✅ match | `$` |  |
+| end-of-line@3 | MVP | ✅ match | `$` |  |
 | first-non-blank | MVP | ✅ match | `^` |  |
+| first-non-blank@2 | MVP | ✅ match | `^` |  |
+| first-non-blank@3 | MVP | ✅ match | `^` |  |
 | next-word | MVP | ✅ match | `w` |  |
+| next-word@2 | MVP | ✅ match | `w` |  |
+| next-word@3 | MVP | ✅ match | `w` |  |
 | end-of-a-word | MVP | ✅ match | `e` |  |
+| end-of-a-word@2 | MVP | ✅ match | `e` |  |
+| end-of-a-word@3 | MVP | ✅ match | `e` |  |
 | open-a-line-below | MVP | ✅ match | `onotes<Esc>` |  |
+| open-a-line-below@2 | MVP | ✅ match | `omiddle<Esc>` |  |
+| open-a-line-below@3 | MVP | ✅ match | `otwo<Esc>` |  |
 | delete-a-line | MVP | ✅ match | `dd` |  |
+| delete-a-line@2 | MVP | ✅ match | `dd` |  |
+| delete-a-line@3 | MVP | ✅ match | `dd` |  |
 | duplicate-a-line | MVP | ✅ match | `yyp` |  |
+| duplicate-a-line@2 | MVP | ✅ match | `yyp` |  |
+| duplicate-a-line@3 | MVP | ✅ match | `yyp` |  |
 | capitalize | MVP | ✅ match | `~` |  |
+| capitalize@2 | MVP | ✅ match | `~` |  |
+| capitalize@3 | MVP | ✅ match | `~` |  |
 | find-a-character | MVP | ✅ match | `f:` |  |
+| find-a-character@2 | MVP | ✅ match | `f=` |  |
+| find-a-character@3 | MVP | ✅ match | `f,` |  |
 | back-to-the-top | MVP | ✅ match | `gg` |  |
+| back-to-the-top@2 | MVP | ✅ match | `gg` |  |
+| back-to-the-top@3 | MVP | ✅ match | `gg` |  |
 | change-a-word | MVP | ✅ match | `ciwfast<Esc>` |  |
+| change-a-word@2 | MVP | ✅ match | `ciwwarm<Esc>` |  |
+| change-a-word@3 | MVP | ✅ match | `ciwleft<Esc>` |  |
 | delete-a-word | MVP | ✅ match | `dw` |  |
+| delete-a-word@2 | MVP | ✅ match | `dw` |  |
+| delete-a-word@3 | MVP | ✅ match | `dw` |  |
+| delete-to-end-of-line | MVP | ✅ match | `D` |  |
+| delete-to-end-of-line@2 | MVP | ✅ match | `D` |  |
+| delete-to-end-of-line@3 | MVP | ✅ match | `D` |  |
 | delete-two-lines | MVP | ✅ match | `2dd` |  |
+| delete-two-lines@2 | MVP | ✅ match | `2dd` |  |
+| delete-two-lines@3 | MVP | ✅ match | `2dd` |  |
+| jump-two-words | MVP | ✅ match | `2w` |  |
+| jump-two-words@2 | MVP | ✅ match | `2w` |  |
+| jump-two-words@3 | MVP | ✅ match | `3w` |  |
+| join-lines | MVP | ✅ match | `J` |  |
+| join-lines@2 | MVP | ✅ match | `J` |  |
+| join-lines@3 | MVP | ✅ match | `J` |  |
 | search | MVP | ✅ match | `/port<CR>` |  |
+| search@2 | MVP | ✅ match | `/user<CR>` |  |
+| search@3 | MVP | ✅ match | `/mode<CR>` |  |
+| next-match | MVP | ✅ match | `/cat<CR>n` |  |
+| next-match@2 | MVP | ✅ match | `/ab<CR>n` |  |
+| next-match@3 | MVP | ✅ match | `/log<CR>n` |  |
 | yank-into-a-register | MVP | ✅ match | `"ayiw` |  |
+| yank-into-a-register@2 | MVP | ✅ match | `"ayiw` |  |
+| yank-into-a-register@3 | MVP | ✅ match | `"cyiw` |  |
+| copy-a-line | MVP | ✅ match | `yyjp` |  |
+| copy-a-line@2 | MVP | ✅ match | `yyjp` |  |
+| copy-a-line@3 | MVP | ✅ match | `yyGp` |  |
 | select-characters | MVP | ✅ match | `v2l` |  |
+| select-characters@2 | MVP | ✅ match | `v3l` |  |
+| select-characters@3 | MVP | ✅ match | `vl` |  |
+| indent-lines | MVP | ✅ match | `Vj>` |  |
+| indent-lines@2 | MVP | ✅ match | `Vj>` |  |
+| indent-lines@3 | MVP | ✅ match | `Vjj>` |  |
 | undo-a-change | MVP | ✅ match | `xu` | <br>Steps judged: Delete the `!`. → Undo the deletion to get the `!` back. |
+| undo-a-change@2 | MVP | ✅ match | `xu` | <br>Steps judged: Delete the `?`. → Undo the deletion to get the `?` back. |
+| undo-a-change@3 | MVP | ✅ match | `dwu` | <br>Steps judged: Delete the word `not`. → Undo the deletion to get `not` back. |
+| increment-a-number | MVP | ✅ match | `<C-a>` |  |
+| increment-a-number@2 | MVP | ✅ match | `<C-a>` |  |
+| increment-a-number@3 | MVP | ✅ match | `<C-a>` |  |
+| uppercase-a-word | MVP | ✅ match | `gUiw` |  |
+| uppercase-a-word@2 | MVP | ✅ match | `gUiw` |  |
+| uppercase-a-word@3 | MVP | ✅ match | `gUiw` |  |
 | visit-the-end-first | MVP | ✅ match | `G$bbciwnew<Esc>` | <br>Steps judged: Move to the last character of the document before your first edit. |
+| visit-the-end-first@2 | MVP | ✅ match | `G$bbciwgreen<Esc>` | <br>Steps judged: Move to the last character of the document before your first edit. |
+| visit-the-end-first@3 | MVP | ✅ match | `G$bbciwsix<Esc>` | <br>Steps judged: Move to the last character of the document before your first edit. |
+| change-inside-quotes | MVP | ✅ match | `ci"cat<Esc>` |  |
+| change-inside-quotes@2 | MVP | ✅ match | `ci"en<Esc>` |  |
+| change-inside-quotes@3 | MVP | ✅ match | `ci"ok<Esc>` |  |
+| empty-inner-parentheses | MVP | ✅ match | `di(` |  |
+| empty-inner-parentheses@2 | MVP | ✅ match | `di(` |  |
+| empty-inner-parentheses@3 | MVP | ✅ match | `di(` |  |
+| change-tag-content | MVP | ✅ match | `citfox<Esc>` |  |
+| change-tag-content@2 | MVP | ✅ match | `citHi<Esc>` |  |
+| change-tag-content@3 | MVP | ✅ match | `citdocs<Esc>` |  |
+| select-words | MVP | ✅ match | `vwe` |  |
+| select-words@2 | MVP | ✅ match | `vwe` |  |
+| select-words@3 | MVP | ✅ match | `vwe` |  |
+| move-a-line | MVP | ✅ match | `ddp` |  |
+| move-a-line@2 | MVP | ✅ match | `ddp` |  |
+| move-a-line@3 | MVP | ✅ match | `ddp` |  |
+| yank-lines-into-a-register | MVP | ✅ match | `"b2yy` |  |
+| yank-lines-into-a-register@2 | MVP | ✅ match | `"b2yy` |  |
+| yank-lines-into-a-register@3 | MVP | ✅ match | `"x3yy` |  |
+| toggle-case-of-a-line | MVP | ✅ match | `g~~` |  |
+| toggle-case-of-a-line@2 | MVP | ✅ match | `g~~` |  |
+| toggle-case-of-a-line@3 | MVP | ✅ match | `g~~` |  |
+| delete-without-losing-a-yank | MVP | ✅ match | `yiwj"_dd` |  |
+| delete-without-losing-a-yank@2 | MVP | ✅ match | `yiwj"_dd` |  |
+| delete-without-losing-a-yank@3 | MVP | ✅ match | `yiwjj"_dd` |  |
+| undo-and-redo | MVP | ✅ match | `oB<Esc>u<C-r>` | <br>Steps judged: Add the line `B`. → Undo adding it. → Bring it back with redo. |
+| undo-and-redo@2 | MVP | ✅ match | `oend<Esc>u<C-r>` | <br>Steps judged: Add the line `end`. → Undo adding it. → Bring it back with redo. |
+| undo-and-redo@3 | MVP | ✅ match | `ddu<C-r>` | <br>Steps judged: Delete the line `x`. → Undo the deletion. → Delete it again with redo. |
+| join-without-spaces | MVP | ✅ match | `3gJ` |  |
+| join-without-spaces@2 | MVP | ✅ match | `gJ` |  |
+| join-without-spaces@3 | MVP | ✅ match | `3gJ` |  |

@@ -28,6 +28,16 @@ describe('judge HTTP API', { timeout: 30_000 }, () => {
     expect(await res.json()).toMatchObject({ verdict: 'passed', failures: [], task: 'undo-a-change', version: 1, keys: 2, judge: { version: 1 } });
   });
 
+  it('judges a run on another text of the task', async () => {
+    const res = await post({ task: 'undo-a-change', version: 1, text: 2, keys: ['x', 'u'] });
+    expect(await res.json()).toMatchObject({ verdict: 'passed', text: 2 });
+    // The first text's solution does not reach the goals of the third: different text.
+    const other = await post({ task: 'undo-a-change', version: 1, text: 3, keys: ['x', 'u'] });
+    expect((await other.json()).verdict).toBe('failed');
+    expect((await post({ task: 'undo-a-change', version: 1, text: 4, keys: [] })).status).toBe(404);
+    expect((await post({ task: 'undo-a-change', version: 1, text: 0, keys: [] })).status).toBe(400);
+  });
+
   it('fails a run that skips a required step and says which', async () => {
     const res = await post({ task: 'undo-a-change', version: 1, keys: ['x', 'a', '!', '<Esc>'] });
     const body = await res.json();

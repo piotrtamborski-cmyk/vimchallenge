@@ -46,6 +46,16 @@ export interface Task {
   expected: Expected;
   /** Par time for a fluent player, in seconds. */
   referenceSeconds?: number;
+  /** The same technique on other texts ("practise on new text"); text 1 is the task itself. */
+  variants?: TaskVariant[];
+}
+
+/** Another text for a task: what differs from the task's first text. Title and version are the task's. */
+export interface TaskVariant {
+  prompt: string;
+  keys: string;
+  initial: InitialState;
+  expected: Expected;
 }
 
 /** Deep equality that ignores object key order. */

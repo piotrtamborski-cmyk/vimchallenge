@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "allowImportingTsExtensions": true },
-  "include": ["src", "test", "tasks.json"]
+  "include": ["src", "test", "tasks.json", "lessons.json"]
 }

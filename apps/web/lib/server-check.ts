@@ -21,6 +21,7 @@ const REJECTED: Record<string, string> = {
 
 export async function confirmOnServer(
   task: { id: string; version: number },
+  text: number,
   keys: readonly string[],
   signal: AbortSignal,
 ): Promise<ServerCheck> {
@@ -29,7 +30,7 @@ export async function confirmOnServer(
     res = await fetch('/api/judge', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ task: task.id, version: task.version, keys }),
+      body: JSON.stringify({ task: task.id, version: task.version, text, keys }),
       signal,
     });
   } catch (err) {

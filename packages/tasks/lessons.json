@@ -1,0 +1,576 @@
+[
+  {
+    "id": "modes-and-typing",
+    "plan": "L01",
+    "section": "First minutes",
+    "title": "Modes and typing",
+    "summary": "Switch between Normal and Insert mode, type before or after the cursor, and open a new line.",
+    "requires": [],
+    "body": [
+      "Vim starts in Normal mode. There, keys are commands, not text: `x` deletes a character and `j` moves down. The line under the editor shows the mode, e.g. `-- NORMAL --`.",
+      "To type text, switch to Insert mode. `i` inserts before the cursor and `a` appends after it. `I` and `A` do the same at the start and at the end of the line.",
+      "`o` opens a new line below the cursor and `O` one above it, both ready for typing.",
+      "`<Esc>` always brings you back to Normal mode. Most tasks expect you to finish there."
+    ],
+    "keys": [
+      {
+        "keys": "i",
+        "does": "Insert before the cursor"
+      },
+      {
+        "keys": "a",
+        "does": "Append after the cursor"
+      },
+      {
+        "keys": "I",
+        "does": "Insert at the first non-blank character of the line"
+      },
+      {
+        "keys": "A",
+        "does": "Append at the end of the line"
+      },
+      {
+        "keys": "o",
+        "does": "Open a new line below"
+      },
+      {
+        "keys": "O",
+        "does": "Open a new line above"
+      },
+      {
+        "keys": "<Esc>",
+        "does": "Back to Normal mode"
+      }
+    ],
+    "tasks": [
+      "insert-before",
+      "append-to-a-line",
+      "open-a-line-below"
+    ]
+  },
+  {
+    "id": "moving-the-cursor",
+    "plan": "L02",
+    "section": "First minutes",
+    "title": "Moving the cursor",
+    "summary": "Move by characters and lines, and jump to the ends of a line and of the file.",
+    "requires": [],
+    "body": [
+      "In Normal mode, `h`, `j`, `k` and `l` move the cursor left, down, up and right. They sit under your right hand, so you need not reach for the arrow keys.",
+      "A number before a motion repeats it: `3l` moves three characters to the right and `2j` two lines down.",
+      "`0` goes to the first column of the line, `^` to its first non-blank character and `$` to its last character.",
+      "`gg` jumps to the first line of the file and `G` to the last one. With a number, `G` goes to that line: `5G` is line 5."
+    ],
+    "keys": [
+      {
+        "keys": "h j k l",
+        "does": "Left, down, up, right"
+      },
+      {
+        "keys": "3l",
+        "does": "Three characters to the right"
+      },
+      {
+        "keys": "0",
+        "does": "First column of the line"
+      },
+      {
+        "keys": "^",
+        "does": "First non-blank character of the line"
+      },
+      {
+        "keys": "$",
+        "does": "Last character of the line"
+      },
+      {
+        "keys": "gg",
+        "does": "First line of the file"
+      },
+      {
+        "keys": "G",
+        "does": "Last line of the file"
+      },
+      {
+        "keys": "5G",
+        "does": "Line 5"
+      }
+    ],
+    "tasks": [
+      "move-with-a-count",
+      "one-line-down",
+      "end-of-line",
+      "first-non-blank",
+      "back-to-the-top"
+    ]
+  },
+  {
+    "id": "editing-characters",
+    "plan": "L03",
+    "section": "First minutes",
+    "title": "Editing single characters",
+    "summary": "Replace, delete and change the case of one character, and change a number.",
+    "requires": [
+      "modes-and-typing"
+    ],
+    "body": [
+      "Many fixes touch a single character, and Vim has a command for each of them that keeps you in Normal mode.",
+      "`r` followed by a character replaces the character under the cursor: `ra` puts an `a` there. `x` deletes the character under the cursor and `X` the one before it.",
+      "`~` switches the case of the character under the cursor and moves on, so `~~~` switches three.",
+      "`<C-a>` adds one to the number under or after the cursor and `<C-x>` subtracts one. A count changes it by more: `5<C-a>` adds five."
+    ],
+    "keys": [
+      {
+        "keys": "ra",
+        "does": "Replace the character under the cursor with a"
+      },
+      {
+        "keys": "x",
+        "does": "Delete the character under the cursor"
+      },
+      {
+        "keys": "X",
+        "does": "Delete the character before the cursor"
+      },
+      {
+        "keys": "~",
+        "does": "Switch the case of the character and move on"
+      },
+      {
+        "keys": "<C-a>",
+        "does": "Add one to the number"
+      },
+      {
+        "keys": "<C-x>",
+        "does": "Subtract one from the number"
+      }
+    ],
+    "tasks": [
+      "replace-a-letter",
+      "delete-a-character",
+      "capitalize",
+      "increment-a-number"
+    ]
+  },
+  {
+    "id": "words",
+    "plan": "L04",
+    "section": "Motion and range",
+    "title": "Words",
+    "summary": "Move by words: to the start of the next word, to the end of a word, and back.",
+    "requires": [
+      "moving-the-cursor"
+    ],
+    "body": [
+      "Moving one character at a time is slow. Word motions jump over whole words.",
+      "`w` goes to the start of the next word, `e` to the end of the current or the next word, and `b` back to the start of the previous one.",
+      "Punctuation is a word of its own: after `end` in `end.`, `w` stops at the `.`. `W`, `E` and `B` treat everything between spaces as one word.",
+      "Counts work here too: `2w` skips two words. Letters with accents, like the `é` in `café`, belong to the word."
+    ],
+    "keys": [
+      {
+        "keys": "w",
+        "does": "Start of the next word"
+      },
+      {
+        "keys": "e",
+        "does": "End of the word"
+      },
+      {
+        "keys": "b",
+        "does": "Start of the previous word"
+      },
+      {
+        "keys": "W E B",
+        "does": "The same, with words separated by spaces only"
+      },
+      {
+        "keys": "2w",
+        "does": "Two words forward"
+      }
+    ],
+    "tasks": [
+      "next-word",
+      "end-of-a-word",
+      "jump-two-words",
+      "visit-the-end-first"
+    ]
+  },
+  {
+    "id": "lines",
+    "plan": "L05",
+    "section": "Motion and range",
+    "title": "Lines",
+    "summary": "Open, delete, copy and move whole lines.",
+    "requires": [
+      "modes-and-typing",
+      "moving-the-cursor"
+    ],
+    "body": [
+      "Doubling an operator makes it work on the whole line: `dd` deletes the current line and `yy` copies (yanks) it.",
+      "`p` puts what you deleted or copied after the cursor; for whole lines, that is below the current line. `P` puts it above.",
+      "So `ddp` swaps a line with the one below it, and `yyp` duplicates a line.",
+      "`o` and `O` open a new line below or above, ready for typing."
+    ],
+    "keys": [
+      {
+        "keys": "dd",
+        "does": "Delete the line"
+      },
+      {
+        "keys": "yy",
+        "does": "Copy the line"
+      },
+      {
+        "keys": "p",
+        "does": "Put below the line (after the cursor for characters)"
+      },
+      {
+        "keys": "P",
+        "does": "Put above the line"
+      },
+      {
+        "keys": "ddp",
+        "does": "Swap the line with the next one"
+      },
+      {
+        "keys": "yyp",
+        "does": "Duplicate the line"
+      }
+    ],
+    "tasks": [
+      "open-a-line-below",
+      "delete-a-line",
+      "duplicate-a-line",
+      "move-a-line"
+    ]
+  },
+  {
+    "id": "search",
+    "plan": "L06",
+    "section": "Motion and range",
+    "title": "Search",
+    "summary": "Find a character in the line, search the file for a pattern, and go to the next match.",
+    "requires": [
+      "moving-the-cursor"
+    ],
+    "body": [
+      "`f` followed by a character moves to its next occurrence in the line: `fx` jumps to the next `x`. `t` stops just before it, and `F` and `T` look backwards.",
+      "`;` repeats the last `f` or `t`, and `,` repeats it in the other direction.",
+      "`/` searches the whole file: type a pattern and press `<CR>`. `?` searches backwards. `n` goes to the next match and `N` to the previous one.",
+      "Search is case-sensitive here, and patterns use Vim's syntax: `/\\<cat\\>` finds the word `cat` but not `cats`."
+    ],
+    "keys": [
+      {
+        "keys": "fx",
+        "does": "Next x in the line"
+      },
+      {
+        "keys": "tx",
+        "does": "Just before the next x"
+      },
+      {
+        "keys": "Fx Tx",
+        "does": "The same, backwards"
+      },
+      {
+        "keys": ";",
+        "does": "Repeat the last f or t"
+      },
+      {
+        "keys": ",",
+        "does": "Repeat it backwards"
+      },
+      {
+        "keys": "/cat<CR>",
+        "does": "Search forward for cat"
+      },
+      {
+        "keys": "?cat<CR>",
+        "does": "Search backward"
+      },
+      {
+        "keys": "n N",
+        "does": "Next and previous match"
+      }
+    ],
+    "tasks": [
+      "find-a-character",
+      "search",
+      "next-match"
+    ]
+  },
+  {
+    "id": "operators-and-counts",
+    "plan": "L07",
+    "section": "Composing commands",
+    "title": "Operators and counts",
+    "summary": "Combine an operator with a motion, and use counts to reach further.",
+    "requires": [
+      "moving-the-cursor",
+      "words"
+    ],
+    "body": [
+      "Commands such as `d` (delete), `c` (change) and `y` (yank) are operators: they wait for a motion and act on the text it moves over.",
+      "`dw` deletes to the start of the next word, `d$` to the end of the line, and `dj` deletes the current line and the next one.",
+      "`c` works the same way but leaves you in Insert mode to type the replacement. Some pairs have a shortcut: `D` is `d$` and `C` is `c$`.",
+      "A count can go before the operator or the motion: `2dd` and `d2d` both delete two lines, and `d3w` deletes three words."
+    ],
+    "keys": [
+      {
+        "keys": "dw",
+        "does": "Delete to the next word"
+      },
+      {
+        "keys": "d$ or D",
+        "does": "Delete to the end of the line"
+      },
+      {
+        "keys": "c$ or C",
+        "does": "Change to the end of the line"
+      },
+      {
+        "keys": "dj",
+        "does": "Delete this line and the next"
+      },
+      {
+        "keys": "2dd",
+        "does": "Delete two lines"
+      },
+      {
+        "keys": "d3w",
+        "does": "Delete three words"
+      }
+    ],
+    "tasks": [
+      "delete-a-word",
+      "delete-to-end-of-line",
+      "delete-two-lines"
+    ]
+  },
+  {
+    "id": "registers",
+    "plan": "L08",
+    "section": "Composing commands",
+    "title": "Registers",
+    "summary": "Copy into named registers, keep a copy while deleting, and put whole lines.",
+    "requires": [
+      "lines"
+    ],
+    "body": [
+      "Every delete and yank goes into a register. Without a name, it is the unnamed register `\"`, which `p` puts back.",
+      "Type `\"` and a letter before a command to use a named register: `\"ayiw` copies a word into register `a`, and `\"ap` puts it.",
+      "A register remembers whether it holds characters or whole lines; lines are always put on lines of their own, wherever the cursor is in the line.",
+      "Deleting overwrites the unnamed register. To delete without losing what you copied, delete into the black hole register: `\"_dd`."
+    ],
+    "keys": [
+      {
+        "keys": "\"ayiw",
+        "does": "Copy the word into register a"
+      },
+      {
+        "keys": "\"ap",
+        "does": "Put register a"
+      },
+      {
+        "keys": "\"b2yy",
+        "does": "Copy two lines into register b"
+      },
+      {
+        "keys": "yyjp",
+        "does": "Copy a line and put it below the next one"
+      },
+      {
+        "keys": "\"_dd",
+        "does": "Delete the line without touching any register"
+      }
+    ],
+    "tasks": [
+      "yank-into-a-register",
+      "copy-a-line",
+      "yank-lines-into-a-register",
+      "delete-without-losing-a-yank"
+    ]
+  },
+  {
+    "id": "text-objects",
+    "plan": "L09",
+    "section": "Composing commands",
+    "title": "Text objects",
+    "summary": "Act on a whole word, or on the inside of quotes, brackets and tags, from wherever the cursor is in them.",
+    "requires": [
+      "words",
+      "operators-and-counts"
+    ],
+    "body": [
+      "After an operator, `i` and `a` select a text object around the cursor. `iw` is the word under the cursor, whatever its position in the word; `aw` also takes the space after it.",
+      "`ciw` changes the whole word, so the cursor does not have to be at its start. `diw` deletes it.",
+      "The same works for pairs: `i\"` is the inside of the quotes, `i(` the inside of the parentheses and `it` the inside of an HTML tag. `a\"`, `a(` and `at` also take the quotes, the parentheses or the tags.",
+      "`ci\"cat<Esc>` replaces the quoted text and keeps the quotes. `di(` empties the innermost pair of parentheses around the cursor."
+    ],
+    "keys": [
+      {
+        "keys": "ciw",
+        "does": "Change the word under the cursor"
+      },
+      {
+        "keys": "diw daw",
+        "does": "Delete the word, or the word and its space"
+      },
+      {
+        "keys": "ci\"",
+        "does": "Change inside the quotes"
+      },
+      {
+        "keys": "di(",
+        "does": "Delete inside the parentheses"
+      },
+      {
+        "keys": "cit",
+        "does": "Change inside the HTML tag"
+      },
+      {
+        "keys": "da\"",
+        "does": "Delete the quotes and what is inside"
+      }
+    ],
+    "tasks": [
+      "change-a-word",
+      "change-inside-quotes",
+      "empty-inner-parentheses",
+      "change-tag-content"
+    ]
+  },
+  {
+    "id": "visual-selection",
+    "plan": "L10",
+    "section": "Composing commands",
+    "title": "Visual selection",
+    "summary": "Select characters or lines, see the area, and run an operator on it.",
+    "requires": [
+      "moving-the-cursor"
+    ],
+    "body": [
+      "`v` starts selecting characters at the cursor and `V` whole lines. Motions then extend the selection, and it is highlighted, so you see exactly what an operator will touch.",
+      "Both ends are included: `vwe`, started on the `b` of `beta` in `alpha beta gamma`, selects up to the last `a` of `gamma`.",
+      "With a selection, an operator acts on it at once: `d` deletes it, `y` copies it, `>` indents the lines and `~` switches the case.",
+      "`o` jumps to the other end of the selection and `<Esc>` ends it. Some tasks want the selection still active at the end: press Check, or Alt+Enter, while it is."
+    ],
+    "keys": [
+      {
+        "keys": "v",
+        "does": "Select characters"
+      },
+      {
+        "keys": "V",
+        "does": "Select lines"
+      },
+      {
+        "keys": "o",
+        "does": "Go to the other end of the selection"
+      },
+      {
+        "keys": "d y > ~",
+        "does": "Delete, copy, indent, switch case of the selection"
+      },
+      {
+        "keys": "<Esc>",
+        "does": "End the selection"
+      }
+    ],
+    "tasks": [
+      "select-characters",
+      "indent-lines",
+      "select-words"
+    ]
+  },
+  {
+    "id": "undo-and-redo",
+    "plan": "L11",
+    "section": "Control of changes",
+    "title": "Undo and redo",
+    "summary": "Take a change back with undo and bring it back with redo.",
+    "requires": [
+      "editing-characters"
+    ],
+    "body": [
+      "`u` undoes the last change and `<C-r>` redoes it. A change is one Normal-mode command together with everything typed in the Insert mode it started: `ifoo<Esc>` is undone by a single `u`.",
+      "Undo walks back through your changes one by one, and redo forward again, until you make a new change.",
+      "`:undo` and `:redo` do the same from the command line.",
+      "In these tasks the judge checks the way, not only the result: typing a deleted `!` again gives the same text, but it is not an undo."
+    ],
+    "keys": [
+      {
+        "keys": "u",
+        "does": "Undo the last change"
+      },
+      {
+        "keys": "<C-r>",
+        "does": "Redo"
+      },
+      {
+        "keys": "3u",
+        "does": "Undo three changes"
+      },
+      {
+        "keys": ":undo<CR> :redo<CR>",
+        "does": "Undo and redo from the command line"
+      }
+    ],
+    "tasks": [
+      "undo-a-change",
+      "undo-and-redo"
+    ]
+  },
+  {
+    "id": "formatting",
+    "plan": "L12",
+    "section": "Control of changes",
+    "title": "Formatting",
+    "summary": "Join lines, indent them, and change the case of words and lines.",
+    "requires": [
+      "lines",
+      "operators-and-counts"
+    ],
+    "body": [
+      "`J` joins the next line to the current one with a single space between them; `gJ` joins without adding a space. With a count, `3J` joins three lines.",
+      "`>>` indents the line by one level and `<<` takes the indent back; here one level is two spaces. With a selection, `>` and `<` indent every selected line.",
+      "`gU`, `gu` and `g~` are operators that make text uppercase, lowercase or switch its case: `gUiw` uppercases a word. Doubled, they act on the line: `g~~` switches the case of the whole line."
+    ],
+    "keys": [
+      {
+        "keys": "J",
+        "does": "Join with the next line, with one space"
+      },
+      {
+        "keys": "gJ",
+        "does": "Join without a space"
+      },
+      {
+        "keys": "3gJ",
+        "does": "Join three lines without spaces"
+      },
+      {
+        "keys": ">> <<",
+        "does": "Indent the line, or take the indent back"
+      },
+      {
+        "keys": "gUiw",
+        "does": "Uppercase the word"
+      },
+      {
+        "keys": "guiw",
+        "does": "Lowercase the word"
+      },
+      {
+        "keys": "g~~",
+        "does": "Switch the case of the line"
+      }
+    ],
+    "tasks": [
+      "join-lines",
+      "uppercase-a-word",
+      "toggle-case-of-a-line",
+      "join-without-spaces"
+    ]
+  }
+]
