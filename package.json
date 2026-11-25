@@ -8,12 +8,16 @@
   },
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
-    "typecheck": "tsc -p packages/engine && tsc -p packages/conformance",
+    "typecheck": "tsc -p packages/engine && tsc -p packages/tasks && tsc -p packages/conformance && tsc -p apps/web",
     "test": "vitest run",
-    "conformance": "npm run -w @vimchallenge/conformance run --"
+    "conformance": "npm run -w @vimchallenge/conformance run --",
+    "dev": "npm run -w @vimchallenge/web dev",
+    "build": "npm run -w @vimchallenge/web build",
+    "conformance:browser": "npm run -w @vimchallenge/conformance browser --"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

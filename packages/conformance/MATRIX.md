@@ -6,7 +6,7 @@ Reference Vim 9.1.16 · @replit/codemirror-vim 6.4.0 · vim-core 0.1.0 (vendored
 
 Each case is replayed key by key in reference Vim and in the headless browser engine. After every key the text, mode and cursor must be equal; at the end visual selection, named registers and marks are compared too. Registers recorded with `q` are not compared (engine-specific key codes). Semantic goals (e.g. "cursor visited the end before the first edit") are listed but not judged yet.
 
-**176 match · 5 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 181 cases.
+**198 match · 5 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 203 cases.
 
 | Case | MVP | Result | Keys (first differing key in bold) | Difference: Vim → browser engine |
 |---|---|---|---|---|
@@ -191,3 +191,25 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | P099 |  | ✅ match | `oB<Esc>u<C-r>` |  |
 | P100 |  | ✅ match | `jOB<Esc>u<C-r>` |  |
 | P101 |  | ✅ match | `:4d<CR>u` |  |
+| replace-a-letter | MVP | ✅ match | `ra` |  |
+| insert-before | MVP | ✅ match | `ic<Esc>` |  |
+| append-to-a-line | MVP | ✅ match | `A!<Esc>` |  |
+| delete-a-character | MVP | ✅ match | `x` |  |
+| move-with-a-count | MVP | ✅ match | `3l` |  |
+| one-line-down | MVP | ✅ match | `j` |  |
+| end-of-line | MVP | ✅ match | `$` |  |
+| first-non-blank | MVP | ✅ match | `^` |  |
+| next-word | MVP | ✅ match | `w` |  |
+| end-of-a-word | MVP | ✅ match | `e` |  |
+| open-a-line-below | MVP | ✅ match | `onotes<Esc>` |  |
+| delete-a-line | MVP | ✅ match | `dd` |  |
+| duplicate-a-line | MVP | ✅ match | `yyp` |  |
+| capitalize | MVP | ✅ match | `~` |  |
+| find-a-character | MVP | ✅ match | `f:` |  |
+| back-to-the-top | MVP | ✅ match | `gg` |  |
+| change-a-word | MVP | ✅ match | `ciwfast<Esc>` |  |
+| delete-a-word | MVP | ✅ match | `dw` |  |
+| delete-two-lines | MVP | ✅ match | `2dd` |  |
+| search | MVP | ✅ match | `/port<CR>` |  |
+| yank-into-a-register | MVP | ✅ match | `"ayiw` |  |
+| select-characters | MVP | ✅ match | `v2l` |  |

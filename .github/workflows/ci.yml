@@ -23,3 +23,8 @@ jobs:
           npm run -s conformance
           git diff --exit-code packages/conformance/MATRIX.md || {
             echo "::error::MATRIX.md changed — run 'npm run conformance' and commit the result"; exit 1; }
+      - name: Browser editor agrees with the judge (Chrome)
+        run: npm run -s conformance:browser
+        env:
+          CHROMIUM_PATH: /usr/bin/google-chrome
+      - run: npm run build

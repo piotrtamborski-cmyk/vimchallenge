@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --color-surface: #fafaf9;
+  --color-panel: #ffffff;
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-line: #d6d3d1;
+  --color-accent: #0f766e;
+  --color-accent-ink: #ffffff;
+  --color-good: #166534;
+  --color-bad: #9f1239;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: #0c0a09;
+    --color-panel: #1c1917;
+    --color-ink: #e7e5e4;
+    --color-muted: #a8a29e;
+    --color-line: #44403c;
+    --color-accent: #2dd4bf;
+    --color-accent-ink: #042f2e;
+    --color-good: #86efac;
+    --color-bad: #fda4af;
+  }
+}
+
+html {
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* CodeMirror inside the task player. */
+.vc-editor .cm-editor {
+  background: var(--color-panel);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+  border-radius: 0.5rem;
+  font-size: 1.125rem;
+}
+.vc-editor .cm-editor.cm-focused {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+.vc-editor .cm-scroller {
+  font-family: var(--font-mono);
+  line-height: 1.7;
+  min-height: 7rem;
+  padding: 0.5rem 0;
+}
+.vc-editor .cm-gutters {
+  background: transparent;
+  border-right: 1px solid var(--color-line);
+  color: var(--color-muted);
+}
+.vc-editor .cm-activeLine,
+.vc-editor .cm-activeLineGutter {
+  background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+}
+.vc-editor .cm-fat-cursor {
+  background: var(--color-accent) !important;
+  color: var(--color-accent-ink) !important;
+}
+.vc-editor .cm-editor:not(.cm-focused) .cm-fat-cursor {
+  background: none !important;
+  outline: 1px solid var(--color-accent) !important;
+  color: transparent !important;
+}
+.vc-editor .cm-cursor {
+  border-left: 2px solid var(--color-accent);
+}
+.vc-editor .cm-selectionBackground,
+.vc-editor .cm-focused .cm-selectionBackground {
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent) !important;
+}
+.vc-editor .cm-panels {
+  background: var(--color-panel);
+  color: var(--color-ink);
+  border-top: 1px solid var(--color-line);
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+.vc-editor .cm-vim-panel {
+  font-family: var(--font-mono);
+  padding: 0.25rem 0.75rem;
+}
+.vc-editor .cm-vim-panel input {
+  color: inherit;
+  font: inherit;
+}

@@ -5,6 +5,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "run": "tsx src/run.ts"
+    "run": "tsx src/run.ts",
+    "browser": "tsx src/browser-run.ts"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "playwright-core": "^1.65.1"
   }
 }

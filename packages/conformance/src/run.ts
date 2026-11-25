@@ -5,24 +5,12 @@
  *   npm run conformance              # all cases
  *   npm run conformance -- V033 P001 # selected cases
  */
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
-import { parseKeys, PROFILE_VERSION, type InitialState, type Snapshot } from '@vimchallenge/engine';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { parseKeys, PROFILE_VERSION, type Snapshot } from '@vimchallenge/engine';
+import { loadCases, repoRoot, root, type Case } from './cases.ts';
 import { runCm } from './cm-run.ts';
-import { finalDifferences, goalFailures, stepDifferences, type Difference, type Expected } from './compare.ts';
+import { finalDifferences, goalFailures, stepDifferences, type Difference } from './compare.ts';
 import { runVim } from './vim-ref.ts';
-
-interface Case {
-  id: string;
-  source: string;
-  mvp?: boolean;
-  title?: string;
-  prompt?: string;
-  keys: string;
-  initial: InitialState;
-  expected: Expected;
-  semanticNotes?: string[];
-}
 
 type Status = 'match' | 'display-only' | 'diverge' | 'engine-error' | 'card-error' | 'vim-error';
 
@@ -43,19 +31,9 @@ interface Result {
   semanticNotes?: string[];
 }
 
-const root = fileURLToPath(new URL('..', import.meta.url));
-const repoRoot = fileURLToPath(new URL('../../../', import.meta.url));
 /** Installed version of a dependency (read from node_modules: not every package exports package.json). */
 const pkg = async (name: string) =>
   JSON.parse(await readFile(`${repoRoot}node_modules/${name}/package.json`, 'utf8')).version as string;
-
-async function loadCases(): Promise<Case[]> {
-  const dir = `${root}cases/`;
-  const files = (await readdir(dir)).filter((f) => f.endsWith('.json')).sort();
-  const all: Case[] = [];
-  for (const f of files) all.push(...(JSON.parse(await readFile(dir + f, 'utf8')) as Case[]));
-  return all;
-}
 
 function macroRegisters(tokens: string[]): Set<string> {
   const out = new Set<string>();
@@ -119,7 +97,7 @@ const LABEL: Record<Status, string> = {
 
 async function main() {
   const filter = new Set(process.argv.slice(2));
-  const cases = (await loadCases()).filter((c) => !filter.size || filter.has(c.id));
+  const cases = await loadCases(filter);
   const results: Result[] = [];
   let vimVersion = '?';
   for (const c of cases) {

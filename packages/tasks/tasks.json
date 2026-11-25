@@ -1,0 +1,585 @@
+[
+  {
+    "id": "replace-a-letter",
+    "version": 1,
+    "plan": "V001",
+    "title": "Replace a letter",
+    "prompt": "Replace the `x` under the cursor with `a`.",
+    "keys": "ra",
+    "initial": {
+      "lines": [
+        "cxt"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "cat"
+      ]
+    },
+    "referenceSeconds": 12
+  },
+  {
+    "id": "insert-before",
+    "version": 1,
+    "plan": "V002",
+    "title": "Insert before the cursor",
+    "prompt": "Insert the missing `c` before the first letter, then go back to Normal mode.",
+    "keys": "ic<Esc>",
+    "initial": {
+      "lines": [
+        "at"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "cat"
+      ],
+      "mode": "normal"
+    },
+    "referenceSeconds": 12
+  },
+  {
+    "id": "append-to-a-line",
+    "version": 1,
+    "plan": "V003",
+    "title": "Append to a line",
+    "prompt": "End the line with an exclamation mark.",
+    "keys": "A!<Esc>",
+    "initial": {
+      "lines": [
+        "Done"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Done!"
+      ]
+    },
+    "referenceSeconds": 15
+  },
+  {
+    "id": "delete-a-character",
+    "version": 1,
+    "plan": "V004",
+    "title": "Delete a character",
+    "prompt": "Delete the extra `s`.",
+    "keys": "x",
+    "initial": {
+      "lines": [
+        "kisss"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "kiss"
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "move-with-a-count",
+    "version": 1,
+    "plan": "V005",
+    "title": "Move with a count",
+    "prompt": "Put the cursor on the letter `d`.",
+    "keys": "3l",
+    "initial": {
+      "lines": [
+        "abcde"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "abcde"
+      ],
+      "cursor": [
+        1,
+        4
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "one-line-down",
+    "version": 1,
+    "plan": "V006",
+    "title": "One line down",
+    "prompt": "Move one line down, keeping the column.",
+    "keys": "j",
+    "initial": {
+      "lines": [
+        "cat",
+        "dog"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "cat",
+        "dog"
+      ],
+      "cursor": [
+        2,
+        2
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "end-of-line",
+    "version": 1,
+    "plan": "V007",
+    "title": "End of the line",
+    "prompt": "Go to the last character of the line.",
+    "keys": "$",
+    "initial": {
+      "lines": [
+        "ab cd"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "ab cd"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "first-non-blank",
+    "version": 1,
+    "plan": "V008",
+    "title": "First non-blank",
+    "prompt": "Go to the first letter after the indent.",
+    "keys": "^",
+    "initial": {
+      "lines": [
+        "  start"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  start"
+      ],
+      "cursor": [
+        1,
+        3
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "next-word",
+    "version": 1,
+    "plan": "V009",
+    "title": "Next word",
+    "prompt": "Move to the start of the word `is`.",
+    "keys": "w",
+    "initial": {
+      "lines": [
+        "café is open"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "café is open"
+      ],
+      "cursor": [
+        1,
+        6
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "end-of-a-word",
+    "version": 1,
+    "plan": "V010",
+    "title": "End of a word",
+    "prompt": "Stop on the last letter of the word `naïve`.",
+    "keys": "e",
+    "initial": {
+      "lines": [
+        "naïve idea"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "naïve idea"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "open-a-line-below",
+    "version": 1,
+    "plan": "V011",
+    "title": "Open a line below",
+    "prompt": "Between the title and the footer, add the line `notes`.",
+    "keys": "onotes<Esc>",
+    "initial": {
+      "lines": [
+        "title",
+        "footer"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "title",
+        "notes",
+        "footer"
+      ]
+    },
+    "referenceSeconds": 15
+  },
+  {
+    "id": "delete-a-line",
+    "version": 1,
+    "plan": "V012",
+    "title": "Delete a line",
+    "prompt": "Delete the middle line, including its line break.",
+    "keys": "dd",
+    "initial": {
+      "lines": [
+        "A",
+        "extra",
+        "B"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B"
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "duplicate-a-line",
+    "version": 1,
+    "plan": "V013",
+    "title": "Duplicate a line",
+    "prompt": "Duplicate the line `one` directly below it.",
+    "keys": "yyp",
+    "initial": {
+      "lines": [
+        "one",
+        "two"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "one",
+        "one",
+        "two"
+      ]
+    },
+    "referenceSeconds": 12
+  },
+  {
+    "id": "capitalize",
+    "version": 1,
+    "plan": "V014",
+    "title": "Capitalize",
+    "prompt": "Start the name with a capital letter.",
+    "keys": "~",
+    "initial": {
+      "lines": [
+        "émile"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Émile"
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "find-a-character",
+    "version": 1,
+    "plan": "V015",
+    "title": "Find a character",
+    "prompt": "Jump to the colon in this line.",
+    "keys": "f:",
+    "initial": {
+      "lines": [
+        "mode: test"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "mode: test"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "back-to-the-top",
+    "version": 1,
+    "plan": "V016",
+    "title": "Back to the top",
+    "prompt": "From the end of the document, go back to the first character of the first line.",
+    "keys": "gg",
+    "initial": {
+      "lines": [
+        "A",
+        "B",
+        "C"
+      ],
+      "cursor": [
+        3,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "A",
+        "B",
+        "C"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "change-a-word",
+    "version": 1,
+    "plan": "V017",
+    "title": "Change a word",
+    "prompt": "Change the whole word under the cursor to `fast`.",
+    "keys": "ciwfast<Esc>",
+    "initial": {
+      "lines": [
+        "mode slow"
+      ],
+      "cursor": [
+        1,
+        8
+      ]
+    },
+    "expected": {
+      "lines": [
+        "mode fast"
+      ]
+    },
+    "referenceSeconds": 15
+  },
+  {
+    "id": "delete-a-word",
+    "version": 1,
+    "plan": "V018",
+    "title": "Delete a word",
+    "prompt": "Delete the first word together with the space after it.",
+    "keys": "dw",
+    "initial": {
+      "lines": [
+        "small cat sleeps"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "cat sleeps"
+      ]
+    },
+    "referenceSeconds": 10
+  },
+  {
+    "id": "delete-two-lines",
+    "version": 1,
+    "plan": "V020",
+    "title": "Delete two lines",
+    "prompt": "Delete the two middle lines.",
+    "keys": "2dd",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "d"
+      ]
+    },
+    "referenceSeconds": 12
+  },
+  {
+    "id": "search",
+    "version": 1,
+    "plan": "V023",
+    "title": "Search",
+    "prompt": "Find `port` and stop on its first letter.",
+    "keys": "/port<CR>",
+    "initial": {
+      "lines": [
+        "host",
+        "port=8",
+        "mode"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "host",
+        "port=8",
+        "mode"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    },
+    "referenceSeconds": 12
+  },
+  {
+    "id": "yank-into-a-register",
+    "version": 1,
+    "plan": "V025",
+    "title": "Yank into a register",
+    "prompt": "Copy just the word `color` into register `a`.",
+    "keys": "\"ayiw",
+    "initial": {
+      "lines": [
+        "color sky"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "color sky"
+      ],
+      "registers": {
+        "a": {
+          "type": "char",
+          "text": "color"
+        }
+      }
+    },
+    "referenceSeconds": 15
+  },
+  {
+    "id": "select-characters",
+    "version": 1,
+    "plan": "V027",
+    "title": "Select characters",
+    "prompt": "Select the characters `key` and submit while the selection is still active (Alt+Enter or Check).",
+    "keys": "v2l",
+    "initial": {
+      "lines": [
+        "key: 17"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "key: 17"
+      ],
+      "visual": {
+        "type": "visual",
+        "from": [
+          1,
+          1
+        ],
+        "to": [
+          1,
+          3
+        ]
+      }
+    },
+    "referenceSeconds": 12
+  }
+]

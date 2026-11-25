@@ -1,4 +1,4 @@
-import type { Pos, Snapshot } from '@vimchallenge/engine';
+import { checkGoals, sameValue, type Expected, type Pos, type Snapshot } from '@vimchallenge/engine';
 
 export interface Difference {
   field: string;
@@ -7,11 +7,7 @@ export interface Difference {
 }
 
 /** Deep equality that ignores object key order (Vim's json_encode orders keys differently). */
-const canon = (v: unknown): unknown =>
-  Array.isArray(v) ? v.map(canon)
-  : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => a.localeCompare(b)).map(([k, x]) => [k, canon(x)]))
-  : v;
-const same = (a: unknown, b: unknown) => JSON.stringify(canon(a)) === JSON.stringify(canon(b));
+const same = sameValue;
 const posEq = (a: Pos | undefined, b: Pos | undefined) => same(a, b);
 
 /** Fields a person can see after each key: text, mode and (outside the command line) cursor. */
@@ -43,30 +39,9 @@ export function finalDifferences(vim: Snapshot, cm: Snapshot, macroRegisters: Se
   return out;
 }
 
-export interface Expected {
-  lines?: string[];
-  cursor?: Pos;
-  mode?: string;
-  visual?: { type: string; from: Pos; to: Pos };
-  registers?: Record<string, { type: string; text: string }>;
-  marks?: Record<string, Pos>;
-}
-
-/** Checks a final state against the goals declared on a card. */
+/** Goal failures as one line each, for the matrix. */
 export function goalFailures(s: Snapshot, e: Expected): string[] {
-  const out: string[] = [];
-  if (e.lines && !same(s.lines, e.lines)) out.push(`text ${JSON.stringify(s.lines)}`);
-  if (e.cursor && !posEq(s.cursor, e.cursor)) out.push(`cursor ${JSON.stringify(s.cursor)}`);
-  if (e.mode && s.mode !== e.mode) out.push(`mode ${s.mode}`);
-  if (e.visual) {
-    const v = s.visual;
-    const ends = v ? [v.anchor, v.head].map((p) => JSON.stringify(p)).sort() : [];
-    const want = [e.visual.from, e.visual.to].map((p) => JSON.stringify(p)).sort();
-    if (s.mode !== e.visual.type || !same(ends, want)) out.push(`visual ${s.mode} ${JSON.stringify(v)}`);
-  }
-  for (const [r, want] of Object.entries(e.registers ?? {}))
-    if (!same(s.registers[r], want)) out.push(`register ${r} ${JSON.stringify(s.registers[r])}`);
-  for (const [m, want] of Object.entries(e.marks ?? {}))
-    if (!posEq(s.marks[m], want)) out.push(`mark ${m} ${JSON.stringify(s.marks[m])}`);
-  return out;
+  return checkGoals(s, e).map((f) =>
+    f.field === 'visual' ? `visual ${s.mode} ${JSON.stringify(s.visual)}` : `${f.field} ${JSON.stringify(f.got)}`,
+  );
 }

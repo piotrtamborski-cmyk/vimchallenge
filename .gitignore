@@ -14,3 +14,10 @@ coverage
 
 # local planning notes — not published
 /plany/
+
+# Next.js
+.next/
+next-env.d.ts
+
+# Local Claude Code session files
+/.claude/
