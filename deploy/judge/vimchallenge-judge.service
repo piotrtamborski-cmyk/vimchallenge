@@ -1,0 +1,33 @@
+# vimchallenge judge: replays key logs of published tasks and returns verdicts (packages/judge).
+# Listens on localhost only and stores nothing. Installation: deploy/README.md.
+[Unit]
+Description=vimchallenge judge
+Documentation=https://github.com/piotrtamborski-cmyk/vimchallenge/blob/main/deploy/README.md
+After=network.target
+
+[Service]
+Type=simple
+User=vimchallenge
+Group=vimchallenge
+WorkingDirectory=/home/vimchallenge/app
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=3101
+# One worker holds one engine, about 100 MB; the host is shared with other services.
+Environment=JUDGE_WORKERS=1
+# The heap limit is for the main thread (HTTP, task list); each worker has its own (limits.ts).
+# Node 22.18+ runs the TypeScript sources directly.
+ExecStart=/usr/bin/node --max-old-space-size=96 packages/judge/src/start.ts
+Restart=on-failure
+RestartSec=2
+TimeoutStopSec=10
+# The whole service, workers included. Without a delegated cgroup memory controller (some LXC
+# hosts) these are ignored; deploy/README.md shows how to check.
+MemoryHigh=250M
+MemoryMax=350M
+# One journal line per request; a flood is dropped instead of filling the disk.
+LogRateLimitIntervalSec=30s
+LogRateLimitBurst=2000
+
+[Install]
+WantedBy=multi-user.target
