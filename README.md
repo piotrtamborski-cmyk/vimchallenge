@@ -13,7 +13,7 @@ version of the web app with 22 training tasks.
 | `apps/web` | The web app (Next.js): home page, task list and task pages with the Vim editor. |
 | `packages/tasks` | Published tasks (`tasks.json`): prompt, initial state, goals and one solution. CI replays every task in Vim. |
 | `packages/judge` | The server-side judge: a pool of worker threads that replay a key log in the headless engine under time, memory and size limits, and a small HTTP service in front of it. |
-| `deploy` | How to run the services on a server: [`deploy/README.md`](deploy/README.md), systemd unit and sandbox for the judge. |
+| `deploy` | Running on a server: [`deploy/README.md`](deploy/README.md), systemd units and sandbox for the web app and the judge, release and rollback scripts. |
 | `packages/engine` | The editing engine: CodeMirror 6 + [`@replit/codemirror-vim`](https://github.com/replit/codemirror-vim), the shared editor profile, key notation, positions and goal checks. `@vimchallenge/engine/browser` is the editor in the page; `@vimchallenge/engine/headless` runs the same session in Node (jsdom) for the server-side judge. |
 | `packages/vim-core` | Vendored fork of `@replit/codemirror-vim-core` (MIT) with the fixes found by conformance. npm links it in place of the published package. |
 | `packages/conformance` | Replays every case key by key in reference Vim and in the headless engine and writes [`MATRIX.md`](packages/conformance/MATRIX.md); types every case into the browser editor in Chromium and checks that the judge reproduces it. |
@@ -79,7 +79,8 @@ The limit lives in the web app's memory, so it assumes one app process.
 Each worker thread holds one engine and judges one run at a time from a fresh session; a run over the
 time limit is stopped by terminating its worker, which is replaced. The service stores nothing and logs
 only the task, the verdict and the time, never the keys. It listens on localhost; the public route sits in
-front of it; [`deploy/README.md`](deploy/README.md) installs it as a systemd service. `npm run -w @vimchallenge/judge bench` measures latency (on the development machine: p95 about
+front of it; [`deploy/README.md`](deploy/README.md) installs it as a systemd service next to the web app.
+`GET /api/health` on the web app reports the release (commit) and whether the judge answers. `npm run -w @vimchallenge/judge bench` measures latency (on the development machine: p95 about
 110 ms with 2 workers and 8 clients; the service takes about 250 MB with 2 workers).
 
 ## Browser editor and judge

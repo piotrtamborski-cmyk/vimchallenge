@@ -1,5 +1,5 @@
 # vimchallenge judge: replays key logs of published tasks and returns verdicts (packages/judge).
-# Listens on localhost only and stores nothing. Installation: deploy/README.md.
+# Listens on localhost only and stores nothing. Runs the release ~/current points at (deploy/README.md).
 [Unit]
 Description=vimchallenge judge
 Documentation=https://github.com/piotrtamborski-cmyk/vimchallenge/blob/main/deploy/README.md
@@ -9,7 +9,7 @@ After=network.target
 Type=simple
 User=vimchallenge
 Group=vimchallenge
-WorkingDirectory=/home/vimchallenge/app
+WorkingDirectory=/home/vimchallenge/current
 Environment=NODE_ENV=production
 Environment=HOST=127.0.0.1
 Environment=PORT=3101
