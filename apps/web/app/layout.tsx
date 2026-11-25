@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { DM_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { headers } from 'next/headers';
 import Link from 'next/link';
+import { NonceProvider } from '@/components/Nonce';
 import './globals.css';
 
 const sans = DM_Sans({ subsets: ['latin', 'latin-ext'], variable: '--font-dm-sans' });
@@ -11,7 +13,9 @@ export const metadata: Metadata = {
   description: 'Learn Vim techniques, practise them in a real editor and compete on the same tasks.',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Set by proxy.ts for every page; reading it renders each page per request, with its own nonce.
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <html lang="en" className={`${sans.variable} ${mono.variable}`}>
       <body className="min-h-dvh font-sans antialiased">
@@ -29,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </nav>
         </header>
         <main id="main" className="mx-auto max-w-5xl px-4 py-8">
-          {children}
+          <NonceProvider nonce={nonce}>{children}</NonceProvider>
         </main>
         <footer className="mx-auto max-w-5xl px-4 py-8 text-sm text-muted">
           Open source under AGPL-3.0 ·{' '}

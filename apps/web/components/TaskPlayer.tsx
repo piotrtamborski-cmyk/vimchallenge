@@ -5,6 +5,7 @@ import type { BrowserEditor } from '@vimchallenge/engine/browser';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { confirmOnServer, type ServerCheck } from '@/lib/server-check';
+import { useNonce } from './Nonce';
 import { CodeText, Prompt } from './Prompt';
 
 const MODE_LABEL: Record<string, string> = {
@@ -57,6 +58,7 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
   const [hint, setHint] = useState(false);
   const [server, setServer] = useState<ServerCheck | null>(null);
   const serverRequest = useRef<AbortController | null>(null);
+  const nonce = useNonce();
 
   /** Forgets the server's answer about an earlier state of the run. */
   const resetServer = useCallback(() => {
@@ -95,6 +97,7 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
       ed = mountEditor(host.current, {
         initial: task.initial,
         autofocus: autofocus || attempt > 0,
+        cspNonce: nonce,
         onKey(step) {
           setSnapshot(step.snapshot);
           setKeys([...ed!.log()]);
@@ -115,7 +118,7 @@ export function TaskPlayer({ task, nextHref, autofocus = true }: { task: Task; n
       editor.current = null;
       resetServer();
     };
-  }, [task, attempt, autofocus, check, resetServer]);
+  }, [task, attempt, autofocus, check, resetServer, nonce]);
 
   const restart = () => {
     setResult(null);

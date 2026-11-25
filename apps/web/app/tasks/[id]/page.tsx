@@ -1,13 +1,9 @@
-import { nextTask, taskById, tasks } from '@vimchallenge/tasks';
+import { nextTask, taskById } from '@vimchallenge/tasks';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { TaskPlayer } from '@/components/TaskPlayer';
 
 type Props = { params: Promise<{ id: string }> };
-
-export function generateStaticParams() {
-  return tasks.map((t) => ({ id: t.id }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const task = taskById((await params).id);

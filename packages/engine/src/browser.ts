@@ -21,6 +21,8 @@ export interface EditorOptions {
   /** Accept pasted text in Insert mode and on the command line (training). Default true. */
   allowPaste?: boolean;
   autofocus?: boolean;
+  /** Nonce of the page's Content Security Policy, for the style elements CodeMirror adds. */
+  cspNonce?: string;
   /** After every key the engine handled. */
   onKey?: (step: Step) => void;
   /** Alt+Enter: submit in the current mode, e.g. with an active selection. */
@@ -59,6 +61,7 @@ export function mountEditor(parent: HTMLElement, options: EditorOptions): Browse
       view.lineNumbers(),
       view.drawSelection(),
       view.highlightActiveLine(),
+      ...(options.cspNonce ? [view.EditorView.cspNonce.of(options.cspNonce)] : []),
       view.EditorView.contentAttributes.of({
         'aria-label': 'Vim editor',
         spellcheck: 'false',

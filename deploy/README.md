@@ -123,8 +123,8 @@ start to say `up`); `200`; `"verdict":"passed"`; and `"verdict":"rejected","reas
 2 seconds: that run would keep the engine busy for a minute, so its worker is stopped and replaced.
 
 Then open https://vimchallenge.com, solve a task and press Check: the page should say *Confirmed by the
-server*. `curl -sI https://vimchallenge.com | grep -i -E 'x-frame|strict-transport'` shows the security
-headers.
+server*. `curl -sI https://vimchallenge.com | grep -i -E 'content-security|x-frame|strict-transport'` shows
+the security headers; the browser console should show no Content Security Policy errors.
 
 ```bash
 systemd-analyze security vimchallenge-web vimchallenge-judge --no-pager | grep Overall

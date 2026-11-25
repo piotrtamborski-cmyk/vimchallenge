@@ -80,7 +80,17 @@ Each worker thread holds one engine and judges one run at a time from a fresh se
 time limit is stopped by terminating its worker, which is replaced. The service stores nothing and logs
 only the task, the verdict and the time, never the keys. It listens on localhost; the public route sits in
 front of it; [`deploy/README.md`](deploy/README.md) installs it as a systemd service next to the web app.
-`GET /api/health` on the web app reports the release (commit) and whether the judge answers. `npm run -w @vimchallenge/judge bench` measures latency (on the development machine: p95 about
+`GET /api/health` on the web app reports the release (commit) and whether the judge answers.
+
+## Content Security Policy
+
+Every page gets a Content Security Policy with a fresh nonce (`apps/web/proxy.ts`, policy in
+`apps/web/lib/csp.ts`): scripts run only with the nonce or when loaded by such a script
+(`'strict-dynamic'`), style elements need the nonce too, and nothing loads from other origins. Next.js
+puts the nonce on its own scripts; the layout hands it to the editor, which puts it on the style element
+CodeMirror adds. A nonce must be new for every response, so pages are rendered per request instead of
+at build time. In development the policy also allows `eval` and inline styles, which React's error
+reporting and the Next.js overlay need. `npm run -w @vimchallenge/judge bench` measures latency (on the development machine: p95 about
 110 ms with 2 workers and 8 clients; the service takes about 250 MB with 2 workers).
 
 ## Browser editor and judge
