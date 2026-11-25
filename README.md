@@ -71,6 +71,11 @@ The task page judges a run in the browser and, once it is solved, asks the serve
 neither the web app nor the judge stores them. Without a running judge the page says the server check is
 not available; the solve still counts in training.
 
+`/api/judge` limits checks per client address: a burst of 20, then 30 a minute (`JUDGE_RATE_BURST`,
+`JUDGE_RATE_PER_MINUTE`), answering 429 with `Retry-After` beyond that. IPv6 clients are counted per /64.
+The address is the last `X-Forwarded-For` entry; behind Cloudflare set `CLIENT_IP_HEADER=cf-connecting-ip`.
+The limit lives in the web app's memory, so it assumes one app process.
+
 Each worker thread holds one engine and judges one run at a time from a fresh session; a run over the
 time limit is stopped by terminating its worker, which is replaced. The service stores nothing and logs
 only the task, the verdict and the time, never the keys. It listens on localhost; the public route sits in

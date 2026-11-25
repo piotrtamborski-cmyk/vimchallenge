@@ -44,6 +44,10 @@ export async function confirmOnServer(
     return { state: 'not-confirmed', detail: 'The server replayed your keys and reached a different result. This is a bug in vimchallenge.' };
   if (res.status === 409)
     return { state: 'not-confirmed', detail: 'This task has changed since the page was loaded. Reload the page to get the new version.' };
+  if (res.status === 429) {
+    const wait = Number(res.headers.get('retry-after')) || 60;
+    return { state: 'unavailable', detail: `Too many checks from your network; the server checks again in ${wait} s.` };
+  }
   if (res.status === 503) return { state: 'unavailable', detail: 'The server check is not available right now.' };
   return { state: 'unavailable', detail: `The server could not check the run: ${body.error ?? `HTTP ${res.status}`}.` };
 }

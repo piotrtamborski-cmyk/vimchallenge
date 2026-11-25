@@ -7,6 +7,8 @@ will be added here when it is deployed. Commands run as root unless they say oth
 
 `packages/judge` listens on `127.0.0.1:3101` and stores nothing. It needs no tunnel route: the web app on
 the same host calls it (its `POST /api/judge` forwards to `JUDGE_URL`, default `http://127.0.0.1:3101`).
+The web app also limits checks per client; behind the Cloudflare Tunnel give it
+`CLIENT_IP_HEADER=cf-connecting-ip`, so the limit counts visitors and not the tunnel (README, "Judge service").
 
 Files in `deploy/judge/`:
 
