@@ -12,6 +12,7 @@
   "dependencies": {
     "@vimchallenge/accounts": "*",
     "@vimchallenge/engine": "*",
+    "@vimchallenge/rooms": "*",
     "@vimchallenge/tasks": "*",
     "next": "16.4.6",
     "react": "19.3.1",

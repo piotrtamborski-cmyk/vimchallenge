@@ -5,8 +5,8 @@ same versioned tasks and the same judging rules.
 
 Early stage: the editor engine, the conformance harnesses that check it against real Vim, and the web app
 with 12 lessons and 42 training tasks on three texts each, judged in the browser and confirmed by the
-server's judge. Players may sign in with GitHub, Google or an email link to keep their progress;
-training works without an account.
+server's judge. Players may sign in with GitHub, Google or an email link to keep their progress,
+and play live rooms with up to eight people; neither needs an account.
 
 ## Layout
 
@@ -14,6 +14,7 @@ training works without an account.
 |---|---|
 | `apps/web` | The web app (Next.js): home page, lessons, task list and task pages with the Vim editor, sign-in, account and privacy pages. |
 | `packages/accounts` | Accounts without passwords: the SQLite schema, sign-in methods (email links, GitHub, Google) connected to one account, sessions, confirmed solves, and the database backup script. |
+| `packages/rooms` | Live rooms: members, matches, rounds and attempts in the same database, task draws by level, key packets, checks through the judge, and the scoring rules. |
 | `packages/tasks` | Published tasks (`tasks.json`: prompt, initial state, goals and one solution, plus `variants` — the same technique on other texts, for "practise on new text") and lessons (`lessons.json`: explanation, keys and the tasks that practise them). Tests check every card's shape and that each task belongs to a lesson; CI replays every task in Vim. |
 | `packages/judge` | The server-side judge: a pool of worker threads that replay a key log in the headless engine under time, memory and size limits, and a small HTTP service in front of it. |
 | `deploy` | Running on a server: [`deploy/README.md`](deploy/README.md), systemd units and sandbox for the web app and the judge, the database backup timer, release and rollback scripts. |
@@ -117,6 +118,31 @@ ones that are set. In development, email links are printed to the dev server's l
 sent, so `npm run dev` can sign in without any setup; see [`apps/web/.env.example`](apps/web/.env.example).
 After a failed check, each unmet goal points to the lesson that teaches it: the task's own lesson, or
 one for the mode, selection, register or undo goals.
+
+## Rooms
+
+A room (`/rooms`) gathers up to eight players by an invite link; guests are welcome. Members mark
+themselves ready once the editor has loaded, and the host starts a match of one to five rounds
+(when the host has been away for a minute, the member who joined first may). The players are fixed
+at the start and every round's task and text are drawn then, by level (`level` in `tasks.json`,
+from the planning card). Everyone gets the round's task at the same moment, after a countdown.
+
+- **Scoring** (`packages/rooms/src/scoring.ts`, version stored with each match): a solve earns the
+  base of its level (100, 160, 240, 360, 520) and up to a quarter more when it comes within the task's
+  reference time, shrinking to nothing at twice that time. A round lasts four times the reference time,
+  at least a minute, or until everyone has solved or skipped. The table ranks by points, then solves,
+  then the time spent on solves in whole seconds; equal players share a place.
+- **Keys** go to the server in packets numbered by position while the player types, so a reload or a
+  second tab replays them into the editor (`replay` in the browser editor) and carries on with the
+  same deadline. **Check** sends the count of keys; the time of a solve is when the server received a
+  check with all its keys. While the judge is unavailable the check keeps its time, and the round waits
+  15 seconds past its deadline for such checks. A solve closes the attempt; repeating it changes nothing.
+- **State** lives in the database and every timed step follows from stored times, so a restart finds
+  the same match. The page gets the room as Server-Sent Events (`/api/rooms/{code}/events`, a message
+  on each change and every 20 seconds, which also marks the player present), and polls while the
+  stream is down. Other players see each other's status during a round and results after it, never keys.
+- A signed-in player's solve also counts in their progress. A room and everything in it is deleted a
+  week after its last activity.
 
 ## Content Security Policy
 

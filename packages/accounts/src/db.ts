@@ -76,6 +76,90 @@ const MIGRATIONS: readonly string[] = [
   ) STRICT;
   CREATE INDEX solves_user ON solves (user_id, solved_at);
   `,
+  // 2: live rooms (packages/rooms). A room is deleted, with everything below it, a week after its
+  // last activity.
+  `
+  CREATE TABLE rooms (
+    id TEXT PRIMARY KEY,
+    -- The invite code in /rooms/{code}.
+    code TEXT NOT NULL UNIQUE,
+    -- Player id of the host: 'u:' and an account id, or 'g:' and a guest id.
+    host TEXT NOT NULL,
+    rounds INTEGER NOT NULL,
+    -- '1' to '5', or 'mixed' for rising levels.
+    level TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    touched_at INTEGER NOT NULL
+  ) STRICT;
+  CREATE INDEX rooms_touched ON rooms (touched_at);
+
+  CREATE TABLE room_members (
+    room_id TEXT NOT NULL REFERENCES rooms (id) ON DELETE CASCADE,
+    player TEXT NOT NULL,
+    user_id TEXT REFERENCES users (id) ON DELETE SET NULL,
+    name TEXT NOT NULL COLLATE NOCASE,
+    ready INTEGER NOT NULL DEFAULT 0,
+    joined_at INTEGER NOT NULL,
+    seen_at INTEGER NOT NULL,
+    PRIMARY KEY (room_id, player),
+    UNIQUE (room_id, name)
+  ) STRICT;
+
+  -- One game in a room: its players and rounds are fixed when it starts.
+  CREATE TABLE matches (
+    id TEXT PRIMARY KEY,
+    room_id TEXT NOT NULL REFERENCES rooms (id) ON DELETE CASCADE,
+    number INTEGER NOT NULL,
+    scoring INTEGER NOT NULL,
+    started_at INTEGER NOT NULL,
+    finished_at INTEGER,
+    UNIQUE (room_id, number)
+  ) STRICT;
+
+  CREATE TABLE match_players (
+    match_id TEXT NOT NULL REFERENCES matches (id) ON DELETE CASCADE,
+    player TEXT NOT NULL,
+    user_id TEXT REFERENCES users (id) ON DELETE SET NULL,
+    name TEXT NOT NULL,
+    PRIMARY KEY (match_id, player)
+  ) STRICT;
+
+  CREATE TABLE rounds (
+    match_id TEXT NOT NULL REFERENCES matches (id) ON DELETE CASCADE,
+    number INTEGER NOT NULL,
+    task_id TEXT NOT NULL,
+    task_version INTEGER NOT NULL,
+    text INTEGER NOT NULL,
+    level INTEGER NOT NULL,
+    reference_ms INTEGER NOT NULL,
+    -- Set when the round before has ended (for the first, when the match starts).
+    starts_at INTEGER,
+    deadline INTEGER,
+    ended_at INTEGER,
+    PRIMARY KEY (match_id, number)
+  ) STRICT;
+
+  -- One player's go at one round. Keys arrive in packets; a check that waits for the judge keeps
+  -- the time it was received, so a busy judge costs the player nothing.
+  CREATE TABLE attempts (
+    match_id TEXT NOT NULL,
+    round INTEGER NOT NULL,
+    player TEXT NOT NULL,
+    keys TEXT NOT NULL DEFAULT '[]',
+    key_count INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'solved', 'skipped', 'timeout')),
+    submitted_count INTEGER,
+    submitted_at INTEGER,
+    checks INTEGER NOT NULL DEFAULT 0,
+    -- When the attempt closed, and for a solve the time from the round's start and its points.
+    resolved_at INTEGER,
+    ms INTEGER,
+    base INTEGER NOT NULL DEFAULT 0,
+    bonus INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (match_id, round, player),
+    FOREIGN KEY (match_id, round) REFERENCES rounds (match_id, number) ON DELETE CASCADE
+  ) STRICT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

@@ -37,6 +37,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Link href="/tasks" className="text-muted hover:text-ink">
               Tasks
             </Link>
+            <Link href="/rooms" className="text-muted hover:text-ink">
+              Rooms
+            </Link>
             <span className="ml-auto">
               {user ? (
                 <Link href="/account" className="font-mono text-muted hover:text-ink">

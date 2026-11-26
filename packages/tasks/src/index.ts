@@ -5,7 +5,18 @@ import data from '../tasks.json' with { type: 'json' };
 export interface BankTask extends Task {
   /** Card in the planning bank this task was written from. */
   plan?: string;
+  /**
+   * Difficulty, 1 to 5; sets the points of a solve in contests (`LEVEL_BASE`). Cards V001–V016 of
+   * the planning bank are level 1, V017–V032 level 2, and so on.
+   */
+  level: number;
 }
+
+/** Points for a solve at each level, before the time bonus (up to a quarter more). */
+export const LEVEL_BASE: Readonly<Record<number, number>> = { 1: 100, 2: 160, 3: 240, 4: 360, 5: 520 };
+
+/** The level of a planning card, from its number: 16 cards per level. */
+export const planLevel = (plan: string): number => Math.ceil(Number(plan.slice(1)) / 16);
 
 export const tasks: readonly BankTask[] = data as BankTask[];
 

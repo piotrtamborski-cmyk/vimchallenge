@@ -4,7 +4,7 @@
  * Vim (npm run conformance) and in the judge (test/judge.test.ts).
  */
 import { isToken, parseKeys, toCh, type Pos, type TaskVariant } from '@vimchallenge/engine';
-import type { BankTask } from './index.ts';
+import { LEVEL_BASE, planLevel, type BankTask } from './index.ts';
 import { TOPIC_LESSONS, type Lesson } from './lessons.ts';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -28,6 +28,8 @@ export function validateTasks(tasks: readonly BankTask[]): string[] {
     if (!Number.isInteger(t.version) || t.version < 1) at('version must be a positive integer');
     if (!t.title.trim()) at('title is empty');
     if (t.referenceSeconds !== undefined && !(t.referenceSeconds > 0)) at('referenceSeconds must be positive');
+    if (!LEVEL_BASE[t.level]) at('level must be 1 to 5');
+    else if (t.plan && /^V\d{3}$/.test(t.plan) && planLevel(t.plan) !== t.level) at(`level ${t.level} differs from card ${t.plan} (level ${planLevel(t.plan)})`);
     checkText(t, at);
     for (const [i, v] of (t.variants ?? []).entries()) checkText(v, (msg) => at(`text ${i + 2}: ${msg}`));
   }

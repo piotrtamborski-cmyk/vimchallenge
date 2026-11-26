@@ -1,53 +1,21 @@
 'use client';
 
-import { checkGoals, type GoalFailure, type Pos, type Snapshot, type Step, type StepGoal, type Task } from '@vimchallenge/engine';
+import { checkGoals, type GoalFailure, type Snapshot, type Step, type Task } from '@vimchallenge/engine';
 import type { BrowserEditor } from '@vimchallenge/engine/browser';
 import Link from 'next/link';
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { lessonsFor, type LessonLink, type TaskLessons } from '@/lib/failure-lessons';
 import { confirmOnServer, type ServerCheck } from '@/lib/server-check';
 import { useNonce } from './Nonce';
+import { describe, modeLabel, notation } from './goals';
 import { CodeText, Prompt } from './Prompt';
 import { SignInLink } from './SignInLink';
-
-const MODE_LABEL: Record<string, string> = {
-  normal: 'NORMAL',
-  insert: 'INSERT',
-  replace: 'REPLACE',
-  visual: 'VISUAL',
-  'visual-line': 'VISUAL LINE',
-  'visual-block': 'VISUAL BLOCK',
-  cmdline: 'COMMAND',
-};
-const modeLabel = (mode: string) => MODE_LABEL[mode] ?? mode.toUpperCase();
-const at = ([line, col]: Pos) => `line ${line}, column ${col}`;
 
 interface Result {
   passed: boolean;
   failures: GoalFailure[];
   keys: number;
 }
-
-/** One sentence per unmet goal, in the player's terms. */
-function describe(f: GoalFailure): string {
-  if (f.field === 'text') return 'The text does not match the goal yet.';
-  if (f.field === 'steps') return (f.want as StepGoal).label;
-  if (f.field === 'cursor') return `The cursor should be on ${at(f.want as Pos)}; it is on ${at(f.got as Pos)}.`;
-  if (f.field === 'mode') return `Finish in ${modeLabel(String(f.want))} mode; you are in ${modeLabel(String(f.got))} mode.`;
-  if (f.field === 'visual') {
-    const want = f.want as { type: string; from: Pos; to: Pos };
-    return `Keep a ${modeLabel(want.type)} selection active from ${at(want.from)} to ${at(want.to)}.`;
-  }
-  if (f.field.startsWith('register ')) {
-    const want = f.want as { text: string };
-    return `Register "${f.field.slice(9)} should hold ${JSON.stringify(want.text)}.`;
-  }
-  const mark = f.field.slice(5);
-  return `Mark '${mark} should be on ${at(f.want as Pos)}.`;
-}
-
-/** Key log in Vim notation, e.g. `ciwfast<Esc>`. */
-const notation = (keys: readonly string[]) => keys.map((k) => (k === '<' ? '<lt>' : k)).join('');
 
 interface TaskPlayerProps {
   /** The task on the text being played (see `onText`). */

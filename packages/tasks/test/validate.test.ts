@@ -26,6 +26,8 @@ describe('the checks catch broken cards', () => {
     const variant = good.variants![0]!;
     expect(broken({ variants: [{ ...variant, initial: { lines: ['ab'], cursor: [1, 9] } }] })[0]).toMatch(/text 2: initial cursor \[1,9\] is not on the text/);
     expect(broken({ variants: [{ ...variant, prompt: '' }] })[0]).toMatch(/text 2: prompt is empty/);
+    expect(broken({ level: 6 })[0]).toMatch(/level must be 1 to 5/);
+    expect(broken({ plan: 'V017', level: 1 })[0]).toMatch(/level 1 differs from card V017 \(level 2\)/);
   });
 
   it('in lessons', () => {

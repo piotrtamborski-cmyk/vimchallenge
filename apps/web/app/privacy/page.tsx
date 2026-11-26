@@ -33,10 +33,22 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-2">
+        <h2 className="text-lg font-semibold">In a room</h2>
+        <p>
+          The name you choose for the room, whether you are ready, when your page was last connected, and for each round the keys
+          you typed, your result, time and points. The keys are kept so the server can judge your run and a reload can carry on
+          where you were. Other players see your name, your status and your results, never your keys. Everything about a room
+          is deleted a week after its last activity. A solve of a signed-in player also goes to their progress, as in training.
+        </p>
+      </section>
+
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">Cookies</h2>
         <p>
           One cookie keeps you signed in. While you sign in with GitHub or Google, a second one lives for ten minutes to tie the
-          sign-in to your browser. Both are needed for signing in, so there is nothing to consent to.
+          sign-in to your browser. A guest who creates or joins a room gets a third, for 30 days, so the room knows them again;
+          it holds a random token, of which only a hash is stored. All are needed for what you asked the site to do, so there is
+          nothing to consent to.
         </p>
       </section>
 

@@ -4,11 +4,13 @@ Two systemd services on an Ubuntu 24.04 host (an LXC container works), run from 
 
 | Service | Listens on | What |
 |---|---|---|
-| `vimchallenge-web` | `127.0.0.1:3100` | The Next.js app: pages, tasks, accounts, `/api/judge` (forwards to the judge, rate-limited per visitor, saves the solves of signed-in players), `/api/health`. Visitors reach it through the Cloudflare Tunnel. |
+| `vimchallenge-web` | `127.0.0.1:3100` | The Next.js app: pages, tasks, accounts, live rooms, `/api/judge` (forwards to the judge, rate-limited per visitor, saves the solves of signed-in players), `/api/health`. Visitors reach it through the Cloudflare Tunnel. |
 | `vimchallenge-judge` | `127.0.0.1:3101` | The judge (`packages/judge`): replays key logs in worker threads under time and memory limits. Only the web app calls it. Stores nothing. |
 
-The web app keeps accounts in one SQLite file, `/var/lib/vimchallenge/accounts.db` (Node's built-in
-`node:sqlite`, no database server). `vimchallenge-backup.timer` copies it every six hours to
+The web app keeps accounts and rooms in one SQLite file, `/var/lib/vimchallenge/accounts.db` (Node's
+built-in `node:sqlite`, no database server). Rooms run inside the web app: their state is in the
+database, and pages follow them over Server-Sent Events, which pass through the tunnel like any
+response (a message every 20 seconds keeps the connection open). `vimchallenge-backup.timer` copies it every six hours to
 `/var/backups/vimchallenge`. Releases live in the home directory of the `vimchallenge` user:
 
 ```text
@@ -190,7 +192,14 @@ and `"verdict":"rejected","reason":"time"` after about 2 seconds: that run would
 for a minute, so its worker is stopped and replaced.
 
 Then open https://vimchallenge.com: solve a task and press Check, and the page should say *Confirmed
-by the server*. Sign in with each method you set up; the name in the top right opens the account
+by the server*. Start a room in one browser and join it from another (or a private window); after
+both press *I'm ready* and the host starts, both should see the countdown and the same task at the
+same moment, without reloading. The live stream should print a `data:` line at once and another
+within 20 seconds:
+
+```bash
+curl -s -N https://vimchallenge.com/api/rooms/<code>/events | cut -c1-80
+``` Sign in with each method you set up; the name in the top right opens the account
 page, which lists the solved task after another Check. Connect a second method there, sign out, and
 sign in with it: the same account and progress come back.
 

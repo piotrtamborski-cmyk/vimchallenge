@@ -29,6 +29,11 @@ export interface EditorOptions {
   onSubmit?: (trail: readonly Step[]) => void;
   /** Input the editor refused or the engine could not handle. */
   onRejected?: (message: string) => void;
+  /**
+   * Keys already typed in this attempt (a reloaded page, a second tab): replayed from the initial
+   * state before the editor takes input, and kept at the start of the log. No callbacks run for them.
+   */
+  replay?: readonly string[];
 }
 
 export interface BrowserEditor {
@@ -176,6 +181,15 @@ export function mountEditor(parent: HTMLElement, options: EditorOptions): Browse
     ['focusout', onFocusOut],
   ];
   for (const [type, fn] of listeners) dom.addEventListener(type, fn as EventListener, true);
+
+  for (const token of options.replay ?? []) {
+    log.push(token);
+    try {
+      session.feed(token);
+    } catch {
+      // The judge replays the same key and hits the same error.
+    }
+  }
 
   if (options.autofocus ?? true) session.view.focus();
 

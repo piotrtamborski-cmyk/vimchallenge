@@ -8,6 +8,7 @@
  */
 import { authorizeUrl, exchange, normalEmail, OAuthError, signInMail, SESSION_MAX_MS, type OAuthProvider, type Provider } from '@vimchallenge/accounts';
 import { readBody } from '../body.ts';
+import { forbidden, sameOrigin } from '../origin.ts';
 import { clientKey, RateLimiter } from '../rate-limit.ts';
 import { clearCookie, flowCookie, readCookie, sessionCookie, setCookie } from './cookies.ts';
 import { requestUser, type AuthContext } from './context.ts';
@@ -46,18 +47,7 @@ function signInPage(ctx: AuthContext, params: Record<string, string>, returnTo?:
 
 const accountPage = (ctx: AuthContext, params: Record<string, string>) => redirect(ctx, `/account?${new URLSearchParams(params)}`);
 
-/**
- * Browsers send Origin with every POST; a form on another site has its own. Where a page's
- * referrer policy makes it `null`, Sec-Fetch-Site (which pages cannot set) still says where the
- * form came from.
- */
-function fromThisSite(request: Request, ctx: AuthContext): boolean {
-  const origin = request.headers.get('origin');
-  if (origin && origin !== 'null') return origin === ctx.config.publicUrl.origin;
-  return request.headers.get('sec-fetch-site') === 'same-origin';
-}
-
-const forbidden = () => new Response('This form must be sent from vimchallenge itself.', { status: 403, headers: { 'content-type': 'text/plain' } });
+const fromThisSite = (request: Request, ctx: AuthContext) => sameOrigin(request, ctx.config.publicUrl);
 const tooMany = (seconds: number) =>
   new Response('Too many attempts; try again in a minute.', { status: 429, headers: { 'content-type': 'text/plain', 'retry-after': String(seconds) } });
 
