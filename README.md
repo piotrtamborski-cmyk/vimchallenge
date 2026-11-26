@@ -115,7 +115,8 @@ removes it with its methods, sessions and progress.
 Sign-in methods are configured with `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`,
 `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` and `RESEND_API_KEY`/`MAIL_FROM`; the sign-in page offers the
 ones that are set. In development, email links are printed to the dev server's log instead of being
-sent, so `npm run dev` can sign in without any setup; see [`apps/web/.env.example`](apps/web/.env.example).
+sent, so `npm run dev` can sign in without any setup; a production build on a test server over plain
+HTTP does the same with `MAIL_TO_LOG=1`. See [`apps/web/.env.example`](apps/web/.env.example).
 After a failed check, each unmet goal points to the lesson that teaches it: the task's own lesson, or
 one for the mode, selection, register or undo goals.
 

@@ -1,6 +1,7 @@
 /**
  * Account settings from the environment. Every sign-in method is optional: GitHub and Google need
- * their OAuth client, email links need Resend (in development they are printed to the log).
+ * their OAuth client, email links need Resend. In development, and on a test server over plain
+ * HTTP with MAIL_TO_LOG=1, email links are printed to the log instead of being sent.
  */
 import { logMailer, resendMailer, type ClientConfig, type Mailer } from '@vimchallenge/accounts';
 
@@ -19,11 +20,16 @@ export interface AuthConfig {
 const client = (id?: string, secret?: string): ClientConfig | undefined =>
   id && secret ? { clientId: id, clientSecret: secret } : undefined;
 
-export function configFromEnv(env: NodeJS.ProcessEnv = process.env): AuthConfig {
+export function configFromEnv(env: NodeJS.ProcessEnv = process.env, warn: (line: string) => void = console.warn): AuthConfig {
   const publicUrl = new URL(env.PUBLIC_URL || 'http://localhost:3100');
   let mailer: Mailer | undefined;
   if (env.RESEND_API_KEY && env.MAIL_FROM) mailer = resendMailer(env.RESEND_API_KEY, env.MAIL_FROM);
   else if (env.NODE_ENV !== 'production') mailer = logMailer();
+  else if (env.MAIL_TO_LOG === '1') {
+    // Anyone who can read the log could sign in as anyone: never on a public (HTTPS) site.
+    if (publicUrl.protocol === 'https:') warn('MAIL_TO_LOG is ignored: PUBLIC_URL is HTTPS, a public site; set up Resend instead');
+    else mailer = logMailer();
+  }
   return {
     publicUrl,
     secure: publicUrl.protocol === 'https:',

@@ -219,6 +219,33 @@ about 130 MB. `memory.max` shows the cap in bytes when it is enforced; `max` or 
 the container does not delegate the memory controller, and only the services' own heap limits apply.
 The backup prints nothing when the database does not exist yet (nobody has signed in).
 
+## A test server on the home network
+
+The same release can run as a test on a machine in the home network, without Cloudflare: the web app
+then listens on the network, builds links from the address you open, and uses the connection's own
+address for the rate limits. A drop-in next to the sandbox does it, e.g. for a machine reached at
+`http://test-box:3100`:
+
+```ini
+# /etc/systemd/system/vimchallenge-web.service.d/test-lan.conf
+[Service]
+Environment=PUBLIC_URL=http://test-box:3100
+Environment=CLIENT_IP_HEADER=
+Environment=MAIL_TO_LOG=1
+ExecStart=
+ExecStart=/usr/bin/node --max-old-space-size=192 --disable-warning=ExperimentalWarning /home/vimchallenge/current/node_modules/next/dist/bin/next start -H 0.0.0.0 -p 3100
+```
+
+With `MAIL_TO_LOG=1` and no Resend, *Email me a link* prints the message to the journal; open the link
+from there:
+
+```bash
+journalctl -u vimchallenge-web -n 50 --no-pager | grep 'sign-in/email' | tail -1
+```
+
+Google sign-in needs HTTPS (or `localhost`), so it does not work on such a test; GitHub does, with a
+callback on the test address.
+
 ## Releases
 
 New release of `main` (or another branch or tag as the argument), then restart onto it:
@@ -297,6 +324,7 @@ Environment=JUDGE_WORKERS=2
 | web | `CLIENT_IP_HEADER` | `cf-connecting-ip` | Header with the visitor's address, for the rate limits. |
 | web | `JUDGE_RATE_BURST`, `JUDGE_RATE_PER_MINUTE` | `20`, `30` | Checks per visitor address on `/api/judge`. |
 | web | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY`, `MAIL_FROM` | in `/etc/vimchallenge/web.env` | Sign-in methods (step 6). |
+| web | `MAIL_TO_LOG` | unset | `1` on a test server without Resend: sign-in links go to the journal instead of an inbox. Ignored when `PUBLIC_URL` is `https`: whoever reads the log could sign in as anyone. |
 
 Run limits of the judge (keys, text size, time, worker heap) are part of its version and live in
 `packages/judge/src/limits.ts`, not in the environment. Sign-in limits are in the code too: a session
