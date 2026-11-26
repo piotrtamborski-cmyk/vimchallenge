@@ -2197,6 +2197,68 @@
     "referenceSeconds": 20
   },
   {
+    "id": "insert-at-the-indent",
+    "version": 1,
+    "plan": "V031",
+    "level": 2,
+    "title": "Insert at the indent",
+    "prompt": "Add `# ` right before `host`, keeping the indentation.",
+    "keys": "I# <Esc>",
+    "initial": {
+      "lines": [
+        "  host"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "  # host"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Add `# ` right before `port`, keeping the indentation.",
+        "keys": "I# <Esc>",
+        "initial": {
+          "lines": [
+            "    port = 80"
+          ],
+          "cursor": [
+            1,
+            9
+          ]
+        },
+        "expected": {
+          "lines": [
+            "    # port = 80"
+          ]
+        }
+      },
+      {
+        "prompt": "Add `# ` right before `mode`, keeping the indentation.",
+        "keys": "I# <Esc>",
+        "initial": {
+          "lines": [
+            "   mode: auto"
+          ],
+          "cursor": [
+            1,
+            8
+          ]
+        },
+        "expected": {
+          "lines": [
+            "   # mode: auto"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 22
+  },
+  {
     "id": "uppercase-a-word",
     "version": 1,
     "plan": "V032",
@@ -2638,6 +2700,214 @@
     "referenceSeconds": 35
   },
   {
+    "id": "find-and-delete-a-line",
+    "version": 1,
+    "plan": "V038",
+    "level": 3,
+    "title": "Find and delete a line",
+    "prompt": "Find the line `DROP` and delete the whole line.",
+    "keys": "/^DROP$<CR>dd",
+    "initial": {
+      "lines": [
+        "alpha",
+        "DROP",
+        "gamma"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "alpha",
+        "gamma"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Find the line that is exactly `DROP` and delete it.",
+        "keys": "/^DROP$<CR>dd",
+        "initial": {
+          "lines": [
+            "keep",
+            "keep DROP",
+            "DROP",
+            "end"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "keep",
+            "keep DROP",
+            "end"
+          ]
+        }
+      },
+      {
+        "prompt": "Find the line `DROP` and delete the whole line.",
+        "keys": "/^DROP$<CR>dd",
+        "initial": {
+          "lines": [
+            "one",
+            "two",
+            "three",
+            "DROP",
+            "four"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "one",
+            "two",
+            "three",
+            "four"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 35
+  },
+  {
+    "id": "return-to-a-mark",
+    "version": 1,
+    "plan": "V039",
+    "level": 3,
+    "title": "Return to a mark",
+    "prompt": "Remember the position of the `e` with mark `a`, visit the last line, then jump back to exactly that letter.",
+    "keys": "maG`a",
+    "initial": {
+      "lines": [
+        "set",
+        "x",
+        "y"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "set",
+        "x",
+        "y"
+      ],
+      "cursor": [
+        1,
+        2
+      ],
+      "marks": {
+        "a": [
+          1,
+          2
+        ]
+      },
+      "steps": [
+        {
+          "label": "Visit the last line.",
+          "cursor": [
+            3,
+            1
+          ]
+        }
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Remember the position of the `e` in `red` with mark `a`, visit the last line, then jump back to exactly that letter.",
+        "keys": "maG`a",
+        "initial": {
+          "lines": [
+            "red",
+            "green",
+            "blue"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "red",
+            "green",
+            "blue"
+          ],
+          "cursor": [
+            1,
+            2
+          ],
+          "marks": {
+            "a": [
+              1,
+              2
+            ]
+          },
+          "steps": [
+            {
+              "label": "Visit the last line.",
+              "cursor": [
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "prompt": "Remember the position of the `s` in `first` with mark `a`, visit the last line, then jump back to exactly that letter.",
+        "keys": "maG`a",
+        "initial": {
+          "lines": [
+            "first word",
+            "middle",
+            "last"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        },
+        "expected": {
+          "lines": [
+            "first word",
+            "middle",
+            "last"
+          ],
+          "cursor": [
+            1,
+            4
+          ],
+          "marks": {
+            "a": [
+              1,
+              4
+            ]
+          },
+          "steps": [
+            {
+              "label": "Visit the last line.",
+              "cursor": [
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 42
+  },
+  {
     "id": "move-a-line",
     "version": 1,
     "plan": "V040",
@@ -2712,6 +2982,291 @@
       }
     ],
     "referenceSeconds": 30
+  },
+  {
+    "id": "repeat-a-change",
+    "version": 1,
+    "plan": "V041",
+    "level": 3,
+    "title": "Repeat a change",
+    "prompt": "Change `red` to `blue` in both lines. For the second, repeat the first change with `.`.",
+    "keys": "/red<CR>ciwblue<Esc>n.",
+    "initial": {
+      "lines": [
+        "alpha red",
+        "beta red"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "alpha blue",
+        "beta blue"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Change `cat` to `dog` in all three lines. After the first, repeat the change with `.`.",
+        "keys": "/cat<CR>ciwdog<Esc>n.n.",
+        "initial": {
+          "lines": [
+            "one cat",
+            "two cat",
+            "three cat"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "one dog",
+            "two dog",
+            "three dog"
+          ]
+        }
+      },
+      {
+        "prompt": "Change both `small` to `large`. For the second, repeat the first change with `.`.",
+        "keys": "/small<CR>ciwlarge<Esc>n.",
+        "initial": {
+          "lines": [
+            "size: small",
+            "color: red",
+            "fit: small"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "size: large",
+            "color: red",
+            "fit: large"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 40
+  },
+  {
+    "id": "substitute-the-first-match",
+    "version": 1,
+    "plan": "V042",
+    "level": 3,
+    "title": "Substitute the first match",
+    "prompt": "In every line, replace only the first `old` with `new`.",
+    "keys": ":%s/old/new/<CR>",
+    "initial": {
+      "lines": [
+        "old old",
+        "old old"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "new old",
+        "new old"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "In every line, replace only the first `-` with `+`.",
+        "keys": ":%s/-/+/<CR>",
+        "initial": {
+          "lines": [
+            "a-b-c",
+            "x-y-z"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a+b-c",
+            "x+y-z"
+          ]
+        }
+      },
+      {
+        "prompt": "In every line, replace only the first `cat` with `cow`.",
+        "keys": ":%s/cat/cow/<CR>",
+        "initial": {
+          "lines": [
+            "cat and cat",
+            "dog",
+            "cat"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "cow and cat",
+            "dog",
+            "cow"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 38
+  },
+  {
+    "id": "delete-a-range-of-lines",
+    "version": 1,
+    "plan": "V043",
+    "level": 3,
+    "title": "Delete a range of lines",
+    "prompt": "Delete lines 2 to 4.",
+    "keys": ":2,4d<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "e"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Delete lines 2 to 5.",
+        "keys": ":2,5d<CR>",
+        "initial": {
+          "lines": [
+            "head",
+            "x1",
+            "x2",
+            "x3",
+            "x4",
+            "tail"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "head",
+            "tail"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete lines 3 to 4.",
+        "keys": ":3,4d<CR>",
+        "initial": {
+          "lines": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "1",
+            "2",
+            "5",
+            "6"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 35
+  },
+  {
+    "id": "delete-around-brackets",
+    "version": 1,
+    "plan": "V044",
+    "level": 3,
+    "title": "Delete around brackets",
+    "prompt": "Delete the square brackets with everything inside them, so the letters on both sides meet.",
+    "keys": "da[",
+    "initial": {
+      "lines": [
+        "x[id]y"
+      ],
+      "cursor": [
+        1,
+        3
+      ]
+    },
+    "expected": {
+      "lines": [
+        "xy"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Delete the first pair of square brackets with what is inside them.",
+        "keys": "da[",
+        "initial": {
+          "lines": [
+            "list[0][1]"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        },
+        "expected": {
+          "lines": [
+            "list[1]"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the square brackets with everything inside them.",
+        "keys": "da[",
+        "initial": {
+          "lines": [
+            "a [b c] d"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a  d"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 35
   },
   {
     "id": "yank-lines-into-a-register",
@@ -2874,6 +3429,939 @@
     "referenceSeconds": 35
   },
   {
+    "id": "jump-to-the-matching-bracket",
+    "version": 1,
+    "plan": "V047",
+    "level": 3,
+    "title": "Jump to the matching bracket",
+    "prompt": "From the opening bracket of `call`, jump to the bracket that closes it.",
+    "keys": "%",
+    "initial": {
+      "lines": [
+        "call(a, f(b))"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "call(a, f(b))"
+      ],
+      "cursor": [
+        1,
+        13
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "From the first `(`, jump to the bracket that closes it.",
+        "keys": "%",
+        "initial": {
+          "lines": [
+            "if (a && (b || c)) {"
+          ],
+          "cursor": [
+            1,
+            4
+          ]
+        },
+        "expected": {
+          "lines": [
+            "if (a && (b || c)) {"
+          ],
+          "cursor": [
+            1,
+            18
+          ]
+        }
+      },
+      {
+        "prompt": "From the first `[`, jump to the bracket that closes it.",
+        "keys": "%",
+        "initial": {
+          "lines": [
+            "[1, [2, 3], 4]"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "[1, [2, 3], 4]"
+          ],
+          "cursor": [
+            1,
+            14
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 32
+  },
+  {
+    "id": "copy-a-line-to-a-place",
+    "version": 1,
+    "plan": "V048",
+    "level": 3,
+    "title": "Copy a line to a place",
+    "prompt": "Copy line 3 above the first line. Keep the original.",
+    "keys": ":3t0<CR>",
+    "initial": {
+      "lines": [
+        "one",
+        "two",
+        "three"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "three",
+        "one",
+        "two",
+        "three"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Copy line 1 below the last line. Keep the original.",
+        "keys": ":1t$<CR>",
+        "initial": {
+          "lines": [
+            "title",
+            "body",
+            "footer"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "title",
+            "body",
+            "footer",
+            "title"
+          ]
+        }
+      },
+      {
+        "prompt": "Copy line 2 below line 4. Keep the original.",
+        "keys": ":2t4<CR>",
+        "initial": {
+          "lines": [
+            "a",
+            "b",
+            "c",
+            "d"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a",
+            "b",
+            "c",
+            "d",
+            "b"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 40
+  },
+  {
+    "id": "substitute-whole-words",
+    "version": 1,
+    "plan": "V049",
+    "level": 4,
+    "title": "Substitute whole words",
+    "prompt": "Replace every whole word `id` with `key`; leave `id2` alone.",
+    "keys": ":%s/\\<id\\>/key/g<CR>",
+    "initial": {
+      "lines": [
+        "id id2 id",
+        "id"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "key id2 key",
+        "key"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Replace every whole word `cat` with `dog`; leave `catalog` alone.",
+        "keys": ":%s/\\<cat\\>/dog/g<CR>",
+        "initial": {
+          "lines": [
+            "cat catalog cat",
+            "the cat"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "dog catalog dog",
+            "the dog"
+          ]
+        }
+      },
+      {
+        "prompt": "Replace every whole word `x` with `y`; leave `x1` alone.",
+        "keys": ":%s/\\<x\\>/y/g<CR>",
+        "initial": {
+          "lines": [
+            "x = x1 + x",
+            "x"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "y = x1 + y",
+            "y"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 48
+  },
+  {
+    "id": "substitute-in-a-range",
+    "version": 1,
+    "plan": "V050",
+    "level": 4,
+    "title": "Substitute in a range",
+    "prompt": "Only in lines 2–3, change every `a` to `x`.",
+    "keys": ":2,3s/a/x/g<CR>",
+    "initial": {
+      "lines": [
+        "aa",
+        "aa",
+        "aa",
+        "aa"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "aa",
+        "xx",
+        "xx",
+        "aa"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Only in lines 3–4, change the `-` to `*`.",
+        "keys": ":3,4s/-/*/<CR>",
+        "initial": {
+          "lines": [
+            "- one",
+            "- two",
+            "- three",
+            "- four"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "- one",
+            "- two",
+            "* three",
+            "* four"
+          ]
+        }
+      },
+      {
+        "prompt": "Only in lines 1–2, change every `.` to `-`.",
+        "keys": ":1,2s/\\./-/g<CR>",
+        "initial": {
+          "lines": [
+            "a.b.c",
+            "a.b.c",
+            "a.b.c"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a-b-c",
+            "a-b-c",
+            "a.b.c"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 48
+  },
+  {
+    "id": "swap-two-fields",
+    "version": 1,
+    "plan": "V051",
+    "level": 4,
+    "title": "Swap two fields",
+    "prompt": "Turn every `surname,name` record into `name surname`.",
+    "keys": ":%s/\\(\\w\\+\\),\\(\\w\\+\\)/\\2 \\1/<CR>",
+    "initial": {
+      "lines": [
+        "Smith,Ada",
+        "Fox,Jan"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "Ada Smith",
+        "Jan Fox"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Turn every `colour,fruit` record into `fruit colour`.",
+        "keys": ":%s/\\(\\w\\+\\),\\(\\w\\+\\)/\\2 \\1/<CR>",
+        "initial": {
+          "lines": [
+            "red,apple",
+            "yellow,banana"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "apple red",
+            "banana yellow"
+          ]
+        }
+      },
+      {
+        "prompt": "Turn every `letter,digit` record into `digit letter`.",
+        "keys": ":%s/\\(\\w\\+\\),\\(\\w\\+\\)/\\2 \\1/<CR>",
+        "initial": {
+          "lines": [
+            "x,1",
+            "y,2",
+            "z,3"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "1 x",
+            "2 y",
+            "3 z"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 65
+  },
+  {
+    "id": "delete-matching-lines",
+    "version": 1,
+    "plan": "V052",
+    "level": 4,
+    "title": "Delete matching lines",
+    "prompt": "Delete every entry that starts with `DBG `.",
+    "keys": ":g/^DBG /d<CR>",
+    "initial": {
+      "lines": [
+        "DBG a",
+        "INFO ok",
+        "DBG b",
+        "WARN slow"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "INFO ok",
+        "WARN slow"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Delete every line that starts with `#`.",
+        "keys": ":g/^#/d<CR>",
+        "initial": {
+          "lines": [
+            "# note",
+            "code",
+            "# todo",
+            "more"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "code",
+            "more"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete every line that starts with `tmp`.",
+        "keys": ":g/^tmp/d<CR>",
+        "initial": {
+          "lines": [
+            "tmp1",
+            "keep",
+            "tmp2",
+            "tmp3",
+            "keep too"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "keep",
+            "keep too"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 48
+  },
+  {
+    "id": "keep-only-matching-lines",
+    "version": 1,
+    "plan": "V053",
+    "level": 4,
+    "title": "Keep only matching lines",
+    "prompt": "Keep only the lines that start with `OK `, in their order.",
+    "keys": ":v/^OK /d<CR>",
+    "initial": {
+      "lines": [
+        "OK a",
+        "BAD b",
+        "OK c",
+        "SKIP d"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "OK a",
+        "OK c"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Keep only the lines that start with `want`.",
+        "keys": ":v/^want/d<CR>",
+        "initial": {
+          "lines": [
+            "want a",
+            "skip b",
+            "want c",
+            "skip d",
+            "want e"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "want a",
+            "want c",
+            "want e"
+          ]
+        }
+      },
+      {
+        "prompt": "Keep only the lines that end with `log`.",
+        "keys": ":v/log$/d<CR>",
+        "initial": {
+          "lines": [
+            "2024 log",
+            "notes",
+            "2025 log",
+            "draft"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "2024 log",
+            "2025 log"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 50
+  },
+  {
+    "id": "insert-in-a-column",
+    "version": 1,
+    "plan": "V054",
+    "level": 4,
+    "title": "Insert in a column",
+    "prompt": "Add `# ` in front of all three lines with one block insert.",
+    "keys": "<C-v>2jI# <Esc>",
+    "initial": {
+      "lines": [
+        "host",
+        "port",
+        "mode"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "# host",
+        "# port",
+        "# mode"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Add `- ` in front of all four lines with one block insert.",
+        "keys": "<C-v>3jI- <Esc>",
+        "initial": {
+          "lines": [
+            "a = 1",
+            "b = 2",
+            "c = 3",
+            "d = 4"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "- a = 1",
+            "- b = 2",
+            "- c = 3",
+            "- d = 4"
+          ]
+        }
+      },
+      {
+        "prompt": "Add `* ` in front of all three lines with one block insert.",
+        "keys": "<C-v>2jI* <Esc>",
+        "initial": {
+          "lines": [
+            "x",
+            "y",
+            "z"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "* x",
+            "* y",
+            "* z"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 55
+  },
+  {
+    "id": "delete-a-column",
+    "version": 1,
+    "plan": "V055",
+    "level": 4,
+    "title": "Delete a column",
+    "prompt": "Delete the middle column of the three lines as one block.",
+    "keys": "<C-v>2jx",
+    "initial": {
+      "lines": [
+        "a1z",
+        "b2y",
+        "c3x"
+      ],
+      "cursor": [
+        1,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "az",
+        "by",
+        "cx"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Delete the column of `|` as one block.",
+        "keys": "<C-v>2jx",
+        "initial": {
+          "lines": [
+            "id|name",
+            "id|mail",
+            "id|role"
+          ],
+          "cursor": [
+            1,
+            3
+          ]
+        },
+        "expected": {
+          "lines": [
+            "idname",
+            "idmail",
+            "idrole"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the column of dashes as one block.",
+        "keys": "<C-v>3jx",
+        "initial": {
+          "lines": [
+            "A-1",
+            "B-2",
+            "C-3",
+            "D-4"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "A1",
+            "B2",
+            "C3",
+            "D4"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 50
+  },
+  {
+    "id": "sort-and-dedupe-a-range",
+    "version": 1,
+    "plan": "V056",
+    "level": 4,
+    "title": "Sort a range without duplicates",
+    "prompt": "Sort the four data lines and remove duplicates. Keep the header and the footer where they are.",
+    "keys": ":2,5sort u<CR>",
+    "initial": {
+      "lines": [
+        "START",
+        "c",
+        "a",
+        "b",
+        "a",
+        "END"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "START",
+        "a",
+        "b",
+        "c",
+        "END"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Sort the four fruit lines and remove duplicates. Keep the header and the footer where they are.",
+        "keys": ":2,5sort u<CR>",
+        "initial": {
+          "lines": [
+            "BEGIN",
+            "pear",
+            "apple",
+            "pear",
+            "fig",
+            "END"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "BEGIN",
+            "apple",
+            "fig",
+            "pear",
+            "END"
+          ]
+        }
+      },
+      {
+        "prompt": "Sort the four words between the comments and remove duplicates.",
+        "keys": ":2,5sort u<CR>",
+        "initial": {
+          "lines": [
+            "# list",
+            "zeta",
+            "beta",
+            "beta",
+            "alpha",
+            "# end"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "# list",
+            "alpha",
+            "beta",
+            "zeta",
+            "# end"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 58
+  },
+  {
+    "id": "move-lines-to-a-place",
+    "version": 1,
+    "plan": "V057",
+    "level": 4,
+    "title": "Move lines to a place",
+    "prompt": "Move lines `b` and `c` below `e`, keeping their order.",
+    "keys": ":2,3m5<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "d",
+        "e",
+        "b",
+        "c",
+        "f"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Move lines 1 and 2 below the last line, keeping their order.",
+        "keys": ":1,2m$<CR>",
+        "initial": {
+          "lines": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "3",
+            "4",
+            "1",
+            "2"
+          ]
+        }
+      },
+      {
+        "prompt": "Move line `z` above `x`.",
+        "keys": ":4m1<CR>",
+        "initial": {
+          "lines": [
+            "intro",
+            "x",
+            "y",
+            "z",
+            "outro"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "intro",
+            "z",
+            "x",
+            "y",
+            "outro"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 50
+  },
+  {
+    "id": "append-to-a-register",
+    "version": 1,
+    "plan": "V058",
+    "level": 4,
+    "title": "Append to a register",
+    "prompt": "Collect the words of both lines in register `a`, in reading order, with nothing between them.",
+    "keys": "\"ayiwj0\"Ayiw",
+    "initial": {
+      "lines": [
+        "red!",
+        "blue?"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "red!",
+        "blue?"
+      ],
+      "registers": {
+        "a": {
+          "type": "char",
+          "text": "redblue"
+        }
+      }
+    },
+    "variants": [
+      {
+        "prompt": "Collect the words of both lines in register `a`, in reading order, with nothing between them.",
+        "keys": "\"ayiwj0\"Ayiw",
+        "initial": {
+          "lines": [
+            "one,",
+            "two."
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "one,",
+            "two."
+          ],
+          "registers": {
+            "a": {
+              "type": "char",
+              "text": "onetwo"
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Collect the words of both lines in register `a`, in reading order, with nothing between them.",
+        "keys": "\"ayiwj0\"Ayiw",
+        "initial": {
+          "lines": [
+            "left)",
+            "right)"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "left)",
+            "right)"
+          ],
+          "registers": {
+            "a": {
+              "type": "char",
+              "text": "leftright"
+            }
+          }
+        }
+      }
+    ],
+    "referenceSeconds": 55
+  },
+  {
     "id": "delete-without-losing-a-yank",
     "version": 1,
     "plan": "V059",
@@ -2959,6 +4447,82 @@
       }
     ],
     "referenceSeconds": 58
+  },
+  {
+    "id": "record-a-macro",
+    "version": 1,
+    "plan": "V060",
+    "level": 4,
+    "title": "Record a macro",
+    "prompt": "Record a macro in register `q` that adds `- ` at the start of a line and moves down, then play it on the other lines.",
+    "keys": "qqI- <Esc>jq2@q",
+    "initial": {
+      "lines": [
+        "one",
+        "two",
+        "three"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "- one",
+        "- two",
+        "- three"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Record a macro in register `q` that adds `- ` at the start of a line and moves down, then play it on the other lines.",
+        "keys": "qqI- <Esc>jq3@q",
+        "initial": {
+          "lines": [
+            "apples",
+            "pears",
+            "plums",
+            "figs"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "- apples",
+            "- pears",
+            "- plums",
+            "- figs"
+          ]
+        }
+      },
+      {
+        "prompt": "Record a macro in register `q` that adds `* ` at the start of a line and moves down, then play it on the other lines.",
+        "keys": "qqI* <Esc>jq2@q",
+        "initial": {
+          "lines": [
+            "a",
+            "b",
+            "c"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "* a",
+            "* b",
+            "* c"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 65
   },
   {
     "id": "undo-and-redo",
@@ -3118,6 +4682,246 @@
     "referenceSeconds": 45
   },
   {
+    "id": "substitute-between-marks",
+    "version": 1,
+    "plan": "V062",
+    "level": 4,
+    "title": "Substitute between marks",
+    "prompt": "Set marks `a` and `b` at the starts of lines 1 and 3. Then change `x` to `y` in the lines from `a` to `b`.",
+    "keys": "ma2jmb:'a,'bs/x/y/g<CR>",
+    "initial": {
+      "lines": [
+        "x",
+        "x",
+        "x",
+        "x"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "y",
+        "y",
+        "y",
+        "x"
+      ],
+      "marks": {
+        "a": [
+          1,
+          1
+        ],
+        "b": [
+          3,
+          1
+        ]
+      }
+    },
+    "variants": [
+      {
+        "prompt": "Set marks `a` and `b` at the starts of lines 2 and 4. Then change `x` to `y` in the lines from `a` to `b`.",
+        "keys": "ma2jmb:'a,'bs/x/y/<CR>",
+        "initial": {
+          "lines": [
+            "ax",
+            "bx",
+            "cx",
+            "dx",
+            "ex"
+          ],
+          "cursor": [
+            2,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "ax",
+            "by",
+            "cy",
+            "dy",
+            "ex"
+          ],
+          "marks": {
+            "a": [
+              2,
+              1
+            ],
+            "b": [
+              4,
+              1
+            ]
+          }
+        }
+      },
+      {
+        "prompt": "Set marks `a` and `b` at the starts of lines 1 and 2. Then change every `x` to `y` in the lines from `a` to `b`.",
+        "keys": "majmb:'a,'bs/x/y/g<CR>",
+        "initial": {
+          "lines": [
+            "x x",
+            "x x",
+            "x x"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "y y",
+            "y y",
+            "x x"
+          ],
+          "marks": {
+            "a": [
+              1,
+              1
+            ],
+            "b": [
+              2,
+              1
+            ]
+          }
+        }
+      }
+    ],
+    "referenceSeconds": 62
+  },
+  {
+    "id": "search-backwards",
+    "version": 1,
+    "plan": "V063",
+    "level": 4,
+    "title": "Search backwards",
+    "prompt": "From the end of the document, search backwards for both `ERR` headings in turn, ending on the first.",
+    "keys": "?^ERR<CR>n",
+    "initial": {
+      "lines": [
+        "ERR one",
+        "OK",
+        "ERR two",
+        "END"
+      ],
+      "cursor": [
+        4,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "ERR one",
+        "OK",
+        "ERR two",
+        "END"
+      ],
+      "cursor": [
+        1,
+        1
+      ],
+      "steps": [
+        {
+          "label": "Reach the `ERR` on line 3 first, searching backwards.",
+          "cursor": [
+            3,
+            1
+          ]
+        }
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "From the end of the document, search backwards for each `WARN` in turn, ending on the first.",
+        "keys": "?^WARN<CR>nn",
+        "initial": {
+          "lines": [
+            "WARN a",
+            "x",
+            "WARN b",
+            "y",
+            "WARN c",
+            "end"
+          ],
+          "cursor": [
+            6,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "WARN a",
+            "x",
+            "WARN b",
+            "y",
+            "WARN c",
+            "end"
+          ],
+          "cursor": [
+            1,
+            1
+          ],
+          "steps": [
+            {
+              "label": "Reach the `WARN` on line 5 first, searching backwards.",
+              "cursor": [
+                5,
+                1
+              ]
+            },
+            {
+              "label": "Then the one on line 3.",
+              "cursor": [
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "prompt": "From the end of the document, search backwards for both `TODO` lines in turn, ending on the first.",
+        "keys": "?^TODO<CR>n",
+        "initial": {
+          "lines": [
+            "TODO 1",
+            "code",
+            "TODO 2",
+            "end"
+          ],
+          "cursor": [
+            4,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "TODO 1",
+            "code",
+            "TODO 2",
+            "end"
+          ],
+          "cursor": [
+            1,
+            1
+          ],
+          "steps": [
+            {
+              "label": "Reach the `TODO` on line 3 first, searching backwards.",
+              "cursor": [
+                3,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 48
+  },
+  {
     "id": "join-without-spaces",
     "version": 1,
     "plan": "V064",
@@ -3187,5 +4991,1360 @@
       }
     ],
     "referenceSeconds": 45
+  },
+  {
+    "id": "rename-a-key",
+    "version": 1,
+    "plan": "V065",
+    "level": 5,
+    "title": "Rename a key",
+    "prompt": "In lines 2–4, rename the key `old` to `new`. Keep the indentation and leave the value of `note` alone.",
+    "keys": ":2,4s/^\\(\\s*\\)old:/\\1new:/<CR>",
+    "initial": {
+      "lines": [
+        "old: root",
+        "  old: a",
+        "  note: old:",
+        "  old: b",
+        "old: tail"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "old: root",
+        "  new: a",
+        "  note: old:",
+        "  new: b",
+        "old: tail"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "In lines 2–3, rename the key `port` to `listen`. Keep the indentation.",
+        "keys": ":2,3s/^\\(\\s*\\)port:/\\1listen:/<CR>",
+        "initial": {
+          "lines": [
+            "port: 1",
+            "  port: 2",
+            "    port: 3",
+            "port: 4"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "port: 1",
+            "  listen: 2",
+            "    listen: 3",
+            "port: 4"
+          ]
+        }
+      },
+      {
+        "prompt": "In lines 2–4, rename the key `name` to `title`. Keep the indentation and leave the value of `label` alone.",
+        "keys": ":2,4s/^\\(\\s*\\)name:/\\1title:/<CR>",
+        "initial": {
+          "lines": [
+            "name: a",
+            "  name: b",
+            "  label: name:",
+            "  name: c"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "name: a",
+            "  title: b",
+            "  label: name:",
+            "  title: c"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 78
+  },
+  {
+    "id": "macro-on-records",
+    "version": 1,
+    "plan": "V066",
+    "level": 5,
+    "title": "A macro on records",
+    "prompt": "Record in `a` a macro that turns a `name:role` record into `role (name)` and moves to the next line. Play it on the next two records.",
+    "keys": "qa:s/^\\([^:]*\\):\\(.*\\)$/\\2 (\\1)/<CR>j0q2@a",
+    "initial": {
+      "lines": [
+        "ada:dev",
+        "bob:ops",
+        "eve:ux",
+        "--"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "dev (ada)",
+        "ops (bob)",
+        "ux (eve)",
+        "--"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Record in `a` a macro that turns a `key:value` record into `value (key)` and moves to the next line. Play it on the next two records.",
+        "keys": "qa:s/^\\([^:]*\\):\\(.*\\)$/\\2 (\\1)/<CR>j0q2@a",
+        "initial": {
+          "lines": [
+            "k1:v1",
+            "k2:v2",
+            "k3:v3",
+            "end"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "v1 (k1)",
+            "v2 (k2)",
+            "v3 (k3)",
+            "end"
+          ]
+        }
+      },
+      {
+        "prompt": "Record in `a` a macro that turns a `letter:digit` record into `digit (letter)` and moves to the next line. Play it on the next three records.",
+        "keys": "qa:s/^\\([^:]*\\):\\(.*\\)$/\\2 (\\1)/<CR>j0q3@a",
+        "initial": {
+          "lines": [
+            "x:1",
+            "y:2",
+            "z:3",
+            "w:4",
+            "--"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "1 (x)",
+            "2 (y)",
+            "3 (z)",
+            "4 (w)",
+            "--"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 100
+  },
+  {
+    "id": "substitute-on-matching-lines",
+    "version": 1,
+    "plan": "V067",
+    "level": 5,
+    "title": "Substitute on matching lines",
+    "prompt": "Put square brackets around the last word of every line of type `X`.",
+    "keys": ":g/^X /s/\\S\\+$/[&]/<CR>",
+    "initial": {
+      "lines": [
+        "X a",
+        "Y b",
+        "X c",
+        "X d"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "X [a]",
+        "Y b",
+        "X [c]",
+        "X [d]"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Put square brackets around the last word of every line of type `A`.",
+        "keys": ":g/^A /s/\\S\\+$/[&]/<CR>",
+        "initial": {
+          "lines": [
+            "A x",
+            "B y",
+            "A z"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "A [x]",
+            "B y",
+            "A [z]"
+          ]
+        }
+      },
+      {
+        "prompt": "Put square brackets around the last word of every line of type `T:`.",
+        "keys": ":g/^T: /s/\\S\\+$/[&]/<CR>",
+        "initial": {
+          "lines": [
+            "T: red apple",
+            "N: green",
+            "T: blue sky"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "T: red [apple]",
+            "N: green",
+            "T: blue [sky]"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 75
+  },
+  {
+    "id": "trim-a-block",
+    "version": 1,
+    "plan": "V068",
+    "level": 5,
+    "title": "Trim a block",
+    "prompt": "Remove trailing spaces only between `BEGIN` and `END`. Keep empty lines and indentation.",
+    "keys": ":/^BEGIN$/,/^END$/s/\\s\\+$//e<CR>",
+    "initial": {
+      "lines": [
+        "top  ",
+        "BEGIN",
+        "  alpha  ",
+        " beta ",
+        "",
+        "END",
+        "end  "
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "top  ",
+        "BEGIN",
+        "  alpha",
+        " beta",
+        "",
+        "END",
+        "end  "
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Remove trailing spaces only between `BEGIN` and `END`.",
+        "keys": ":/^BEGIN$/,/^END$/s/\\s\\+$//e<CR>",
+        "initial": {
+          "lines": [
+            "x  ",
+            "BEGIN",
+            "a  ",
+            "b",
+            "END",
+            "y  "
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "x  ",
+            "BEGIN",
+            "a",
+            "b",
+            "END",
+            "y  "
+          ]
+        }
+      },
+      {
+        "prompt": "Remove trailing spaces only between `BEGIN` and `END`. Keep the indentation.",
+        "keys": ":/^BEGIN$/,/^END$/s/\\s\\+$//e<CR>",
+        "initial": {
+          "lines": [
+            "head ",
+            "BEGIN",
+            "  one ",
+            "  two  ",
+            "END"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "head ",
+            "BEGIN",
+            "  one",
+            "  two",
+            "END"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 85
+  },
+  {
+    "id": "swap-two-values",
+    "version": 1,
+    "plan": "V069",
+    "level": 5,
+    "title": "Swap two values",
+    "prompt": "Swap the values of `staging` and `prod`. Keep their original values in registers `a` and `b`.",
+    "keys": "f=l\"ayiwj0f=l\"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>",
+    "initial": {
+      "lines": [
+        "staging=blue",
+        "prod=green"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "staging=green",
+        "prod=blue"
+      ],
+      "registers": {
+        "a": {
+          "type": "char",
+          "text": "blue"
+        },
+        "b": {
+          "type": "char",
+          "text": "green"
+        }
+      }
+    },
+    "variants": [
+      {
+        "prompt": "Swap the values of `left` and `right`. Keep their original values in registers `a` and `b`.",
+        "keys": "f=l\"ayiwj0f=l\"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>",
+        "initial": {
+          "lines": [
+            "left=10",
+            "right=20"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "left=20",
+            "right=10"
+          ],
+          "registers": {
+            "a": {
+              "type": "char",
+              "text": "10"
+            },
+            "b": {
+              "type": "char",
+              "text": "20"
+            }
+          }
+        }
+      },
+      {
+        "prompt": "Swap the values of `from` and `to`. Keep their original values in registers `a` and `b`.",
+        "keys": "f=l\"ayiwj0f=l\"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>",
+        "initial": {
+          "lines": [
+            "from=north",
+            "to=south"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "from=south",
+            "to=north"
+          ],
+          "registers": {
+            "a": {
+              "type": "char",
+              "text": "north"
+            },
+            "b": {
+              "type": "char",
+              "text": "south"
+            }
+          }
+        }
+      }
+    ],
+    "referenceSeconds": 95
+  },
+  {
+    "id": "clean-a-block",
+    "version": 1,
+    "plan": "V070",
+    "level": 5,
+    "title": "Clean a block",
+    "prompt": "Between the headers, delete the comments that start with `#`, remove duplicates and sort the remaining lines.",
+    "keys": ":/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>",
+    "initial": {
+      "lines": [
+        "head",
+        "BEGIN",
+        "b",
+        "#tmp",
+        "a",
+        "b",
+        "END",
+        "foot"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "head",
+        "BEGIN",
+        "a",
+        "b",
+        "END",
+        "foot"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Between the headers, delete the comments that start with `#`, remove duplicates and sort the remaining lines.",
+        "keys": ":/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>",
+        "initial": {
+          "lines": [
+            "top",
+            "BEGIN",
+            "#x",
+            "zz",
+            "yy",
+            "zz",
+            "#y",
+            "END"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "top",
+            "BEGIN",
+            "yy",
+            "zz",
+            "END"
+          ]
+        }
+      },
+      {
+        "prompt": "Between the headers, delete the comments that start with `#`, remove duplicates and sort the remaining lines.",
+        "keys": ":/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>",
+        "initial": {
+          "lines": [
+            "intro",
+            "BEGIN",
+            "c",
+            "#c",
+            "c",
+            "a",
+            "END",
+            "outro"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "intro",
+            "BEGIN",
+            "a",
+            "c",
+            "END",
+            "outro"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 100
+  },
+  {
+    "id": "number-a-column",
+    "version": 1,
+    "plan": "V071",
+    "level": 5,
+    "title": "Number a column",
+    "prompt": "Select the column of zeros and number the lines from 1.",
+    "keys": "<C-v>2jg<C-a>",
+    "initial": {
+      "lines": [
+        "row 0: a",
+        "row 0: b",
+        "row 0: c"
+      ],
+      "cursor": [
+        1,
+        5
+      ]
+    },
+    "expected": {
+      "lines": [
+        "row 1: a",
+        "row 2: b",
+        "row 3: c"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Select the column of zeros and number the lines from 1.",
+        "keys": "<C-v>3jg<C-a>",
+        "initial": {
+          "lines": [
+            "item 0",
+            "item 0",
+            "item 0",
+            "item 0"
+          ],
+          "cursor": [
+            1,
+            6
+          ]
+        },
+        "expected": {
+          "lines": [
+            "item 1",
+            "item 2",
+            "item 3",
+            "item 4"
+          ]
+        }
+      },
+      {
+        "prompt": "Select the column of zeros and number the lines from 1.",
+        "keys": "<C-v>2jg<C-a>",
+        "initial": {
+          "lines": [
+            "0. x",
+            "0. y",
+            "0. z"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "1. x",
+            "2. y",
+            "3. z"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 85
+  },
+  {
+    "id": "collapse-doubled-words",
+    "version": 1,
+    "plan": "V072",
+    "level": 5,
+    "title": "Collapse doubled words",
+    "prompt": "Reduce every pair of identical neighbouring words to one.",
+    "keys": ":%s/\\<\\(\\k\\+\\)\\s\\+\\1\\>/\\1/g<CR>",
+    "initial": {
+      "lines": [
+        "the the test",
+        "it is is fine",
+        "one two"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "the test",
+        "it is fine",
+        "one two"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Reduce every pair of identical neighbouring words to one.",
+        "keys": ":%s/\\<\\(\\k\\+\\)\\s\\+\\1\\>/\\1/g<CR>",
+        "initial": {
+          "lines": [
+            "a a b b c",
+            "x"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a b c",
+            "x"
+          ]
+        }
+      },
+      {
+        "prompt": "Reduce every pair of identical neighbouring words to one.",
+        "keys": ":%s/\\<\\(\\k\\+\\)\\s\\+\\1\\>/\\1/g<CR>",
+        "initial": {
+          "lines": [
+            "café café au lait",
+            "naïve"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "café au lait",
+            "naïve"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 80
+  },
+  {
+    "id": "strip-comments-and-sort",
+    "version": 1,
+    "plan": "V073",
+    "level": 5,
+    "title": "Strip comments and sort",
+    "prompt": "Delete the comments that start with two spaces and `#`, keep the `#` inside values, and sort the entries.",
+    "keys": ":%s/  #.*$//e<CR>:%sort<CR>",
+    "initial": {
+      "lines": [
+        "z=a#b  #tag",
+        "b=2",
+        "a=1  #tag"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a=1",
+        "b=2",
+        "z=a#b"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Delete the comments that start with two spaces and `#`, keep the `#` inside values, and sort the entries.",
+        "keys": ":%s/  #.*$//e<CR>:%sort<CR>",
+        "initial": {
+          "lines": [
+            "port=80  # web",
+            "host=x#y",
+            "debug=1  # off"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "debug=1",
+            "host=x#y",
+            "port=80"
+          ]
+        }
+      },
+      {
+        "prompt": "Delete the comments that start with two spaces and `#`, keep the `#` inside values, and sort the entries.",
+        "keys": ":%s/  #.*$//e<CR>:%sort<CR>",
+        "initial": {
+          "lines": [
+            "c=3",
+            "a=#1  #note",
+            "b=2  #x"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a=#1",
+            "b=2",
+            "c=3"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 85
+  },
+  {
+    "id": "uppercase-flag-values",
+    "version": 1,
+    "plan": "V074",
+    "level": 5,
+    "title": "Uppercase flag values",
+    "prompt": "In the lines whose key starts with `flag_`, write the value in capitals. Keep the comments.",
+    "keys": ":%s/^\\(flag_\\w\\+=\\)\\(\\w\\+\\)/\\1\\U\\2\\E/<CR>",
+    "initial": {
+      "lines": [
+        "flag_a=off # off",
+        "plain=off",
+        "flag_b=on"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "flag_a=OFF # off",
+        "plain=off",
+        "flag_b=ON"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "In the lines whose key starts with `flag_`, write the value in capitals. Keep the comments.",
+        "keys": ":%s/^\\(flag_\\w\\+=\\)\\(\\w\\+\\)/\\1\\U\\2\\E/<CR>",
+        "initial": {
+          "lines": [
+            "flag_x=yes",
+            "flag_y=no # default",
+            "other=yes"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "flag_x=YES",
+            "flag_y=NO # default",
+            "other=yes"
+          ]
+        }
+      },
+      {
+        "prompt": "In the lines whose key starts with `flag_`, write the value in capitals. Keep the comments.",
+        "keys": ":%s/^\\(flag_\\w\\+=\\)\\(\\w\\+\\)/\\1\\U\\2\\E/<CR>",
+        "initial": {
+          "lines": [
+            "mode=fast",
+            "flag_debug=true # dev"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "mode=fast",
+            "flag_debug=TRUE # dev"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 90
+  },
+  {
+    "id": "copy-matching-lines-to-the-end",
+    "version": 1,
+    "plan": "V075",
+    "level": 5,
+    "title": "Copy matching lines to the end",
+    "prompt": "Copy the lines with the `@ ` prefix to the end, and remove the prefix from the copies only.",
+    "keys": ":g/^@ /t$<CR>:4,5s/^@ //<CR>",
+    "initial": {
+      "lines": [
+        "@ A",
+        "p",
+        "@ B"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "@ A",
+        "p",
+        "@ B",
+        "A",
+        "B"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Copy the lines with the `@ ` prefix to the end, and remove the prefix from the copies only.",
+        "keys": ":g/^@ /t$<CR>:4,5s/^@ //<CR>",
+        "initial": {
+          "lines": [
+            "@ x",
+            "@ y",
+            "z"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "@ x",
+            "@ y",
+            "z",
+            "x",
+            "y"
+          ]
+        }
+      },
+      {
+        "prompt": "Copy the lines with the `@ ` prefix to the end, and remove the prefix from the copies only.",
+        "keys": ":g/^@ /t$<CR>:6,7s/^@ //<CR>",
+        "initial": {
+          "lines": [
+            "a",
+            "@ b",
+            "c",
+            "@ d",
+            "e"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "a",
+            "@ b",
+            "c",
+            "@ d",
+            "e",
+            "b",
+            "d"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 88
+  },
+  {
+    "id": "change-a-block",
+    "version": 1,
+    "plan": "V076",
+    "level": 5,
+    "title": "Change a block",
+    "prompt": "In the three data lines, replace the digits with `--` using one rectangular selection.",
+    "keys": "<C-v>2jlc--<Esc>",
+    "initial": {
+      "lines": [
+        "HEAD",
+        "A11:x",
+        "B22:y",
+        "C33:z",
+        "END"
+      ],
+      "cursor": [
+        2,
+        2
+      ]
+    },
+    "expected": {
+      "lines": [
+        "HEAD",
+        "A--:x",
+        "B--:y",
+        "C--:z",
+        "END"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "In all three lines, replace the digits with `--` using one rectangular selection.",
+        "keys": "<C-v>2jlc--<Esc>",
+        "initial": {
+          "lines": [
+            "x01y",
+            "x02y",
+            "x03y"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "x--y",
+            "x--y",
+            "x--y"
+          ]
+        }
+      },
+      {
+        "prompt": "In the two data lines, replace the digits with `--` using one rectangular selection.",
+        "keys": "<C-v>jllc--<Esc>",
+        "initial": {
+          "lines": [
+            "#",
+            "k123=v",
+            "k456=v",
+            "#"
+          ],
+          "cursor": [
+            2,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "#",
+            "k--=v",
+            "k--=v",
+            "#"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 82
+  },
+  {
+    "id": "mark-fix-and-return",
+    "version": 1,
+    "plan": "V077",
+    "level": 5,
+    "title": "Mark, fix and return",
+    "prompt": "Mark the starting letter with `a`. Change `(bad)` to `(ok)` in both assignments and come back to exactly the marked letter.",
+    "keys": "ma:2,4s/(bad)/(ok)/<CR>`a",
+    "initial": {
+      "lines": [
+        "start",
+        "lhs=(bad)",
+        "mid",
+        "rhs=(bad)",
+        "end"
+      ],
+      "cursor": [
+        1,
+        3
+      ]
+    },
+    "expected": {
+      "lines": [
+        "start",
+        "lhs=(ok)",
+        "mid",
+        "rhs=(ok)",
+        "end"
+      ],
+      "cursor": [
+        1,
+        3
+      ],
+      "marks": {
+        "a": [
+          1,
+          3
+        ]
+      }
+    },
+    "variants": [
+      {
+        "prompt": "Mark the starting letter with `a`. Change `(no)` to `(yes)` in both assignments and come back to exactly the marked letter.",
+        "keys": "ma:2,3s/(no)/(yes)/<CR>`a",
+        "initial": {
+          "lines": [
+            "top",
+            "x=(no)",
+            "y=(no)",
+            "end"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        },
+        "expected": {
+          "lines": [
+            "top",
+            "x=(yes)",
+            "y=(yes)",
+            "end"
+          ],
+          "cursor": [
+            1,
+            2
+          ],
+          "marks": {
+            "a": [
+              1,
+              2
+            ]
+          }
+        }
+      },
+      {
+        "prompt": "Mark the starting letter with `a`. Change `(old)` to `(new)` in both assignments and come back to exactly the marked letter.",
+        "keys": "ma:2,4s/(old)/(new)/<CR>`a",
+        "initial": {
+          "lines": [
+            "begin here",
+            "a=(old)",
+            "b",
+            "c=(old)"
+          ],
+          "cursor": [
+            1,
+            7
+          ]
+        },
+        "expected": {
+          "lines": [
+            "begin here",
+            "a=(new)",
+            "b",
+            "c=(new)"
+          ],
+          "cursor": [
+            1,
+            7
+          ],
+          "marks": {
+            "a": [
+              1,
+              7
+            ]
+          }
+        }
+      }
+    ],
+    "referenceSeconds": 78
+  },
+  {
+    "id": "macro-for-key-values",
+    "version": 1,
+    "plan": "V078",
+    "level": 5,
+    "title": "A macro for key values",
+    "prompt": "Record in `a` a macro that turns `key: value` into `key=value` and moves to the start of the next line. Apply it to all three records.",
+    "keys": "qa0f:r=lxj0q2@a",
+    "initial": {
+      "lines": [
+        "a: 1",
+        "port: 80",
+        "long_key: xyz",
+        "END"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a=1",
+        "port=80",
+        "long_key=xyz",
+        "END"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Record in `a` a macro that turns `key: value` into `key=value` and moves to the start of the next line. Apply it to both records.",
+        "keys": "qa0f:r=lxj0q@a",
+        "initial": {
+          "lines": [
+            "x: 1",
+            "y: 2",
+            "END"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "x=1",
+            "y=2",
+            "END"
+          ]
+        }
+      },
+      {
+        "prompt": "Record in `a` a macro that turns `key: value` into `key=value` and moves to the start of the next line. Apply it to all four records.",
+        "keys": "qa0f:r=lxj0q3@a",
+        "initial": {
+          "lines": [
+            "host: a",
+            "port: b",
+            "mode: c",
+            "user: d",
+            "END"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "host=a",
+            "port=b",
+            "mode=c",
+            "user=d",
+            "END"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 105
+  },
+  {
+    "id": "sort-numbers-and-mark-runs",
+    "version": 1,
+    "plan": "V079",
+    "level": 5,
+    "title": "Sort numbers and mark runs",
+    "prompt": "Sort the job lines by their first number, remove identical duplicates, and write the `run` operation in capitals.",
+    "keys": ":2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>",
+    "initial": {
+      "lines": [
+        "jobs",
+        "10 run",
+        "2 test",
+        "2 test",
+        "1 lint",
+        "end"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "jobs",
+        "1 lint",
+        "2 test",
+        "10 RUN",
+        "end"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Sort the job lines by their first number, remove identical duplicates, and write the `run` operation in capitals.",
+        "keys": ":2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>",
+        "initial": {
+          "lines": [
+            "begin",
+            "3 run",
+            "20 build",
+            "3 run",
+            "1 lint",
+            "end"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "begin",
+            "1 lint",
+            "3 RUN",
+            "20 build",
+            "end"
+          ]
+        }
+      },
+      {
+        "prompt": "Sort the job lines by their first number, remove identical duplicates, and write the `run` operation in capitals.",
+        "keys": ":2,4sort nu<CR>:g/ run$/s/run$/RUN/<CR>",
+        "initial": {
+          "lines": [
+            "tasks",
+            "5 test",
+            "15 run",
+            "5 test",
+            "end"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "tasks",
+            "5 test",
+            "15 RUN",
+            "end"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 82
+  },
+  {
+    "id": "refactor-a-block",
+    "version": 1,
+    "plan": "V080",
+    "level": 5,
+    "title": "Refactor a block",
+    "prompt": "Refactor only the `BEGIN`–`END` block: delete the `DEBUG` line, change every whole word `old` to `new`, and remove one level of indentation.",
+    "keys": ":3,5g/^  DEBUG /d<CR>:3,4s/\\<old\\>/new/g<CR>:3,4s/^  //<CR>",
+    "initial": {
+      "lines": [
+        "mod old",
+        "BEGIN",
+        "  old(x)",
+        "  DEBUG old",
+        "  older(old)",
+        "END",
+        "old(x)"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "mod old",
+        "BEGIN",
+        "new(x)",
+        "older(new)",
+        "END",
+        "old(x)"
+      ]
+    },
+    "variants": [
+      {
+        "prompt": "Refactor only the `BEGIN`–`END` block: delete the `DEBUG` line, change every whole word `old` to `new`, and remove one level of indentation.",
+        "keys": ":3,5g/^  DEBUG /d<CR>:3,4s/\\<old\\>/new/g<CR>:3,4s/^  //<CR>",
+        "initial": {
+          "lines": [
+            "old",
+            "BEGIN",
+            "  DEBUG x",
+            "  call(old)",
+            "  old.run()",
+            "END"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "old",
+            "BEGIN",
+            "call(new)",
+            "new.run()",
+            "END"
+          ]
+        }
+      },
+      {
+        "prompt": "Refactor only the `BEGIN`–`END` block: delete the `DEBUG` line, change every whole word `old` to `new`, and remove one level of indentation.",
+        "keys": ":3,5g/^  DEBUG /d<CR>:3,4s/\\<old\\>/new/g<CR>:3,4s/^  //<CR>",
+        "initial": {
+          "lines": [
+            "# old",
+            "BEGIN",
+            "  x = old",
+            "  y = older",
+            "  DEBUG y",
+            "END",
+            "old"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        },
+        "expected": {
+          "lines": [
+            "# old",
+            "BEGIN",
+            "x = new",
+            "y = older",
+            "END",
+            "old"
+          ]
+        }
+      }
+    ],
+    "referenceSeconds": 110
   }
 ]

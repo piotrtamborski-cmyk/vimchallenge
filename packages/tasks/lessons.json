@@ -45,7 +45,8 @@
     "tasks": [
       "insert-before",
       "append-to-a-line",
-      "open-a-line-below"
+      "open-a-line-below",
+      "insert-at-the-indent"
     ]
   },
   {
@@ -296,7 +297,9 @@
     "tasks": [
       "find-a-character",
       "search",
-      "next-match"
+      "next-match",
+      "find-and-delete-a-line",
+      "search-backwards"
     ]
   },
   {
@@ -388,7 +391,9 @@
       "yank-into-a-register",
       "copy-a-line",
       "yank-lines-into-a-register",
-      "delete-without-losing-a-yank"
+      "delete-without-losing-a-yank",
+      "append-to-a-register",
+      "swap-two-values"
     ]
   },
   {
@@ -437,7 +442,8 @@
       "change-a-word",
       "change-inside-quotes",
       "empty-inner-parentheses",
-      "change-tag-content"
+      "change-tag-content",
+      "delete-around-brackets"
     ]
   },
   {
@@ -487,8 +493,8 @@
     "id": "undo-and-redo",
     "plan": "L11",
     "section": "Control of changes",
-    "title": "Undo and redo",
-    "summary": "Take a change back with undo and bring it back with redo.",
+    "title": "Undo, redo and repeat",
+    "summary": "Take a change back with undo, bring it back with redo, and do it again elsewhere with `.`.",
     "requires": [
       "editing-characters"
     ],
@@ -496,6 +502,7 @@
       "`u` undoes the last change and `<C-r>` redoes it. A change is one Normal-mode command together with everything typed in the Insert mode it started: `ifoo<Esc>` is undone by a single `u`.",
       "Undo walks back through your changes one by one, and redo forward again, until you make a new change.",
       "`:undo` and `:redo` do the same from the command line.",
+      "`.` repeats the last change at the cursor: after `ciwblue<Esc>` on one word, `n` to the next match and `.` changes that one too. It is the cheapest way to make the same edit in a few places.",
       "In these tasks the judge checks the way, not only the result: typing a deleted `!` again gives the same text, but it is not an undo."
     ],
     "keys": [
@@ -514,11 +521,16 @@
       {
         "keys": ":undo<CR> :redo<CR>",
         "does": "Undo and redo from the command line"
+      },
+      {
+        "keys": ".",
+        "does": "Repeat the last change"
       }
     ],
     "tasks": [
       "undo-a-change",
-      "undo-and-redo"
+      "undo-and-redo",
+      "repeat-a-change"
     ]
   },
   {
@@ -571,6 +583,305 @@
       "uppercase-a-word",
       "toggle-case-of-a-line",
       "join-without-spaces"
+    ]
+  },
+  {
+    "id": "substitutions",
+    "plan": "L13",
+    "section": "Ex commands",
+    "title": "Substitutions",
+    "summary": "Replace text with `:s`: the first match or all of them, whole words, and parts of the match put back in a new order.",
+    "requires": [
+      "search"
+    ],
+    "body": [
+      "`:s/old/new/` replaces the first `old` in the current line. With `g` at the end, `:s/old/new/g`, it replaces every match in the line.",
+      "A range in front says which lines: `:%s/old/new/` works on every line, `:2,4s/old/new/` on lines 2 to 4. In each line it still replaces only the first match unless you add `g`.",
+      "`\\<` and `\\>` match the start and the end of a word, so `:%s/\\<id\\>/key/g` changes `id` but leaves `id2` alone.",
+      "`\\(` and `\\)` capture part of the match, and `\\1`, `\\2` put the parts back in the replacement: `:s/\\(\\w\\+\\),\\(\\w\\+\\)/\\2 \\1/` swaps two fields. In the replacement, `&` stands for the whole match, and `\\U` … `\\E` writes what is between them in capitals.",
+      "A substitution that finds nothing reports an error; the flag `e` at the end keeps it quiet."
+    ],
+    "keys": [
+      {
+        "keys": ":s/a/b/",
+        "does": "Replace the first `a` in the line with `b`"
+      },
+      {
+        "keys": ":s/a/b/g",
+        "does": "Replace every `a` in the line"
+      },
+      {
+        "keys": ":%s/a/b/g",
+        "does": "Replace every `a` in every line"
+      },
+      {
+        "keys": ":2,4s/a/b/",
+        "does": "Replace in lines 2 to 4 only"
+      },
+      {
+        "keys": "\\<word\\>",
+        "does": "A whole word, in a pattern"
+      },
+      {
+        "keys": "\\(…\\)  \\1",
+        "does": "Capture a part, and put it back"
+      },
+      {
+        "keys": "&",
+        "does": "The whole match, in the replacement"
+      },
+      {
+        "keys": "\\U…\\E",
+        "does": "Capitals, in the replacement"
+      }
+    ],
+    "tasks": [
+      "substitute-the-first-match",
+      "substitute-whole-words",
+      "swap-two-fields",
+      "collapse-doubled-words",
+      "uppercase-flag-values",
+      "strip-comments-and-sort"
+    ]
+  },
+  {
+    "id": "line-ranges",
+    "plan": "L14",
+    "section": "Ex commands",
+    "title": "Line ranges",
+    "summary": "Work on many lines at once: delete, copy, move, sort and filter them by number or by pattern.",
+    "requires": [
+      "lines",
+      "search"
+    ],
+    "body": [
+      "Ex commands start with `:` and take a range of lines in front: `:2,4d` deletes lines 2 to 4. In a range, `.` is the current line, `$` the last one and `%` all of them.",
+      "`:t` copies lines and `:m` moves them, each to below the line you name: `:3t0` copies line 3 above the first line, `:2,3m5` moves lines 2 and 3 below line 5.",
+      "Either end of a range can be a pattern: `:/^BEGIN$/,/^END$/` runs from the next `BEGIN` line to the `END` after it, and `+1` or `-1` move an end by one line.",
+      "`:sort` sorts the lines of its range. With `u` it also drops duplicates, and with `n` it compares the first number in each line.",
+      "`:g/pattern/` runs a command on every line that matches, and `:v/pattern/` on every line that does not: `:g/^DBG /d` deletes the debug lines, `:v/^OK /d` keeps only the OK ones."
+    ],
+    "keys": [
+      {
+        "keys": ":2,4d",
+        "does": "Delete lines 2 to 4"
+      },
+      {
+        "keys": ":3t0",
+        "does": "Copy line 3 above line 1"
+      },
+      {
+        "keys": ":2,3m5",
+        "does": "Move lines 2–3 below line 5"
+      },
+      {
+        "keys": ":/a/,/b/",
+        "does": "From the next line with `a` to the next with `b`"
+      },
+      {
+        "keys": ":sort u",
+        "does": "Sort and drop duplicates"
+      },
+      {
+        "keys": ":sort n",
+        "does": "Sort by the first number"
+      },
+      {
+        "keys": ":g/pat/d",
+        "does": "Delete the lines that match"
+      },
+      {
+        "keys": ":v/pat/d",
+        "does": "Delete the lines that do not match"
+      }
+    ],
+    "tasks": [
+      "delete-a-range-of-lines",
+      "copy-a-line-to-a-place",
+      "substitute-in-a-range",
+      "move-lines-to-a-place",
+      "delete-matching-lines",
+      "keep-only-matching-lines",
+      "sort-and-dedupe-a-range",
+      "substitute-on-matching-lines",
+      "trim-a-block",
+      "copy-matching-lines-to-the-end",
+      "sort-numbers-and-mark-runs",
+      "clean-a-block"
+    ]
+  },
+  {
+    "id": "marks-and-jumps",
+    "plan": "L15",
+    "section": "Precision and automation",
+    "title": "Marks and jumps",
+    "summary": "Remember a place and come back to it, use marks as a range, and jump between matching brackets.",
+    "requires": [
+      "moving-the-cursor",
+      "search"
+    ],
+    "body": [
+      "`ma` sets mark `a` at the cursor. Later, the backtick key followed by `a` jumps back to exactly that character, and `'a` to the start of its line.",
+      "Marks also name lines in Ex commands: `:'a,'bs/x/y/` substitutes from the line of mark `a` to the line of mark `b`.",
+      "`%` on a bracket jumps to the bracket that matches it, skipping the pairs nested inside."
+    ],
+    "keys": [
+      {
+        "keys": "ma",
+        "does": "Set mark `a` at the cursor"
+      },
+      {
+        "keys": "`a",
+        "does": "Back to the marked character"
+      },
+      {
+        "keys": "'a",
+        "does": "Back to the start of the marked line"
+      },
+      {
+        "keys": ":'a,'b",
+        "does": "The lines from mark `a` to mark `b`, in an Ex command"
+      },
+      {
+        "keys": "%",
+        "does": "To the matching bracket"
+      }
+    ],
+    "tasks": [
+      "return-to-a-mark",
+      "jump-to-the-matching-bracket",
+      "substitute-between-marks",
+      "mark-fix-and-return"
+    ]
+  },
+  {
+    "id": "columns-and-blocks",
+    "plan": "L16",
+    "section": "Precision and automation",
+    "title": "Columns and blocks",
+    "summary": "Work on a rectangle of text: insert, delete, change and number the same columns in many lines.",
+    "requires": [
+      "visual-selection",
+      "formatting"
+    ],
+    "body": [
+      "`<C-v>` starts a block selection: a rectangle from the cursor, grown with the usual moves, e.g. `<C-v>2j` for a column three lines high.",
+      "`I` then inserts at the left edge of every line of the block; what you type appears in all of them when you press `<Esc>`. `x` deletes the block, and `c` replaces it with what you type.",
+      "`g<C-a>` adds 1 to the first number in the first line of the block, 2 in the second, and so on: a quick way to number lines."
+    ],
+    "keys": [
+      {
+        "keys": "<C-v>",
+        "does": "Start a block selection"
+      },
+      {
+        "keys": "I…<Esc>",
+        "does": "Insert in every line of the block"
+      },
+      {
+        "keys": "x",
+        "does": "Delete the block"
+      },
+      {
+        "keys": "c…<Esc>",
+        "does": "Replace the block in every line"
+      },
+      {
+        "keys": "g<C-a>",
+        "does": "Number the selected lines 1, 2, 3…"
+      }
+    ],
+    "tasks": [
+      "insert-in-a-column",
+      "delete-a-column",
+      "number-a-column",
+      "change-a-block"
+    ]
+  },
+  {
+    "id": "macros",
+    "plan": "L17",
+    "section": "Precision and automation",
+    "title": "Macros",
+    "summary": "Record a sequence of keys once and play it again on the next record.",
+    "requires": [
+      "registers",
+      "undo-and-redo"
+    ],
+    "body": [
+      "`qa` starts recording your keys into register `a`, and `q` stops. `@a` plays them again, `2@a` twice, and `@@` repeats the last macro you played.",
+      "A good macro works on any record. Start it from a known place (`0` for the start of the line), move with commands that do not depend on the length of the text (`f:` rather than `5l`), and end where the next run should begin, usually with `j`.",
+      "Ex commands can be part of a macro too: a `:s` with groups is often the simplest way to reshape one record."
+    ],
+    "keys": [
+      {
+        "keys": "qa",
+        "does": "Record into register `a`"
+      },
+      {
+        "keys": "q",
+        "does": "Stop recording"
+      },
+      {
+        "keys": "@a",
+        "does": "Play register `a`"
+      },
+      {
+        "keys": "2@a",
+        "does": "Play it twice"
+      },
+      {
+        "keys": "@@",
+        "does": "Play the last macro again"
+      }
+    ],
+    "tasks": [
+      "record-a-macro",
+      "macro-for-key-values",
+      "macro-on-records"
+    ]
+  },
+  {
+    "id": "multi-step-edits",
+    "plan": "L18",
+    "section": "Putting it together",
+    "title": "Edits in several steps",
+    "summary": "Plan an edit that takes several commands: split the goal, narrow the range, and put the steps in an order that keeps the rest intact.",
+    "requires": [
+      "words",
+      "text-objects",
+      "substitutions",
+      "line-ranges"
+    ],
+    "body": [
+      "Bigger edits combine what you already know. Read the goal first and split it: what must change, what must stay, and in which order the steps leave each other alone.",
+      "Narrow the range before you change it: a block between `BEGIN` and `END`, or the lines `:g` finds, so that the text outside stays as it is.",
+      "Delete what goes away before you change what remains: line numbers and matches are simpler to count afterwards.",
+      "When a task asks for an order, such as visiting a place before the first edit, the judge follows your steps, not only the final text."
+    ],
+    "keys": [
+      {
+        "keys": "G$",
+        "does": "To the last character of the document"
+      },
+      {
+        "keys": ":3,5g/pat/d",
+        "does": "First, delete the lines that go"
+      },
+      {
+        "keys": ":3,4s/\\<old\\>/new/g",
+        "does": "Then change whole words in what remains"
+      },
+      {
+        "keys": ":3,4s/^  //",
+        "does": "Then remove one level of indentation"
+      }
+    ],
+    "tasks": [
+      "visit-the-end-first",
+      "rename-a-key",
+      "clean-a-block",
+      "refactor-a-block"
     ]
   }
 ]

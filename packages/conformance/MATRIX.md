@@ -6,7 +6,7 @@ Reference Vim 9.1.16 · @replit/codemirror-vim 6.4.0 · vim-core 0.1.0 (vendored
 
 Each case is replayed key by key in reference Vim and in the headless browser engine. After every key the text, mode and cursor must be equal; at the end visual selection, named registers and marks are compared too. Registers recorded with `q` are not compared (engine-specific key codes). After every key both engines must also agree on whether the key was an undo or a redo. Step goals (`expected.steps`, e.g. "cursor visited the end before the first edit") are judged on both runs; other semantic goals are listed but not judged yet.
 
-**311 match · 5 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 316 cases.
+**419 match · 11 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 430 cases.
 
 | Case | MVP | Result | Keys (first differing key in bold) | Difference: Vim → browser engine |
 |---|---|---|---|---|
@@ -290,6 +290,9 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | increment-a-number | MVP | ✅ match | `<C-a>` |  |
 | increment-a-number@2 | MVP | ✅ match | `<C-a>` |  |
 | increment-a-number@3 | MVP | ✅ match | `<C-a>` |  |
+| insert-at-the-indent | MVP | ✅ match | `I# <Esc>` |  |
+| insert-at-the-indent@2 | MVP | ✅ match | `I# <Esc>` |  |
+| insert-at-the-indent@3 | MVP | ✅ match | `I# <Esc>` |  |
 | uppercase-a-word | MVP | ✅ match | `gUiw` |  |
 | uppercase-a-word@2 | MVP | ✅ match | `gUiw` |  |
 | uppercase-a-word@3 | MVP | ✅ match | `gUiw` |  |
@@ -308,21 +311,132 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | select-words | MVP | ✅ match | `vwe` |  |
 | select-words@2 | MVP | ✅ match | `vwe` |  |
 | select-words@3 | MVP | ✅ match | `vwe` |  |
+| find-and-delete-a-line | MVP | ✅ match | `/^DROP$<CR>dd` |  |
+| find-and-delete-a-line@2 | MVP | ✅ match | `/^DROP$<CR>dd` |  |
+| find-and-delete-a-line@3 | MVP | ✅ match | `/^DROP$<CR>dd` |  |
+| return-to-a-mark | MVP | ✅ match | `maG`a` | <br>Steps judged: Visit the last line. |
+| return-to-a-mark@2 | MVP | ✅ match | `maG`a` | <br>Steps judged: Visit the last line. |
+| return-to-a-mark@3 | MVP | ✅ match | `maG`a` | <br>Steps judged: Visit the last line. |
 | move-a-line | MVP | ✅ match | `ddp` |  |
 | move-a-line@2 | MVP | ✅ match | `ddp` |  |
 | move-a-line@3 | MVP | ✅ match | `ddp` |  |
+| repeat-a-change | MVP | ✅ match | `/red<CR>ciwblue<Esc>n.` |  |
+| repeat-a-change@2 | MVP | ✅ match | `/cat<CR>ciwdog<Esc>n.n.` |  |
+| repeat-a-change@3 | MVP | ✅ match | `/small<CR>ciwlarge<Esc>n.` |  |
+| substitute-the-first-match | MVP | ✅ match | `:%s/old/new/<CR>` |  |
+| substitute-the-first-match@2 | MVP | ✅ match | `:%s/-/+/<CR>` |  |
+| substitute-the-first-match@3 | MVP | ✅ match | `:%s/cat/cow/<CR>` |  |
+| delete-a-range-of-lines | MVP | ✅ match | `:2,4d<CR>` |  |
+| delete-a-range-of-lines@2 | MVP | ✅ match | `:2,5d<CR>` |  |
+| delete-a-range-of-lines@3 | MVP | ✅ match | `:3,4d<CR>` |  |
+| delete-around-brackets | MVP | ✅ match | `da[` |  |
+| delete-around-brackets@2 | MVP | ✅ match | `da[` |  |
+| delete-around-brackets@3 | MVP | ✅ match | `da[` |  |
 | yank-lines-into-a-register | MVP | ✅ match | `"b2yy` |  |
 | yank-lines-into-a-register@2 | MVP | ✅ match | `"b2yy` |  |
 | yank-lines-into-a-register@3 | MVP | ✅ match | `"x3yy` |  |
 | toggle-case-of-a-line | MVP | ✅ match | `g~~` |  |
 | toggle-case-of-a-line@2 | MVP | ✅ match | `g~~` |  |
 | toggle-case-of-a-line@3 | MVP | ✅ match | `g~~` |  |
+| jump-to-the-matching-bracket | MVP | ✅ match | `%` |  |
+| jump-to-the-matching-bracket@2 | MVP | ✅ match | `%` |  |
+| jump-to-the-matching-bracket@3 | MVP | ✅ match | `%` |  |
+| copy-a-line-to-a-place | MVP | ✅ match | `:3t0<CR>` |  |
+| copy-a-line-to-a-place@2 | MVP | ✅ match | `:1t$<CR>` |  |
+| copy-a-line-to-a-place@3 | MVP | ✅ match | `:2t4<CR>` |  |
+| substitute-whole-words | MVP | ✅ match | `:%s/\<id\>/key/g<CR>` |  |
+| substitute-whole-words@2 | MVP | ✅ match | `:%s/\<cat\>/dog/g<CR>` |  |
+| substitute-whole-words@3 | MVP | ✅ match | `:%s/\<x\>/y/g<CR>` |  |
+| substitute-in-a-range | MVP | ✅ match | `:2,3s/a/x/g<CR>` |  |
+| substitute-in-a-range@2 | MVP | ✅ match | `:3,4s/-/*/<CR>` |  |
+| substitute-in-a-range@3 | MVP | ✅ match | `:1,2s/\./-/g<CR>` |  |
+| swap-two-fields | MVP | ✅ match | `:%s/\(\w\+\),\(\w\+\)/\2 \1/<CR>` |  |
+| swap-two-fields@2 | MVP | ✅ match | `:%s/\(\w\+\),\(\w\+\)/\2 \1/<CR>` |  |
+| swap-two-fields@3 | MVP | ✅ match | `:%s/\(\w\+\),\(\w\+\)/\2 \1/<CR>` |  |
+| delete-matching-lines | MVP | ✅ match | `:g/^DBG /d<CR>` |  |
+| delete-matching-lines@2 | MVP | ✅ match | `:g/^#/d<CR>` |  |
+| delete-matching-lines@3 | MVP | ✅ match | `:g/^tmp/d<CR>` |  |
+| keep-only-matching-lines | MVP | ✅ match | `:v/^OK /d<CR>` |  |
+| keep-only-matching-lines@2 | MVP | ✅ match | `:v/^want/d<CR>` |  |
+| keep-only-matching-lines@3 | MVP | ✅ match | `:v/log$/d<CR>` |  |
+| insert-in-a-column | MVP | 🟡 same result, differs while typing | `<C-v>2jI` **#** `␠<Esc>` | text: `["#host","port","mode"]` → `["#host","#port","#mode"]` |
+| insert-in-a-column@2 | MVP | 🟡 same result, differs while typing | `<C-v>3jI` **-** `␠<Esc>` | text: `["-a = 1","b = 2","c = 3","d = 4"]` → `["-a = 1","-b = 2","-c = 3","-d = 4"]` |
+| insert-in-a-column@3 | MVP | 🟡 same result, differs while typing | `<C-v>2jI` ***** `␠<Esc>` | text: `["*x","y","z"]` → `["*x","*y","*z"]` |
+| delete-a-column | MVP | ✅ match | `<C-v>2jx` |  |
+| delete-a-column@2 | MVP | ✅ match | `<C-v>2jx` |  |
+| delete-a-column@3 | MVP | ✅ match | `<C-v>3jx` |  |
+| sort-and-dedupe-a-range | MVP | ✅ match | `:2,5sort u<CR>` |  |
+| sort-and-dedupe-a-range@2 | MVP | ✅ match | `:2,5sort u<CR>` |  |
+| sort-and-dedupe-a-range@3 | MVP | ✅ match | `:2,5sort u<CR>` |  |
+| move-lines-to-a-place | MVP | ✅ match | `:2,3m5<CR>` |  |
+| move-lines-to-a-place@2 | MVP | ✅ match | `:1,2m$<CR>` |  |
+| move-lines-to-a-place@3 | MVP | ✅ match | `:4m1<CR>` |  |
+| append-to-a-register | MVP | ✅ match | `"ayiwj0"Ayiw` |  |
+| append-to-a-register@2 | MVP | ✅ match | `"ayiwj0"Ayiw` |  |
+| append-to-a-register@3 | MVP | ✅ match | `"ayiwj0"Ayiw` |  |
 | delete-without-losing-a-yank | MVP | ✅ match | `yiwj"_dd` |  |
 | delete-without-losing-a-yank@2 | MVP | ✅ match | `yiwj"_dd` |  |
 | delete-without-losing-a-yank@3 | MVP | ✅ match | `yiwjj"_dd` |  |
+| record-a-macro | MVP | ✅ match | `qqI- <Esc>jq2@q` |  |
+| record-a-macro@2 | MVP | ✅ match | `qqI- <Esc>jq3@q` |  |
+| record-a-macro@3 | MVP | ✅ match | `qqI* <Esc>jq2@q` |  |
 | undo-and-redo | MVP | ✅ match | `oB<Esc>u<C-r>` | <br>Steps judged: Add the line `B`. → Undo adding it. → Bring it back with redo. |
 | undo-and-redo@2 | MVP | ✅ match | `oend<Esc>u<C-r>` | <br>Steps judged: Add the line `end`. → Undo adding it. → Bring it back with redo. |
 | undo-and-redo@3 | MVP | ✅ match | `ddu<C-r>` | <br>Steps judged: Delete the line `x`. → Undo the deletion. → Delete it again with redo. |
+| substitute-between-marks | MVP | ✅ match | `ma2jmb:'a,'bs/x/y/g<CR>` |  |
+| substitute-between-marks@2 | MVP | ✅ match | `ma2jmb:'a,'bs/x/y/<CR>` |  |
+| substitute-between-marks@3 | MVP | ✅ match | `majmb:'a,'bs/x/y/g<CR>` |  |
+| search-backwards | MVP | ✅ match | `?^ERR<CR>n` | <br>Steps judged: Reach the `ERR` on line 3 first, searching backwards. |
+| search-backwards@2 | MVP | ✅ match | `?^WARN<CR>nn` | <br>Steps judged: Reach the `WARN` on line 5 first, searching backwards. → Then the one on line 3. |
+| search-backwards@3 | MVP | ✅ match | `?^TODO<CR>n` | <br>Steps judged: Reach the `TODO` on line 3 first, searching backwards. |
 | join-without-spaces | MVP | ✅ match | `3gJ` |  |
 | join-without-spaces@2 | MVP | ✅ match | `gJ` |  |
 | join-without-spaces@3 | MVP | ✅ match | `3gJ` |  |
+| rename-a-key | MVP | ✅ match | `:2,4s/^\(\s*\)old:/\1new:/<CR>` |  |
+| rename-a-key@2 | MVP | ✅ match | `:2,3s/^\(\s*\)port:/\1listen:/<CR>` |  |
+| rename-a-key@3 | MVP | ✅ match | `:2,4s/^\(\s*\)name:/\1title:/<CR>` |  |
+| macro-on-records | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` |  |
+| macro-on-records@2 | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` |  |
+| macro-on-records@3 | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q3@a` |  |
+| substitute-on-matching-lines | MVP | ✅ match | `:g/^X /s/\S\+$/[&]/<CR>` |  |
+| substitute-on-matching-lines@2 | MVP | ✅ match | `:g/^A /s/\S\+$/[&]/<CR>` |  |
+| substitute-on-matching-lines@3 | MVP | ✅ match | `:g/^T: /s/\S\+$/[&]/<CR>` |  |
+| trim-a-block | MVP | ✅ match | `:/^BEGIN$/,/^END$/s/\s\+$//e<CR>` |  |
+| trim-a-block@2 | MVP | ✅ match | `:/^BEGIN$/,/^END$/s/\s\+$//e<CR>` |  |
+| trim-a-block@3 | MVP | ✅ match | `:/^BEGIN$/,/^END$/s/\s\+$//e<CR>` |  |
+| swap-two-values | MVP | ✅ match | `f=l"ayiwj0f=l"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>` |  |
+| swap-two-values@2 | MVP | ✅ match | `f=l"ayiwj0f=l"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>` |  |
+| swap-two-values@3 | MVP | ✅ match | `f=l"ayiwj0f=l"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>` |  |
+| clean-a-block | MVP | ✅ match | `:/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>` |  |
+| clean-a-block@2 | MVP | ✅ match | `:/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>` |  |
+| clean-a-block@3 | MVP | ✅ match | `:/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>` |  |
+| number-a-column | MVP | ✅ match | `<C-v>2jg<C-a>` |  |
+| number-a-column@2 | MVP | ✅ match | `<C-v>3jg<C-a>` |  |
+| number-a-column@3 | MVP | ✅ match | `<C-v>2jg<C-a>` |  |
+| collapse-doubled-words | MVP | ✅ match | `:%s/\<\(\k\+\)\s\+\1\>/\1/g<CR>` |  |
+| collapse-doubled-words@2 | MVP | ✅ match | `:%s/\<\(\k\+\)\s\+\1\>/\1/g<CR>` |  |
+| collapse-doubled-words@3 | MVP | ✅ match | `:%s/\<\(\k\+\)\s\+\1\>/\1/g<CR>` |  |
+| strip-comments-and-sort | MVP | ✅ match | `:%s/  #.*$//e<CR>:%sort<CR>` |  |
+| strip-comments-and-sort@2 | MVP | ✅ match | `:%s/  #.*$//e<CR>:%sort<CR>` |  |
+| strip-comments-and-sort@3 | MVP | ✅ match | `:%s/  #.*$//e<CR>:%sort<CR>` |  |
+| uppercase-flag-values | MVP | ✅ match | `:%s/^\(flag_\w\+=\)\(\w\+\)/\1\U\2\E/<CR>` |  |
+| uppercase-flag-values@2 | MVP | ✅ match | `:%s/^\(flag_\w\+=\)\(\w\+\)/\1\U\2\E/<CR>` |  |
+| uppercase-flag-values@3 | MVP | ✅ match | `:%s/^\(flag_\w\+=\)\(\w\+\)/\1\U\2\E/<CR>` |  |
+| copy-matching-lines-to-the-end | MVP | ✅ match | `:g/^@ /t$<CR>:4,5s/^@ //<CR>` |  |
+| copy-matching-lines-to-the-end@2 | MVP | ✅ match | `:g/^@ /t$<CR>:4,5s/^@ //<CR>` |  |
+| copy-matching-lines-to-the-end@3 | MVP | ✅ match | `:g/^@ /t$<CR>:6,7s/^@ //<CR>` |  |
+| change-a-block | MVP | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["HEAD","A-:x","B:y","C:z","END"]` → `["HEAD","A-:x","B-:y","C-:z","END"]` |
+| change-a-block@2 | MVP | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["x-y","xy","xy"]` → `["x-y","x-y","x-y"]` |
+| change-a-block@3 | MVP | 🟡 same result, differs while typing | `<C-v>jllc` **-** `-<Esc>` | text: `["#","k-=v","k=v","#"]` → `["#","k-=v","k-=v","#"]` |
+| mark-fix-and-return | MVP | ✅ match | `ma:2,4s/(bad)/(ok)/<CR>`a` |  |
+| mark-fix-and-return@2 | MVP | ✅ match | `ma:2,3s/(no)/(yes)/<CR>`a` |  |
+| mark-fix-and-return@3 | MVP | ✅ match | `ma:2,4s/(old)/(new)/<CR>`a` |  |
+| macro-for-key-values | MVP | ✅ match | `qa0f:r=lxj0q2@a` |  |
+| macro-for-key-values@2 | MVP | ✅ match | `qa0f:r=lxj0q@a` |  |
+| macro-for-key-values@3 | MVP | ✅ match | `qa0f:r=lxj0q3@a` |  |
+| sort-numbers-and-mark-runs | MVP | ✅ match | `:2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>` |  |
+| sort-numbers-and-mark-runs@2 | MVP | ✅ match | `:2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>` |  |
+| sort-numbers-and-mark-runs@3 | MVP | ✅ match | `:2,4sort nu<CR>:g/ run$/s/run$/RUN/<CR>` |  |
+| refactor-a-block | MVP | ✅ match | `:3,5g/^  DEBUG /d<CR>:3,4s/\<old\>/new/g<CR>:3,4s/^  //<CR>` |  |
+| refactor-a-block@2 | MVP | ✅ match | `:3,5g/^  DEBUG /d<CR>:3,4s/\<old\>/new/g<CR>:3,4s/^  //<CR>` |  |
+| refactor-a-block@3 | MVP | ✅ match | `:3,5g/^  DEBUG /d<CR>:3,4s/\<old\>/new/g<CR>:3,4s/^  //<CR>` |  |

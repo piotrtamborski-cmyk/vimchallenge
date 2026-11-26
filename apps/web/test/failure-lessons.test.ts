@@ -16,7 +16,7 @@ describe('lessons for unmet goals', () => {
   it('name each lesson once', () => {
     const lessons = taskLessons('undo-a-change');
     const failures = [fail('text'), fail('steps', { label: 'Undo', change: 'undo' })];
-    expect(lessonsFor(failures, lessons).map((l) => l.title)).toEqual(['Undo and redo']);
+    expect(lessonsFor(failures, lessons).map((l) => l.title)).toEqual(['Undo, redo and repeat']);
     expect(lessonsFor([fail('steps', { label: 'Visit', cursor: [1, 0] })], taskLessons('visit-the-end-first')).map((l) => l.href)).toEqual(['/lessons/words']);
   });
 

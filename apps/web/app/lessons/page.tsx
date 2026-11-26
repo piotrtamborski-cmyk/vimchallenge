@@ -1,6 +1,7 @@
 import { lessonById, lessons } from '@vimchallenge/tasks';
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { CodeText } from '@/components/Prompt';
 
 export const metadata: Metadata = { title: 'Lessons' };
 
@@ -29,7 +30,9 @@ export default function LessonsPage() {
                     <span className="font-semibold">
                       <span className="font-mono text-muted">{String(lessons.indexOf(l) + 1).padStart(2, '0')}</span> {l.title}
                     </span>
-                    <span className="text-sm text-muted">{l.summary}</span>
+                    <span className="text-sm text-muted">
+                      <CodeText text={l.summary} />
+                    </span>
                     <span className="mt-auto pt-2 text-sm text-muted">
                       {l.tasks.length} exercises
                       {l.requires.length > 0 && <> · after {l.requires.map((r) => lessonById(r)?.title).join(', ')}</>}

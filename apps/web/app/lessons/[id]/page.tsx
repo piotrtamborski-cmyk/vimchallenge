@@ -8,7 +8,7 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const lesson = lessonById((await params).id);
-  return { title: lesson?.title ?? 'Lesson not found', description: lesson?.summary };
+  return { title: lesson?.title ?? 'Lesson not found', description: lesson?.summary.replaceAll('`', '') };
 }
 
 export default async function LessonPage({ params }: Props) {
@@ -26,7 +26,9 @@ export default async function LessonPage({ params }: Props) {
           · {lesson.section}
         </p>
         <h1 className="text-2xl font-semibold">{lesson.title}</h1>
-        <p className="text-lg text-muted">{lesson.summary}</p>
+        <p className="text-lg text-muted">
+          <CodeText text={lesson.summary} />
+        </p>
         {lesson.requires.length > 0 && (
           <p className="text-sm text-muted">
             Builds on{' '}

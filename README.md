@@ -4,7 +4,7 @@ Learn a Vim technique, use it in a real editor, then prove it in a contest — a
 same versioned tasks and the same judging rules.
 
 Early stage: the editor engine, the conformance harnesses that check it against real Vim, and the web app
-with 12 lessons and 42 training tasks on three texts each, judged in the browser and confirmed by the
+with 18 lessons and all 80 tasks of the planned bank (five levels) on three texts each, judged in the browser and confirmed by the
 server's judge. Players may sign in with GitHub, Google or an email link to keep their progress,
 and play live rooms with up to eight people; neither needs an account.
 
