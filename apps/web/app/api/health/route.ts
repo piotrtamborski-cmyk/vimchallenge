@@ -1,8 +1,21 @@
 /**
  * GET /api/health: for uptime checks and after a release. `release` is the commit the build was
- * made from; `judge` says whether the judge service answers (the pages work without it).
+ * made from; `judge` says whether the judge service answers (the pages work without it);
+ * `accounts` whether the accounts database opens and answers.
  */
+import { authContext } from '../../../lib/auth/context.ts';
+
 export const dynamic = 'force-dynamic';
+
+function accounts(): 'ok' | 'error' {
+  try {
+    authContext().accounts.db.prepare('SELECT 1').get();
+    return 'ok';
+  } catch (err) {
+    console.error(`accounts database: ${(err as Error).message}`);
+    return 'error';
+  }
+}
 
 export async function GET(): Promise<Response> {
   const judgeUrl = process.env.JUDGE_URL ?? 'http://127.0.0.1:3101';
@@ -13,5 +26,9 @@ export async function GET(): Promise<Response> {
   } catch {
     // Reported as down.
   }
-  return Response.json({ ok: true, release: process.env.VC_RELEASE ?? 'unknown', judge }, { headers: { 'cache-control': 'no-store' } });
+  const db = accounts();
+  return Response.json(
+    { ok: db === 'ok', release: process.env.VC_RELEASE ?? 'unknown', judge, accounts: db },
+    { status: db === 'ok' ? 200 : 503, headers: { 'cache-control': 'no-store' } },
+  );
 }

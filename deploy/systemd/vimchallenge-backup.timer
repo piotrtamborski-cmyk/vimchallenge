@@ -1,0 +1,11 @@
+# Every six hours, and at the next boot when one was missed.
+[Unit]
+Description=vimchallenge accounts database backup, every six hours
+
+[Timer]
+OnCalendar=*-*-* 00/6:17:00
+RandomizedDelaySec=5m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

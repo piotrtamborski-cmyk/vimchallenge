@@ -1,0 +1,16 @@
+{
+  "name": "@vimchallenge/accounts",
+  "version": "0.0.0",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "backup": "node src/backup.ts"
+  },
+  "dependencies": {
+    "jose": "^6.2.18"
+  }
+}

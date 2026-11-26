@@ -1,8 +1,10 @@
 /** The page's path to the judge: /api/judge forwards to a real judge service, and the page reads its answers. */
 import type { AddressInfo } from 'node:net';
+import { Accounts, openDatabase } from '@vimchallenge/accounts';
 import { createJudgeServer, JudgePool } from '@vimchallenge/judge';
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { POST } from '../app/api/judge/route.ts';
+import { setAuthContext } from '../lib/auth/context.ts';
 import { confirmOnServer } from '../lib/server-check.ts';
 
 const request = (body: unknown, contentType = 'application/json') =>
@@ -34,6 +36,31 @@ describe('POST /api/judge', { timeout: 30_000 }, () => {
     expect(await res.json()).toMatchObject({ verdict: 'passed', task: 'undo-a-change' });
   });
 
+  it("saves a signed-in player's solves, and nothing for guests", async () => {
+    const accounts = new Accounts(openDatabase(':memory:'));
+    setAuthContext({ accounts, config: { publicUrl: new URL('http://localhost:3100'), secure: false, databasePath: ':memory:' } });
+    try {
+      const run = { task: 'undo-a-change', version: 1, keys: ['x', 'u'] };
+      expect(await (await POST(request(run))).json()).toMatchObject({ verdict: 'passed', saved: false, signedIn: false });
+
+      const signedIn = accounts.signIn({ provider: 'github', subject: '1' });
+      if (!signedIn.ok) throw new Error('sign-in failed');
+      const token = accounts.createSession(signedIn.user.id);
+      const asPlayer = (body: unknown) => {
+        const r = request(body);
+        r.headers.set('cookie', `vc_session=${token}`);
+        return r;
+      };
+      expect(await (await POST(asPlayer({ ...run, text: 2 }))).json()).toMatchObject({ verdict: 'passed', saved: true, signedIn: true });
+      expect(await (await POST(asPlayer({ ...run, keys: ['x'] }))).json()).toMatchObject({ verdict: 'failed', saved: false, signedIn: true });
+      expect(accounts.history(signedIn.user.id)).toEqual([
+        { taskId: 'undo-a-change', text: 2, taskVersion: 1, judgeVersion: 1, keys: 2, solvedAt: expect.any(Number) },
+      ]);
+    } finally {
+      setAuthContext(undefined);
+    }
+  });
+
   it('passes on what the judge refuses', async () => {
     expect((await POST(request({ task: 'undo-a-change', version: 9, keys: [] }))).status).toBe(409);
     expect((await POST(request({ task: 'undo-a-change', version: 1, keys: ['xu'] }))).status).toBe(400);
@@ -61,8 +88,10 @@ describe('confirmOnServer', () => {
   const confirm = () => confirmOnServer({ id: 'undo-a-change', version: 1 }, 1, ['x', 'u'], new AbortController().signal);
 
   it('reads every answer of the judge', async () => {
-    answer(200, { verdict: 'passed' });
-    expect(await confirm()).toEqual({ state: 'confirmed' });
+    answer(200, { verdict: 'passed', saved: false });
+    expect(await confirm()).toEqual({ state: 'confirmed', saved: false });
+    answer(200, { verdict: 'passed', saved: true });
+    expect(await confirm()).toEqual({ state: 'confirmed', saved: true });
     answer(200, { verdict: 'failed', failures: [] });
     expect((await confirm()).state).toBe('not-confirmed');
     answer(200, { verdict: 'rejected', reason: 'time' });

@@ -5,7 +5,7 @@
  */
 import { isToken, parseKeys, toCh, type Pos, type TaskVariant } from '@vimchallenge/engine';
 import type { BankTask } from './index.ts';
-import type { Lesson } from './lessons.ts';
+import { TOPIC_LESSONS, type Lesson } from './lessons.ts';
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const balancedCode = (text: string) => (text.match(/`/g)?.length ?? 0) % 2 === 0;
@@ -79,5 +79,7 @@ export function validateLessons(lessons: readonly Lesson[], tasks: readonly Bank
     earlier.add(l.id);
   }
   for (const t of tasks) if (!practised.has(t.id)) problems.push(`task ${t.id}: no lesson practises it`);
+  for (const [topic, id] of Object.entries(TOPIC_LESSONS))
+    if (!earlier.has(id)) problems.push(`topic ${topic}: lesson "${id}" does not exist`);
   return problems;
 }

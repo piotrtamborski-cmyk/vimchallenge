@@ -18,6 +18,10 @@ Environment=JUDGE_WORKERS=1
 # The heap limit is for the main thread (HTTP, task list); each worker has its own (limits.ts).
 # Node 22.18+ runs the TypeScript sources directly.
 ExecStart=/usr/bin/node --max-old-space-size=96 packages/judge/src/start.ts
+# Serves and connects on localhost only. IPAddress* needs BPF and is skipped with a warning where
+# the kernel or container does not allow it.
+IPAddressDeny=any
+IPAddressAllow=localhost
 Restart=on-failure
 RestartSec=2
 TimeoutStopSec=10

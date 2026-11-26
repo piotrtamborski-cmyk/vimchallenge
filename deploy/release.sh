@@ -7,12 +7,15 @@
 # Each release is a fresh clone in ~/releases/<UTC time>-<commit> with its own dependencies and
 # build, so the running services keep serving the old one until the restart. ~/current points at
 # the release to run; deploy/rollback.sh points it back at the previous one. The two newest
-# releases are kept (current and the one before, about 700 MB each).
+# releases are kept (current and the one before, about 700 MB each). Before the switch, the
+# accounts database is copied, so a release that changes it can be rolled back with its data.
 set -euo pipefail
 
 repo=${VC_REPO:-https://github.com/piotrtamborski-cmyk/vimchallenge.git}
 ref=${1:-main}
 home=${VC_HOME:-$HOME}
+database=${VC_DATABASE:-/var/lib/vimchallenge/accounts.db}
+backups=${VC_BACKUPS:-/var/backups/vimchallenge}
 keep=2
 
 mkdir -p "$home/releases"
@@ -30,6 +33,10 @@ npm ci --no-audit --no-fund --loglevel=error
 NEXT_TELEMETRY_DISABLED=1 npm run -s build
 # Marks a release that built completely; rollback.sh only goes back to these.
 touch "$release/.complete"
+
+if [ -f "$database" ]; then
+  node --disable-warning=ExperimentalWarning "$release/packages/accounts/src/backup.ts" "$database" "$backups"
+fi
 
 ln -sfn "$release" "$home/current.new"
 mv -T "$home/current.new" "$home/current"

@@ -75,3 +75,29 @@ describe('POST /api/judge rate limit', () => {
     expect((await send('203.0.113.201')).status).toBe(415);
   });
 });
+
+describe('readBody', async () => {
+  const { readBody } = await import('../lib/body.ts');
+  const streamed = (parts: string[]) =>
+    new Request('http://localhost/', {
+      method: 'POST',
+      body: new ReadableStream({
+        start(c) {
+          for (const p of parts) c.enqueue(new TextEncoder().encode(p));
+          c.close();
+        },
+      }),
+      duplex: 'half',
+    } as RequestInit);
+
+  it('reads bodies up to the limit, with or without a length', async () => {
+    expect(await readBody(new Request('http://localhost/', { method: 'POST', body: 'a=1' }), 10)).toBe('a=1');
+    expect(await readBody(streamed(['a=', 'ż']), 10)).toBe('a=ż');
+    expect(await readBody(new Request('http://localhost/'), 10)).toBe('');
+  });
+
+  it('stops at the limit', async () => {
+    expect(await readBody(new Request('http://localhost/', { method: 'POST', body: 'x'.repeat(11) }), 10)).toBeUndefined();
+    expect(await readBody(streamed(['x'.repeat(6), 'x'.repeat(6)]), 10)).toBeUndefined();
+  });
+});

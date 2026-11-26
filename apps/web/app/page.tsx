@@ -1,11 +1,11 @@
-import { lessons, lessonsForTask, tasks, textCount } from '@vimchallenge/tasks';
+import { lessons, tasks, textCount } from '@vimchallenge/tasks';
 import Link from 'next/link';
 import { TaskPlayer } from '@/components/TaskPlayer';
+import { taskLessons } from '@/lib/lesson-links';
 
 export default function Home() {
   const first = tasks[0]!;
   const second = tasks[1];
-  const firstLesson = lessonsForTask(first.id)[0];
   return (
     <div className="space-y-10">
       <div className="max-w-2xl space-y-3">
@@ -19,7 +19,7 @@ export default function Home() {
         task={first}
         text={{ n: 1, count: textCount(first), nextHref: `/tasks/${first.id}?text=2` }}
         next={second ? { href: `/tasks/${second.id}`, label: 'Next task →' } : undefined}
-        lesson={firstLesson ? { title: firstLesson.title, href: `/lessons/${firstLesson.id}` } : undefined}
+        lessons={taskLessons(first.id)}
         autofocus={false}
       />
       <p className="flex flex-wrap gap-x-6 gap-y-2">

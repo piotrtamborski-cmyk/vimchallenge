@@ -4,10 +4,12 @@ Two systemd services on an Ubuntu 24.04 host (an LXC container works), run from 
 
 | Service | Listens on | What |
 |---|---|---|
-| `vimchallenge-web` | `127.0.0.1:3100` | The Next.js app: pages, tasks, `/api/judge` (forwards to the judge, rate-limited per visitor), `/api/health`. Visitors reach it through the Cloudflare Tunnel. |
-| `vimchallenge-judge` | `127.0.0.1:3101` | The judge (`packages/judge`): replays key logs in worker threads under time and memory limits. Only the web app calls it. |
+| `vimchallenge-web` | `127.0.0.1:3100` | The Next.js app: pages, tasks, accounts, `/api/judge` (forwards to the judge, rate-limited per visitor, saves the solves of signed-in players), `/api/health`. Visitors reach it through the Cloudflare Tunnel. |
+| `vimchallenge-judge` | `127.0.0.1:3101` | The judge (`packages/judge`): replays key logs in worker threads under time and memory limits. Only the web app calls it. Stores nothing. |
 
-Neither stores anything. Releases live in the home directory of the `vimchallenge` user:
+The web app keeps accounts in one SQLite file, `/var/lib/vimchallenge/accounts.db` (Node's built-in
+`node:sqlite`, no database server). `vimchallenge-backup.timer` copies it every six hours to
+`/var/backups/vimchallenge`. Releases live in the home directory of the `vimchallenge` user:
 
 ```text
 /home/vimchallenge/
@@ -17,17 +19,18 @@ Neither stores anything. Releases live in the home directory of the `vimchalleng
     20261124-…/                     the previous release, for rollback
 ```
 
-`deploy/release.sh` makes a new release next to the running one and moves `current` only when the
-build succeeded, so the site keeps serving until the services are restarted (about two seconds);
-`deploy/rollback.sh` moves it back.
+`deploy/release.sh` makes a new release next to the running one, copies the database, and moves
+`current` only when the build succeeded, so the site keeps serving until the services are restarted
+(about two seconds); `deploy/rollback.sh` moves it back.
 
 Files in `deploy/systemd/`:
 
 | File | Installed as | What |
 |---|---|---|
-| `vimchallenge-web.service`, `vimchallenge-judge.service` | `/etc/systemd/system/` | The services: user, port, memory cap, journal rate limit. |
-| `sandbox.conf` | `/etc/systemd/system/<service>.service.d/` for both | No privileges or capabilities, a system call filter, no connections beyond localhost. Works in LXC. |
-| `sandbox-mounts.conf` | same directories | Read-only file system, private `/tmp` and `/dev`. Needs mount namespaces, which some LXC containers refuse. |
+| `vimchallenge-web.service`, `vimchallenge-judge.service` | `/etc/systemd/system/` | The services: user, port, memory cap, journal rate limit, the web app's database directory and secrets file. The judge may connect to localhost only. |
+| `vimchallenge-backup.service`, `vimchallenge-backup.timer` | `/etc/systemd/system/` | The database copy, every six hours; copies older than 14 days are deleted. |
+| `sandbox.conf` | `/etc/systemd/system/<service>.service.d/` for both services | No privileges or capabilities, a system call filter. Works in LXC. |
+| `sandbox-mounts.conf` | same directories | Read-only file system (except the database directory), private `/tmp` and `/dev`. Needs mount namespaces, which some LXC containers refuse. |
 
 Commands run as root unless they say otherwise.
 
@@ -43,10 +46,12 @@ git --version
 If Node is older or missing, install Node 22 from NodeSource (`curl -fsSL https://deb.nodesource.com/setup_22.x | bash -`,
 then `apt install -y nodejs`), which gives the latest 22.x.
 
-## 2. User
+## 2. User and directories
 
 ```bash
 adduser --disabled-password --gecos "" vimchallenge
+install -d -o vimchallenge -g vimchallenge -m 0750 /var/backups/vimchallenge
+install -d -m 0700 /etc/vimchallenge
 ss -ltn | grep -E ':310[01]\b'      # prints nothing: both ports are free
 ```
 
@@ -66,19 +71,20 @@ memory, run it with `NODE_OPTIONS=--max-old-space-size=1024` in front of `bash`.
 
 ```bash
 cd /home/vimchallenge/current/deploy/systemd
-cp vimchallenge-web.service vimchallenge-judge.service /etc/systemd/system/
+cp vimchallenge-web.service vimchallenge-judge.service vimchallenge-backup.service vimchallenge-backup.timer /etc/systemd/system/
 for s in vimchallenge-web vimchallenge-judge; do
   mkdir -p /etc/systemd/system/$s.service.d
   cp sandbox.conf sandbox-mounts.conf /etc/systemd/system/$s.service.d/
 done
-systemd-analyze verify /etc/systemd/system/vimchallenge-web.service /etc/systemd/system/vimchallenge-judge.service
+systemd-analyze verify /etc/systemd/system/vimchallenge-{web,judge,backup}.service /etc/systemd/system/vimchallenge-backup.timer
 systemctl daemon-reload
-systemctl enable --now vimchallenge-judge vimchallenge-web
+systemctl enable --now vimchallenge-judge vimchallenge-web vimchallenge-backup.timer
 systemctl status vimchallenge-judge vimchallenge-web --no-pager
 ```
 
 `verify` prints nothing when the files are valid. Both services should be `active (running)`; the
-judge logs `judge on http://127.0.0.1:3101 with 1 workers`, the web app `Ready in …`.
+judge logs `judge on http://127.0.0.1:3101 with 1 workers`, the web app `Ready in …`. The web app
+creates `/var/lib/vimchallenge/accounts.db` the first time it needs it.
 
 If a service fails with `status=226/NAMESPACE`, the container does not allow mount namespaces. Remove
 that drop-in from both services and keep the rest of the sandbox:
@@ -107,9 +113,69 @@ Cloudflare creates the proxied DNS record for the name. The judge gets no hostna
 proxied `CNAME www → vimchallenge.com` and a redirect rule to the apex, as for the other sites.
 
 The web unit sets `CLIENT_IP_HEADER=cf-connecting-ip`: behind the tunnel every request comes from
-`cloudflared`, and only that header tells visitors apart for the rate limit on `/api/judge`.
+`cloudflared`, and only that header tells visitors apart for the rate limits. It also sets
+`PUBLIC_URL=https://vimchallenge.com`, from which links in emails and OAuth redirects are built; a
+site on another address (staging) sets its own with `systemctl edit vimchallenge-web`.
 
-## 6. Check
+## 6. Sign-in
+
+Players sign in with GitHub, Google or a link sent by email; each method works once its secrets are
+in `/etc/vimchallenge/web.env`, and the sign-in page offers only those that are set. Without the file
+the site works, but nobody can sign in. Each environment (staging, production) needs its own OAuth
+clients, because the redirect address is part of them.
+
+**GitHub.** On github.com: **Settings → Developer settings → OAuth Apps → New OAuth App**:
+
+| Field | Value |
+|---|---|
+| Application name | `vimchallenge` |
+| Homepage URL | `https://vimchallenge.com` |
+| Authorization callback URL | `https://vimchallenge.com/api/auth/github/callback` |
+| Enable Device Flow | off |
+
+Then **Generate a new client secret**. The app asks for the `user:email` scope only: GitHub then tells
+which addresses the player verified (used to spot a second account of the same person).
+
+**Google.** In the Google Cloud console, a new project, then **Google Auth Platform**:
+
+1. **Branding**: app name `vimchallenge`, support email, home page `https://vimchallenge.com`, privacy policy
+   `https://vimchallenge.com/privacy`, authorised domain `vimchallenge.com`. No logo: with a logo Google
+   reviews the app first.
+2. **Audience**: External, then **Publish app** (to production). The app asks only for `openid` and
+   `email`, which need no review.
+3. **Clients → Create client**: Web application, authorised redirect URI
+   `https://vimchallenge.com/api/auth/google/callback`. Note the client ID and secret.
+
+**Email links** go out through [Resend](https://resend.com). **Domains → Add domain**: `vimchallenge.com`;
+Resend lists DNS records (DKIM, and SPF/MX for its bounce subdomain) to add in Cloudflare DNS as they
+are, DNS only. When the domain shows *Verified*, **API Keys → Create API key** with *Sending access*
+for that domain only.
+
+The secrets file, readable by root only (systemd reads it before starting the service as
+`vimchallenge`):
+
+```bash
+install -m 0600 /dev/null /etc/vimchallenge/web.env
+nano /etc/vimchallenge/web.env
+```
+
+```ini
+GITHUB_CLIENT_ID=...
+GITHUB_CLIENT_SECRET=...
+GOOGLE_CLIENT_ID=....apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=...
+RESEND_API_KEY=re_...
+MAIL_FROM=vimchallenge <sign-in@vimchallenge.com>
+```
+
+```bash
+systemctl restart vimchallenge-web
+```
+
+Leave out the lines of a method you do not use yet. Do not quote the values and do not `source` the
+file in a shell: systemd reads it as `KEY=value` lines.
+
+## 7. Check
 
 ```bash
 curl -s localhost:3100/api/health
@@ -118,24 +184,31 @@ curl -s -X POST localhost:3100/api/judge -H 'content-type: application/json' -H 
 curl -s -X POST localhost:3101/v1/judge -H 'content-type: application/json' -d '{"task":"undo-a-change","version":1,"keys":["9","9","9","9","9","i","x","<Esc>"]}'
 ```
 
-Expected: `{"ok":true,"release":"<commit>","judge":"up"}` (the judge needs a second or two after a
-start to say `up`); `200`; `"verdict":"passed"`; and `"verdict":"rejected","reason":"time"` after about
-2 seconds: that run would keep the engine busy for a minute, so its worker is stopped and replaced.
+Expected: `{"ok":true,"release":"<commit>","judge":"up","accounts":"ok"}` (the judge needs a second
+or two after a start to say `up`); `200`; `"verdict":"passed"` with `"saved":false,"signedIn":false`;
+and `"verdict":"rejected","reason":"time"` after about 2 seconds: that run would keep the engine busy
+for a minute, so its worker is stopped and replaced.
 
-Then open https://vimchallenge.com, solve a task and press Check: the page should say *Confirmed by the
-server*. `curl -sI https://vimchallenge.com | grep -i -E 'content-security|x-frame|strict-transport'` shows
-the security headers; the browser console should show no Content Security Policy errors.
+Then open https://vimchallenge.com: solve a task and press Check, and the page should say *Confirmed
+by the server*. Sign in with each method you set up; the name in the top right opens the account
+page, which lists the solved task after another Check. Connect a second method there, sign out, and
+sign in with it: the same account and progress come back.
+
+`curl -sI https://vimchallenge.com | grep -i -E 'content-security|x-frame|strict-transport'` shows the
+security headers; the browser console should show no Content Security Policy errors.
 
 ```bash
 systemd-analyze security vimchallenge-web vimchallenge-judge --no-pager | grep Overall
 systemctl show vimchallenge-web vimchallenge-judge -p MemoryCurrent -p MemoryMax
 cat /sys/fs/cgroup/system.slice/vimchallenge-*.service/memory.max
+systemctl start vimchallenge-backup && ls -l /var/backups/vimchallenge
 ```
 
-With both drop-ins the exposure level is low (1.7 for each, measured under systemd 255). Idle, the web
-app takes about 50 MB and the judge about 130 MB. `memory.max` shows the cap in bytes when it is
-enforced; `max` or a missing file means the container does not delegate the memory controller, and
-only the services' own heap limits apply.
+With both drop-ins the exposure level is low (1.7 for each, measured under systemd 255 before the web
+app was allowed to connect out to the sign-in providers; expect a little more for it now). Idle, the web app takes about 50 MB and the judge
+about 130 MB. `memory.max` shows the cap in bytes when it is enforced; `max` or a missing file means
+the container does not delegate the memory controller, and only the services' own heap limits apply.
+The backup prints nothing when the database does not exist yet (nobody has signed in).
 
 ## Releases
 
@@ -147,10 +220,11 @@ systemctl restart vimchallenge-judge vimchallenge-web
 curl -s localhost:3100/api/health        # the new commit
 ```
 
-A failed build leaves `~/current` unchanged and prints where the broken release is. The script keeps the
-two newest releases and never deletes one a running service still works in. When a release changes
-`deploy/systemd/`, copy the changed files again as in step 4 and run `systemctl daemon-reload` before the
-restart.
+A failed build leaves `~/current` unchanged and prints where the broken release is. Before switching,
+the script copies the database to `/var/backups/vimchallenge` (a failed copy stops the release). It
+keeps the two newest releases and never deletes one a running service still works in. When a
+release changes `deploy/systemd/`, copy the changed files again as in step 4 and run
+`systemctl daemon-reload` before the restart.
 
 Rollback to the newest complete release before the current one:
 
@@ -159,8 +233,31 @@ sudo -u vimchallenge -H bash ~vimchallenge/current/deploy/rollback.sh
 systemctl restart vimchallenge-judge vimchallenge-web
 ```
 
+A release may add to the database's schema, which it does when it first opens it. An older release
+refuses a newer schema (`/api/health` answers `"accounts":"error"`); restore the copy made before the
+release then, as below.
+
 A restart drops runs the judge is replaying at that moment; the page then says the server check is not
 available, and the solve still counts in training.
+
+## Backups and restore
+
+`vimchallenge-backup.timer` runs at 00:17, 06:17, 12:17 and 18:17 (and after a boot that missed one).
+Each copy is a complete SQLite file, `vimchallenge-<UTC time>.db`, checked with `PRAGMA integrity_check`
+before it is kept; copies older than 14 days are deleted. Pull them off the host like other backups.
+`journalctl -u vimchallenge-backup` shows each run; a failed one leaves the unit `failed`.
+
+To restore a copy:
+
+```bash
+systemctl stop vimchallenge-web
+cd /var/lib/vimchallenge
+mv accounts.db accounts.db.broken; rm -f accounts.db-wal accounts.db-shm
+install -o vimchallenge -g vimchallenge -m 0600 /var/backups/vimchallenge/vimchallenge-<time>.db accounts.db
+systemctl start vimchallenge-web
+```
+
+Sign-ins and solves after that copy are lost; sessions made since then end.
 
 ## Logs
 
@@ -169,7 +266,8 @@ journalctl -u vimchallenge-web -u vimchallenge-judge -f
 ```
 
 The judge writes one line per request (method, path, status, task, verdict, time); the web app logs
-errors only. Neither logs keys or visitor addresses.
+errors only, such as a provider that refused a sign-in or an email that could not be sent. Neither
+logs keys, addresses or tokens.
 
 ## Settings
 
@@ -184,19 +282,27 @@ Environment=JUDGE_WORKERS=2
 |---|---|---|---|
 | judge | `JUDGE_WORKERS` | `1` | Worker threads. One takes about 130 MB with the service; two about 250 MB. Raise `MemoryHigh`/`MemoryMax` with it. |
 | judge | `PORT`, `HOST` | `3101`, `127.0.0.1` | Where the judge listens. Keep it on localhost. |
+| web | `PUBLIC_URL` | `https://vimchallenge.com` | Where visitors reach the site: links in emails, OAuth redirects, the origin forms must come from. Cookies are `Secure` when it is `https`. |
+| web | `DATABASE_PATH` | `/var/lib/vimchallenge/accounts.db` | The accounts database. |
 | web | `JUDGE_URL` | `http://127.0.0.1:3101` | Where the web app finds the judge. |
-| web | `CLIENT_IP_HEADER` | `cf-connecting-ip` | Header with the visitor's address, for the rate limit. |
+| web | `CLIENT_IP_HEADER` | `cf-connecting-ip` | Header with the visitor's address, for the rate limits. |
 | web | `JUDGE_RATE_BURST`, `JUDGE_RATE_PER_MINUTE` | `20`, `30` | Checks per visitor address on `/api/judge`. |
+| web | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `RESEND_API_KEY`, `MAIL_FROM` | in `/etc/vimchallenge/web.env` | Sign-in methods (step 6). |
 
 Run limits of the judge (keys, text size, time, worker heap) are part of its version and live in
-`packages/judge/src/limits.ts`, not in the environment.
+`packages/judge/src/limits.ts`, not in the environment. Sign-in limits are in the code too: a session
+ends after 30 days without a visit and after 180 days in any case; an email link works once within 15
+minutes; an address gets at most 5 links an hour.
 
 ## Remove
 
 ```bash
-systemctl disable --now vimchallenge-web vimchallenge-judge
-rm -r /etc/systemd/system/vimchallenge-{web,judge}.service /etc/systemd/system/vimchallenge-{web,judge}.service.d
+systemctl disable --now vimchallenge-web vimchallenge-judge vimchallenge-backup.timer
+rm -r /etc/systemd/system/vimchallenge-{web,judge}.service /etc/systemd/system/vimchallenge-{web,judge}.service.d \
+  /etc/systemd/system/vimchallenge-backup.{service,timer}
 systemctl daemon-reload
 ```
 
 Then remove the public hostname from the tunnel, and the user with `deluser --remove-home vimchallenge`.
+The database (`/var/lib/vimchallenge`), its copies (`/var/backups/vimchallenge`) and the secrets
+(`/etc/vimchallenge`) stay until you delete them; revoke the OAuth clients and the Resend key too.

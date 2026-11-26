@@ -3,10 +3,12 @@
 import { checkGoals, type GoalFailure, type Pos, type Snapshot, type Step, type StepGoal, type Task } from '@vimchallenge/engine';
 import type { BrowserEditor } from '@vimchallenge/engine/browser';
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { lessonsFor, type LessonLink, type TaskLessons } from '@/lib/failure-lessons';
 import { confirmOnServer, type ServerCheck } from '@/lib/server-check';
 import { useNonce } from './Nonce';
 import { CodeText, Prompt } from './Prompt';
+import { SignInLink } from './SignInLink';
 
 const MODE_LABEL: Record<string, string> = {
   normal: 'NORMAL',
@@ -54,12 +56,14 @@ interface TaskPlayerProps {
   text?: { n: number; count: number; nextHref: string };
   /** Where "next" leads after a solve: the next task, exercise or lesson. */
   next?: { href: string; label: string };
-  /** The lesson that teaches this task, offered when an attempt fails. */
-  lesson?: { title: string; href: string };
+  /** Lessons offered when an attempt fails: the task's own, and those of the unmet goals. */
+  lessons?: TaskLessons;
+  /** The signed-in player's earlier solves of this task. */
+  progress?: { best: number; solves: number };
   autofocus?: boolean;
 }
 
-export function TaskPlayer({ task, text, next, lesson, autofocus = true }: TaskPlayerProps) {
+export function TaskPlayer({ task, text, next, lessons, progress, autofocus = true }: TaskPlayerProps) {
   const host = useRef<HTMLDivElement>(null);
   const editor = useRef<BrowserEditor | null>(null);
   const [attempt, setAttempt] = useState(0);
@@ -145,9 +149,11 @@ export function TaskPlayer({ task, text, next, lesson, autofocus = true }: TaskP
         <h1 id={`task-${task.id}`} className="text-2xl font-semibold">
           {task.title}
         </h1>
-        {text && text.count > 1 && (
+        {((text && text.count > 1) || progress) && (
           <p className="text-sm text-muted">
-            Text {text.n} of {text.count}
+            {text && text.count > 1 && `Text ${text.n} of ${text.count}`}
+            {text && text.count > 1 && progress && ' · '}
+            {progress && `You solved this task ${progress.solves === 1 ? 'once' : `${progress.solves} times`}, in ${progress.best} ${progress.best === 1 ? 'key' : 'keys'} at best`}
           </p>
         )}
         <Prompt text={task.prompt} className="text-lg leading-relaxed" />
@@ -233,13 +239,12 @@ export function TaskPlayer({ task, text, next, lesson, autofocus = true }: TaskP
                 ))}
               </ul>
               {result.failures.some((f) => f.field === 'text') && <TextDiff want={task.expected.lines!} got={snapshot?.lines ?? []} />}
-              {lesson && (
+              <Stuck lessons={lessonsFor(result.failures, lessons)} />
+              {text && text.count > 1 && (
                 <p className="text-sm">
-                  Stuck? The lesson{' '}
-                  <Link href={lesson.href} className="underline">
-                    {lesson.title}
-                  </Link>{' '}
-                  explains the keys for this.
+                  <Link href={text.nextHref} className="underline">
+                    Or try it on new text →
+                  </Link>
                 </p>
               )}
             </div>
@@ -253,10 +258,36 @@ export function TaskPlayer({ task, text, next, lesson, autofocus = true }: TaskP
 /** What the server's judge said about a solve. */
 function ServerStatus({ check }: { check: ServerCheck }) {
   if (check.state === 'checking') return <p className="text-sm text-muted">Confirming on the server…</p>;
+  if (check.state === 'confirmed' && check.saved)
+    return <p className="text-sm text-muted">Confirmed by the server, which replayed your keys, and saved to your progress.</p>;
   if (check.state === 'confirmed')
-    return <p className="text-sm text-muted">Confirmed by the server, which replayed your keys. Nothing is stored.</p>;
+    return (
+      <p className="text-sm text-muted">
+        Confirmed by the server, which replayed your keys. Nothing is stored:{' '}
+        <SignInLink className="underline">sign in</SignInLink> to keep your progress.
+      </p>
+    );
   if (check.state === 'not-confirmed') return <p className="text-sm text-bad">The server did not confirm this solve. {check.detail}</p>;
   return <p className="text-sm text-muted">Not confirmed on the server. {check.detail}</p>;
+}
+
+/** "Stuck? The lessons A and B explain the keys for this." */
+function Stuck({ lessons }: { lessons: LessonLink[] }) {
+  if (!lessons.length) return null;
+  return (
+    <p className="text-sm">
+      Stuck? The {lessons.length === 1 ? 'lesson' : 'lessons'}{' '}
+      {lessons.map((l, i) => (
+        <Fragment key={l.href}>
+          {i > 0 && (i === lessons.length - 1 ? ' and ' : ', ')}
+          <Link href={l.href} className="underline">
+            {l.title}
+          </Link>
+        </Fragment>
+      ))}{' '}
+      {lessons.length === 1 ? 'explains' : 'explain'} the keys for this.
+    </p>
+  );
 }
 
 function TextDiff({ want, got }: { want: string[]; got: string[] }) {

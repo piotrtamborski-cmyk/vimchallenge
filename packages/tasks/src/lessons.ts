@@ -35,3 +35,15 @@ export function nextLesson(id: string): Lesson | undefined {
   const i = lessons.findIndex((l) => l.id === id);
   return i < 0 ? undefined : lessons[i + 1];
 }
+
+/**
+ * Lessons for goals that are a technique of their own in any task: an unmet goal of this kind
+ * points to its lesson rather than to the lesson of the task.
+ */
+export const TOPIC_LESSONS = {
+  mode: 'modes-and-typing',
+  visual: 'visual-selection',
+  register: 'registers',
+  undo: 'undo-and-redo',
+} as const;
+export type Topic = keyof typeof TOPIC_LESSONS;

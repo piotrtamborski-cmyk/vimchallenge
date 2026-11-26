@@ -1,7 +1,9 @@
-import { lessonsForTask, nextTask, onText, taskById, textCount } from '@vimchallenge/tasks';
+import { nextTask, onText, taskById, textCount } from '@vimchallenge/tasks';
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { TaskPlayer } from '@/components/TaskPlayer';
+import { taskProgress } from '@/lib/auth/session';
+import { taskLessons } from '@/lib/lesson-links';
 
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ text?: string }> };
 
@@ -18,14 +20,14 @@ export default async function TaskPage({ params, searchParams }: Props) {
   if (!base || !task) notFound();
   const count = textCount(base);
   const next = nextTask(id);
-  const lesson = lessonsForTask(id)[0];
   return (
     <TaskPlayer
       key={`${task.id}:${n}`}
       task={task}
       text={{ n, count, nextHref: `/tasks/${id}?text=${(n % count) + 1}` }}
       next={next ? { href: `/tasks/${next.id}`, label: 'Next task →' } : undefined}
-      lesson={lesson ? { title: lesson.title, href: `/lessons/${lesson.id}` } : undefined}
+      lessons={taskLessons(id)}
+      progress={await taskProgress(id)}
     />
   );
 }

@@ -1,6 +1,6 @@
-# vimchallenge web app (Next.js): pages, tasks and /api/judge in front of the judge service.
-# Listens on localhost only; the Cloudflare Tunnel brings visitors in. Runs the release ~/current
-# points at (deploy/README.md).
+# vimchallenge web app (Next.js): pages, tasks, accounts and /api/judge in front of the judge
+# service. Listens on localhost only; the Cloudflare Tunnel brings visitors in. Runs the release
+# ~/current points at; keeps the accounts database in /var/lib/vimchallenge (deploy/README.md).
 [Unit]
 Description=vimchallenge web app
 Documentation=https://github.com/piotrtamborski-cmyk/vimchallenge/blob/main/deploy/README.md
@@ -18,7 +18,16 @@ Environment=NEXT_TELEMETRY_DISABLED=1
 Environment=JUDGE_URL=http://127.0.0.1:3101
 # Behind the tunnel every request comes from cloudflared; Cloudflare puts the visitor's address here.
 Environment=CLIENT_IP_HEADER=cf-connecting-ip
-ExecStart=/usr/bin/node --max-old-space-size=192 /home/vimchallenge/current/node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3100
+# Links in sign-in emails and OAuth redirects are built from it, never from request headers.
+Environment=PUBLIC_URL=https://vimchallenge.com
+# /var/lib/vimchallenge, made by systemd for the service user, writable under the sandbox.
+StateDirectory=vimchallenge
+StateDirectoryMode=0700
+Environment=DATABASE_PATH=/var/lib/vimchallenge/accounts.db
+# OAuth clients and the mail key, root-only (deploy/README.md); without it there is no sign-in.
+EnvironmentFile=-/etc/vimchallenge/web.env
+# node:sqlite is marked experimental in Node 22; its warning would print on every start.
+ExecStart=/usr/bin/node --max-old-space-size=192 --disable-warning=ExperimentalWarning /home/vimchallenge/current/node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3100
 Restart=on-failure
 RestartSec=2
 TimeoutStopSec=10

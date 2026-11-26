@@ -15,6 +15,9 @@ coverage
 # local planning notes — not published
 /plany/
 
+# local databases (apps/web/.data in development)
+.data/
+
 # Next.js
 .next/
 next-env.d.ts

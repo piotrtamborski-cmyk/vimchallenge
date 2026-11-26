@@ -1,11 +1,11 @@
 /**
  * Asks the server's judge to confirm a run the page already judged as solved. Training is judged
- * in the browser; the server replays the same key log and must reach the same verdict. Nothing is
- * stored on the server.
+ * in the browser; the server replays the same key log and must reach the same verdict. For a
+ * signed-in player the server then saves the solve (not the keys); for guests nothing is stored.
  */
 export type ServerCheck =
   | { state: 'checking' }
-  | { state: 'confirmed' }
+  | { state: 'confirmed'; saved: boolean }
   /** The judge replayed the run and did not accept it: a disagreement, or a limit. */
   | { state: 'not-confirmed'; detail: string }
   /** No verdict: the judge is not running, busy, or the request failed. */
@@ -37,8 +37,8 @@ export async function confirmOnServer(
     if (signal.aborted) throw err;
     return { state: 'unavailable', detail: 'The server could not be reached.' };
   }
-  const body = (await res.json().catch(() => ({}))) as { verdict?: string; reason?: string; error?: string };
-  if (res.status === 200 && body.verdict === 'passed') return { state: 'confirmed' };
+  const body = (await res.json().catch(() => ({}))) as { verdict?: string; reason?: string; error?: string; saved?: boolean };
+  if (res.status === 200 && body.verdict === 'passed') return { state: 'confirmed', saved: body.saved === true };
   if (res.status === 200 && body.verdict === 'rejected')
     return { state: 'not-confirmed', detail: REJECTED[body.reason ?? ''] ?? `The server rejected the run (${body.reason}).` };
   if (res.status === 200)

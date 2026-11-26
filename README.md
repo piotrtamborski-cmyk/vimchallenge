@@ -5,16 +5,18 @@ same versioned tasks and the same judging rules.
 
 Early stage: the editor engine, the conformance harnesses that check it against real Vim, and the web app
 with 12 lessons and 42 training tasks on three texts each, judged in the browser and confirmed by the
-server's judge.
+server's judge. Players may sign in with GitHub, Google or an email link to keep their progress;
+training works without an account.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `apps/web` | The web app (Next.js): home page, lessons, task list and task pages with the Vim editor. |
+| `apps/web` | The web app (Next.js): home page, lessons, task list and task pages with the Vim editor, sign-in, account and privacy pages. |
+| `packages/accounts` | Accounts without passwords: the SQLite schema, sign-in methods (email links, GitHub, Google) connected to one account, sessions, confirmed solves, and the database backup script. |
 | `packages/tasks` | Published tasks (`tasks.json`: prompt, initial state, goals and one solution, plus `variants` — the same technique on other texts, for "practise on new text") and lessons (`lessons.json`: explanation, keys and the tasks that practise them). Tests check every card's shape and that each task belongs to a lesson; CI replays every task in Vim. |
 | `packages/judge` | The server-side judge: a pool of worker threads that replay a key log in the headless engine under time, memory and size limits, and a small HTTP service in front of it. |
-| `deploy` | Running on a server: [`deploy/README.md`](deploy/README.md), systemd units and sandbox for the web app and the judge, release and rollback scripts. |
+| `deploy` | Running on a server: [`deploy/README.md`](deploy/README.md), systemd units and sandbox for the web app and the judge, the database backup timer, release and rollback scripts. |
 | `packages/engine` | The editing engine: CodeMirror 6 + [`@replit/codemirror-vim`](https://github.com/replit/codemirror-vim), the shared editor profile, key notation, positions and goal checks. `@vimchallenge/engine/browser` is the editor in the page; `@vimchallenge/engine/headless` runs the same session in Node (jsdom) for the server-side judge. |
 | `packages/vim-core` | Vendored fork of `@replit/codemirror-vim-core` (MIT) with the fixes found by conformance. npm links it in place of the published package. |
 | `packages/conformance` | Replays every case key by key in reference Vim and in the headless engine and writes [`MATRIX.md`](packages/conformance/MATRIX.md); types every case into the browser editor in Chromium and checks that the judge reproduces it. |
@@ -27,7 +29,7 @@ Node 22.18+ (it runs the TypeScript sources directly), Vim 9.1 on `PATH` (the re
 
 ```bash
 npm install
-npm run dev                    # web app on http://localhost:3000
+npm run dev                    # web app on http://localhost:3100
 npm run judge                  # judge service on http://127.0.0.1:3101 (PORT, HOST, JUDGE_WORKERS);
                                # run it next to `npm run dev` so the task page can confirm solves
 npm run typecheck
@@ -70,8 +72,9 @@ tokens), 404 (unknown task), 409 (the task changed since the run started), 413, 
 The task page judges a run in the browser and, once it is solved, asks the server to confirm it:
 `POST /api/judge` in the web app forwards the run to the judge at `JUDGE_URL` (default
 `http://127.0.0.1:3101`) and the page shows whether the server agreed. Only solved runs are sent, and
-neither the web app nor the judge stores them. Without a running judge the page says the server check is
-not available; the solve still counts in training.
+the keys are never stored. For a signed-in player the web app saves the confirmed solve (task, text,
+versions, number of keys, time); for guests nothing. Without a running judge the page says the server
+check is not available; the solve still counts in training.
 
 `/api/judge` limits checks per client address: a burst of 20, then 30 a minute (`JUDGE_RATE_BURST`,
 `JUDGE_RATE_PER_MINUTE`), answering 429 with `Retry-After` beyond that. IPv6 clients are counted per /64.
@@ -83,6 +86,37 @@ time limit is stopped by terminating its worker, which is replaced. The service 
 only the task, the verdict and the time, never the keys. It listens on localhost; the public route sits in
 front of it; [`deploy/README.md`](deploy/README.md) installs it as a systemd service next to the web app.
 `GET /api/health` on the web app reports the release (commit) and whether the judge answers.
+
+## Accounts
+
+There are no passwords. A player signs in with a link sent by email, with GitHub (OAuth 2.0) or with
+Google (OpenID Connect), and may connect more of these to the same account on the account page; a
+first sign-in makes the account. A new method whose verified email address another account already
+uses does not make a second account: the page says how the player signed in before, so they can sign
+in there and connect the new method. Disconnecting the last method is refused; deleting the account
+removes it with its methods, sessions and progress.
+
+- **Storage**: one SQLite file through Node's built-in `node:sqlite` (`DATABASE_PATH`, default
+  `apps/web/.data/vimchallenge.db` in development). Migrations run when the file is opened
+  (`packages/accounts/src/db.ts`).
+- **Sessions**: a random 256-bit token in a `HttpOnly`, `SameSite=Lax` cookie (`__Host-` and `Secure` over
+  HTTPS); only its SHA-256 is stored. A session ends after 30 days without a visit and after 180 days.
+- **Email links** work once, within 15 minutes, and only after the player presses a button on the page
+  the link opens (mail scanners open links too). An address gets at most 5 links an hour.
+- **GitHub and Google** use the authorization code flow with PKCE (S256) and a one-time state held in
+  the database and tied to the browser by a short-lived cookie; Google's ID token is verified (signature,
+  issuer, audience, expiry, nonce) with [`jose`](https://github.com/panva/jose). Only verified addresses
+  are kept.
+- **Forms** (sign-out, account changes, email links) are plain HTML forms posting to `/api/auth/*` and
+  `/api/account/*`; each must come from the site's own origin (`PUBLIC_URL`), and sign-in requests are
+  rate-limited per client address.
+
+Sign-in methods are configured with `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET`,
+`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` and `RESEND_API_KEY`/`MAIL_FROM`; the sign-in page offers the
+ones that are set. In development, email links are printed to the dev server's log instead of being
+sent, so `npm run dev` can sign in without any setup; see [`apps/web/.env.example`](apps/web/.env.example).
+After a failed check, each unmet goal points to the lesson that teaches it: the task's own lesson, or
+one for the mode, selection, register or undo goals.
 
 ## Content Security Policy
 

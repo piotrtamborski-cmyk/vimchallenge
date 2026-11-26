@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { TaskPlayer } from '@/components/TaskPlayer';
+import { taskProgress } from '@/lib/auth/session';
+import { taskLessons } from '@/lib/lesson-links';
 
 type Props = { params: Promise<{ id: string; task: string }>; searchParams: Promise<{ text?: string }> };
 
@@ -43,7 +45,8 @@ export default async function ExercisePage({ params, searchParams }: Props) {
         task={task}
         text={{ n, count, nextHref: `/lessons/${lesson.id}/${taskId}?text=${(n % count) + 1}` }}
         next={next}
-        lesson={{ title: lesson.title, href: `/lessons/${lesson.id}` }}
+        lessons={taskLessons(taskId, lesson.id)}
+        progress={await taskProgress(taskId)}
       />
     </div>
   );

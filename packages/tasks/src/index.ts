@@ -32,5 +32,5 @@ export function nextTask(id: string): BankTask | undefined {
   return i < 0 ? undefined : tasks[i + 1];
 }
 
-export { lessonById, lessons, lessonsForTask, nextLesson, type Lesson } from './lessons.ts';
+export { lessonById, lessons, lessonsForTask, nextLesson, TOPIC_LESSONS, type Lesson, type Topic } from './lessons.ts';
 export { validateLessons, validateTasks } from './validate.ts';

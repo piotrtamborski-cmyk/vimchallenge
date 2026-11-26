@@ -1,0 +1,24 @@
+# Copies the accounts database to /var/backups/vimchallenge and keeps 14 days of copies
+# (packages/accounts/src/backup.ts). Started by vimchallenge-backup.timer (deploy/README.md).
+[Unit]
+Description=vimchallenge accounts database backup
+Documentation=https://github.com/piotrtamborski-cmyk/vimchallenge/blob/main/deploy/README.md
+ConditionPathExists=/var/lib/vimchallenge/accounts.db
+
+[Service]
+Type=oneshot
+User=vimchallenge
+Group=vimchallenge
+ExecStart=/usr/bin/node --disable-warning=ExperimentalWarning /home/vimchallenge/current/packages/accounts/src/backup.ts /var/lib/vimchallenge/accounts.db /var/backups/vimchallenge 14
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictRealtime=yes
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallErrorNumber=EPERM
+# No network at all. IPAddressDeny needs BPF and is skipped where the container lacks it.
+RestrictAddressFamilies=AF_UNIX
+IPAddressDeny=any
+UMask=0077
