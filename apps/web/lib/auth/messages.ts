@@ -2,6 +2,10 @@
 
 export const METHOD_NAME: Record<string, string> = { email: 'an email link', github: 'GitHub', google: 'Google' };
 
+/** What a valid player name looks like (`validName` in @vimchallenge/accounts). */
+export const NAME_RULES =
+  'A name has 3 to 24 characters: Latin letters without accents (A–Z), digits, - or _, and starts with a letter or a digit.';
+
 /** "GitHub or an email link" */
 export function methodList(methods: string): string {
   const names = methods
@@ -32,13 +36,13 @@ export function errorMessage(code: string | undefined, methods = ''): string | u
     case 'email-failed':
       return 'The email could not be sent. Please try again later, or use another method.';
     case 'link-expired':
-      return 'This link has expired or was already used. Ask for a new one below.';
+      return 'This link has expired or has already been used. Ask for a new one below.';
     case 'link-other-account':
       return 'Open this link in the browser where you are signed in to the account it adds the address to.';
     case 'linked-elsewhere':
       return 'This sign-in method belongs to another vimchallenge account. Sign in there to use it, or delete that account first.';
     case 'name-invalid':
-      return 'A name has 3 to 24 letters, digits, - or _, and starts with a letter or a digit.';
+      return NAME_RULES;
     case 'name-taken':
       return 'Someone already has that name.';
     case 'last-method':
@@ -67,15 +71,15 @@ export function noticeMessage(code: string | undefined): string | undefined {
     case 'connected-google':
       return 'Google is connected: you can sign in with it from now on.';
     case 'connected-email':
-      return 'The address is added: you can sign in with a link to it from now on.';
+      return 'Address added. From now on you can sign in with a link sent to it.';
     case 'already-connected':
-      return 'That method was already connected to this account.';
+      return 'That method is already connected to this account.';
     case 'disconnected':
       return 'Disconnected.';
     case 'signed-out-others':
-      return 'Signed out on every other device.';
+      return 'Signed out of all other devices.';
     case 'email-sent':
-      return 'Check your inbox and open the link in this browser to add the address. It works once, within 15 minutes.';
+      return 'Check your inbox and open the link in this browser to add the address. The link works once and expires in 15 minutes.';
     default:
       return undefined;
   }

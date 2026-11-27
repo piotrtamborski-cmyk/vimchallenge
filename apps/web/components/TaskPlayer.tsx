@@ -121,7 +121,7 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
           <p className="text-sm text-muted">
             {text && text.count > 1 && `Text ${text.n} of ${text.count}`}
             {text && text.count > 1 && progress && ' · '}
-            {progress && `You solved this task ${progress.solves === 1 ? 'once' : `${progress.solves} times`}, in ${progress.best} ${progress.best === 1 ? 'key' : 'keys'} at best`}
+            {progress && `You’ve solved this task ${progress.solves === 1 ? 'once' : `${progress.solves} times`}. Best: ${progress.best} ${progress.best === 1 ? 'key' : 'keys'}`}
           </p>
         )}
         <Prompt text={task.prompt} className="text-lg leading-relaxed" />
@@ -189,7 +189,7 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
               {text && text.count > 1 && (
                 <p>
                   <Link href={text.nextHref} className="underline">
-                    Practise on new text →
+                    Practise on another text →
                   </Link>
                 </p>
               )}
@@ -211,7 +211,7 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
               {text && text.count > 1 && (
                 <p className="text-sm">
                   <Link href={text.nextHref} className="underline">
-                    Or try it on new text →
+                    Or try another text →
                   </Link>
                 </p>
               )}

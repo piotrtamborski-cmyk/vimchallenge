@@ -23,7 +23,7 @@ export default async function SignInPage({ searchParams }: Props) {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold">Sign in</h1>
         <p className="text-muted">
-          An account keeps your solved tasks and, later, your place in rooms and leaderboards. Training works without one.
+          An account keeps your progress and puts you on the daily challenge leaderboards. Practice and rooms work without one.
         </p>
       </header>
 
@@ -31,9 +31,9 @@ export default async function SignInPage({ searchParams }: Props) {
         error={errorMessage(params.error, params.methods)}
         notice={
           params.sent
-            ? 'Check your inbox: the link signs you in once, within 15 minutes.'
+            ? 'Check your inbox. The link works once and expires in 15 minutes.'
             : params.deleted
-              ? 'Your account and its progress are deleted.'
+              ? 'Your account and its progress have been deleted.'
               : undefined
         }
       />

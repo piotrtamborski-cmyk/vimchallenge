@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Message } from '@/components/Messages';
+import { NAME_RULES } from '@/lib/auth/messages';
 import { Room } from '@/components/Room';
 import { authConfig } from '@/lib/auth/context';
 import { roomsContext } from '@/lib/rooms/context';
@@ -11,7 +12,7 @@ export const metadata: Metadata = { title: 'Room' };
 type Props = { params: Promise<{ code: string }>; searchParams: Promise<{ error?: string }> };
 
 const ERROR: Record<string, string> = {
-  'name-invalid': 'A name has 3 to 24 letters, digits, - or _, and starts with a letter or a digit.',
+  'name-invalid': NAME_RULES,
   'name-taken': 'Someone in this room already has that name.',
   full: 'This room is full: eight players at most.',
   rate: 'Too many joins from your network just now. Please wait a minute.',
@@ -43,7 +44,7 @@ export default async function RoomPage({ params, searchParams }: Props) {
         </h1>
         <p className="text-muted">
           {view.members.length} {view.members.length === 1 ? 'player' : 'players'} here: {view.members.map((m) => m.name).join(', ')}.
-          {view.phase !== 'lobby' && view.phase !== 'finished' && ' A match is under way; you play in the next one.'}
+          {view.phase !== 'lobby' && view.phase !== 'finished' && ' A match is under way. You’ll play in the next one.'}
         </p>
         <Message error={error ? (ERROR[error] ?? 'Something went wrong. Please try again.') : undefined} />
       </header>

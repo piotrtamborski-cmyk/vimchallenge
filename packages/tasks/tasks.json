@@ -2610,7 +2610,7 @@
     "plan": "V037",
     "level": 3,
     "title": "Select to the end of a word",
-    "prompt": "Select characters from the `b` in `beta` to the last `a` in `gamma`, inclusive.",
+    "prompt": "Select characters from the `b` in `beta` to the last `a` in `gamma`, inclusive, and submit while the selection is still active (Alt+Enter or Check).",
     "keys": "vwe",
     "initial": {
       "lines": [
@@ -3111,7 +3111,7 @@
         }
       },
       {
-        "prompt": "Change both `small` to `large`. For the second, repeat the first change with `.`.",
+        "prompt": "Change both occurrences of `small` to `large`. For the second, repeat the first change with `.`.",
         "keys": "/small<CR>ciwlarge<Esc>n.",
         "initial": {
           "lines": [
@@ -5472,7 +5472,7 @@
     "plan": "V067",
     "level": 5,
     "title": "Substitute on matching lines",
-    "prompt": "Put square brackets around the last word of every line of type `X`.",
+    "prompt": "Put square brackets around the last word of every line that starts with `X`.",
     "keys": ":g/^X /s/\\S\\+$/[&]/<CR>",
     "initial": {
       "lines": [
@@ -5496,7 +5496,7 @@
     },
     "variants": [
       {
-        "prompt": "Put square brackets around the last word of every line of type `A`.",
+        "prompt": "Put square brackets around the last word of every line that starts with `A`.",
         "keys": ":g/^A /s/\\S\\+$/[&]/<CR>",
         "initial": {
           "lines": [
@@ -5518,7 +5518,7 @@
         }
       },
       {
-        "prompt": "Put square brackets around the last word of every line of type `T:`.",
+        "prompt": "Put square brackets around the last word of every line that starts with `T:`.",
         "keys": ":g/^T: /s/\\S\\+$/[&]/<CR>",
         "initial": {
           "lines": [
@@ -6352,7 +6352,7 @@
     "plan": "V077",
     "level": 5,
     "title": "Mark, fix and return",
-    "prompt": "Mark the starting letter with `a`. Change `(bad)` to `(ok)` in both assignments and come back to exactly the marked letter.",
+    "prompt": "Set mark `a` on the letter under the cursor. Change `(bad)` to `(ok)` in both assignments and come back to exactly the marked letter.",
     "keys": "ma:2,4s/(bad)/(ok)/<CR>`a",
     "initial": {
       "lines": [
@@ -6388,7 +6388,7 @@
     },
     "variants": [
       {
-        "prompt": "Mark the starting letter with `a`. Change `(no)` to `(yes)` in both assignments and come back to exactly the marked letter.",
+        "prompt": "Set mark `a` on the letter under the cursor. Change `(no)` to `(yes)` in both assignments and come back to exactly the marked letter.",
         "keys": "ma:2,3s/(no)/(yes)/<CR>`a",
         "initial": {
           "lines": [
@@ -6422,7 +6422,7 @@
         }
       },
       {
-        "prompt": "Mark the starting letter with `a`. Change `(old)` to `(new)` in both assignments and come back to exactly the marked letter.",
+        "prompt": "Set mark `a` on the letter under the cursor. Change `(old)` to `(new)` in both assignments and come back to exactly the marked letter.",
         "keys": "ma:2,4s/(old)/(new)/<CR>`a",
         "initial": {
           "lines": [

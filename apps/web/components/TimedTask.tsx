@@ -21,6 +21,15 @@ export const clock = (ms: number) => {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 };
 
+/** Why the server's judge refused a run (`reason` of a rejected check). */
+const REFUSED: Record<string, string> = {
+  'too-many-keys': 'The server refused this run: it has more keys than the server accepts.',
+  'text-size': 'The server refused this run: the text grew past the size the server accepts.',
+  time: 'The server refused this run: replaying it took too long.',
+  memory: 'The server refused this run: replaying it used too much memory.',
+  error: 'The server failed while replaying this run.',
+};
+
 export type Send = (action: 'keys' | 'check' | 'skip', body: object) => Promise<Record<string, unknown>>;
 
 export interface TimedTaskProps {
@@ -122,7 +131,7 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
       setMessage(`Too late: the ${unit} is over.`);
       onDone?.();
     } else if ('result' in res && res.result === 'rejected') {
-      setMessage(`The server refused this run (${res.reason}).`);
+      setMessage(REFUSED[res.reason] ?? 'The server refused this run.');
     } else {
       setMessage('The check did not reach the server. Please try again.');
     }

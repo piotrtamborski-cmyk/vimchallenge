@@ -45,12 +45,12 @@ export function signInMail(to: string, url: string, adding: boolean): Mail {
     '',
     url,
     '',
-    'The link works once, within 15 minutes. If you did not ask for it, ignore this message: nothing happens without the link.',
+    'The link works once and expires in 15 minutes. If you didn’t ask for it, ignore this message: nothing happens unless the link is opened.',
   ].join('\n');
   const html = [
     `<p>Open this link to ${escape(action)}:</p>`,
     `<p><a href="${escape(url)}">${escape(adding ? 'Add the address' : 'Sign in')}</a></p>`,
-    '<p>The link works once, within 15 minutes. If you did not ask for it, ignore this message: nothing happens without the link.</p>',
+    '<p>The link works once and expires in 15 minutes. If you didn’t ask for it, ignore this message: nothing happens unless the link is opened.</p>',
   ].join('\n');
   return { to, subject, text, html };
 }
