@@ -9,7 +9,7 @@ Object.assign(window, {
   vc: {
     start(initial: InitialState) {
       rejected.length = 0;
-      editor = mountEditor(document.getElementById('editor')!, { initial, onRejected: (m) => rejected.push(m) });
+      editor = mountEditor(document.getElementById('editor')!, { initial, onRejected: (r) => rejected.push(JSON.stringify(r)) });
     },
     state() {
       const step = editor!.trail().at(-1)!;

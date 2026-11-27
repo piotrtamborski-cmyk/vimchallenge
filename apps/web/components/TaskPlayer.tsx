@@ -1,13 +1,15 @@
 'use client';
 
 import { checkGoals, type GoalFailure, type Snapshot, type Step, type Task } from '@vimchallenge/engine';
-import type { BrowserEditor } from '@vimchallenge/engine/browser';
+import type { BrowserEditor, Rejection } from '@vimchallenge/engine/browser';
 import Link from 'next/link';
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { lessonsFor, type LessonLink, type TaskLessons } from '@/lib/failure-lessons';
+import { linkList } from '@/lib/i18n/links';
 import { confirmOnServer, type ServerCheck } from '@/lib/server-check';
 import { useNonce } from './Nonce';
-import { describe, modeLabel, notation } from './goals';
+import { describe, modeLabel, notation, rejectionText, serverCheckText } from './goals';
+import { useI18n } from './I18n';
 import { CodeText, Prompt } from './Prompt';
 import { SignInLink } from './SignInLink';
 
@@ -38,11 +40,13 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [keys, setKeys] = useState<readonly string[]>([]);
   const [result, setResult] = useState<Result | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<Rejection | null>(null);
   const [hint, setHint] = useState(false);
   const [server, setServer] = useState<ServerCheck | null>(null);
   const serverRequest = useRef<AbortController | null>(null);
   const nonce = useNonce();
+  const i = useI18n();
+  const { m, t } = i;
 
   /** Forgets the server's answer about an earlier state of the run. */
   const resetServer = useCallback(() => {
@@ -119,20 +123,20 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
         </h1>
         {((text && text.count > 1) || progress) && (
           <p className="text-sm text-muted">
-            {text && text.count > 1 && `Text ${text.n} of ${text.count}`}
+            {text && text.count > 1 && t(m.task.textOf, { n: text.n, count: text.count })}
             {text && text.count > 1 && progress && ' · '}
-            {progress && `You’ve solved this task ${progress.solves === 1 ? 'once' : `${progress.solves} times`}. Best: ${progress.best} ${progress.best === 1 ? 'key' : 'keys'}`}
+            {progress && t(m.task.solvedBefore, { n: progress.solves, best: t(m.common.keys, { n: progress.best }) })}
           </p>
         )}
         <Prompt text={task.prompt} className="text-lg leading-relaxed" />
         <div className="flex flex-wrap gap-2 text-sm">
           <button type="button" onClick={() => setHint((h) => !h)} className="rounded border border-line px-3 py-1.5 hover:bg-line/40" aria-expanded={hint}>
-            {hint ? 'Hide hint' : 'Hint'}
+            {hint ? m.task.hideHint : m.task.hint}
           </button>
         </div>
         {hint && (
           <p className="text-muted">
-            One solution: <kbd className="rounded bg-line/50 px-1.5 py-0.5 font-mono text-ink">{task.keys}</kbd>
+            {m.task.oneSolution} <kbd className="rounded bg-line/50 px-1.5 py-0.5 font-mono text-ink">{task.keys}</kbd>
           </p>
         )}
       </div>
@@ -141,12 +145,12 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
         <div ref={host} className="vc-editor min-h-28" />
         <div className="flex items-center justify-between font-mono text-sm text-muted" aria-live="off">
           <span>
-            <span className="font-semibold text-ink">{snapshot ? `-- ${modeLabel(snapshot.mode)} --` : 'Loading editor…'}</span>
+            <span className="font-semibold text-ink">{snapshot ? `-- ${modeLabel(snapshot.mode)} --` : m.common.loadingEditor}</span>
           </span>
           {snapshot && <span>{snapshot.cursor.join(':')}</span>}
         </div>
-        <p className="min-h-6 overflow-x-auto whitespace-nowrap font-mono text-sm" aria-label="Keys typed">
-          <span className="text-muted">{keys.length} {keys.length === 1 ? 'key' : 'keys'}</span>{' '}
+        <p className="min-h-6 overflow-x-auto whitespace-nowrap font-mono text-sm" aria-label={m.common.keysTyped}>
+          <span className="text-muted">{t(m.common.keys, { n: keys.length })}</span>{' '}
           {notation(keys.slice(-60))}
         </p>
 
@@ -158,7 +162,7 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
             onClick={() => check()}
             className="rounded bg-accent px-4 py-2 font-semibold text-accent-ink"
           >
-            Check
+            {m.common.check}
           </button>
           <button
             type="button"
@@ -166,20 +170,19 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
             onClick={restart}
             className="rounded border border-line px-4 py-2 hover:bg-line/40"
           >
-            Start over
+            {m.task.startOver}
           </button>
           <span className="text-sm text-muted">
-            <kbd className="font-mono">Esc</kbd> then <kbd className="font-mono">Tab</kbd> leaves the editor ·{' '}
-            <kbd className="font-mono">Alt+Enter</kbd> checks without leaving the mode
+            {i.rich(m.task.leaveEditor, { kbd })} · {i.rich(m.common.altEnter, { kbd })}
           </span>
         </div>
 
         <div role="status" className="min-h-6">
-          {notice && <p className="text-bad">{notice}</p>}
+          {notice && <p className="text-bad">{rejectionText(notice, i)}</p>}
           {result?.passed && (
             <div className="space-y-1">
               <p className="font-semibold text-good">
-                Solved in {result.keys} {result.keys === 1 ? 'key' : 'keys'}.{' '}
+                {t(m.task.solvedIn, { n: result.keys })}{' '}
                 {next && (
                   <Link href={next.href} className="underline">
                     {next.label}
@@ -189,7 +192,7 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
               {text && text.count > 1 && (
                 <p>
                   <Link href={text.nextHref} className="underline">
-                    Practise on another text →
+                    {m.task.practiseAnother}
                   </Link>
                 </p>
               )}
@@ -198,11 +201,11 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
           )}
           {result && !result.passed && (
             <div className="space-y-2">
-              <p className="font-semibold text-bad">Not yet.</p>
+              <p className="font-semibold text-bad">{m.common.notYet}</p>
               <ul className="list-inside list-disc space-y-1">
                 {result.failures.map((f) => (
                   <li key={f.field}>
-                    <CodeText text={describe(f)} />
+                    <CodeText text={describe(f, i)} />
                   </li>
                 ))}
               </ul>
@@ -211,7 +214,7 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
               {text && text.count > 1 && (
                 <p className="text-sm">
                   <Link href={text.nextHref} className="underline">
-                    Or try another text →
+                    {m.task.tryAnother}
                   </Link>
                 </p>
               )}
@@ -223,42 +226,33 @@ export function TaskPlayer({ task, text, next, lessons, progress, autofocus = tr
   );
 }
 
+const kbd = (text: React.ReactNode) => <kbd className="font-mono">{text}</kbd>;
+
 /** What the server's judge said about a solve. */
 function ServerStatus({ check }: { check: ServerCheck }) {
-  if (check.state === 'checking') return <p className="text-sm text-muted">Confirming on the server…</p>;
-  if (check.state === 'confirmed' && check.saved)
-    return <p className="text-sm text-muted">Confirmed by the server, which replayed your keys, and saved to your progress.</p>;
+  const i = useI18n();
+  const { m } = i;
+  if (check.state === 'checking') return <p className="text-sm text-muted">{m.task.confirming}</p>;
+  if (check.state === 'confirmed' && check.saved) return <p className="text-sm text-muted">{m.task.confirmedSaved}</p>;
   if (check.state === 'confirmed')
     return (
       <p className="text-sm text-muted">
-        Confirmed by the server, which replayed your keys. Nothing is stored:{' '}
-        <SignInLink className="underline">sign in</SignInLink> to keep your progress.
+        {i.rich(m.task.confirmed, { signin: (text) => <SignInLink className="underline">{text}</SignInLink> })}
       </p>
     );
-  if (check.state === 'not-confirmed') return <p className="text-sm text-bad">The server did not confirm this solve. {check.detail}</p>;
-  return <p className="text-sm text-muted">Not confirmed on the server. {check.detail}</p>;
+  if (check.state === 'not-confirmed') return <p className="text-sm text-bad">{i.t(m.task.notConfirmed, { detail: serverCheckText(check.reason, i) })}</p>;
+  return <p className="text-sm text-muted">{i.t(m.task.unavailable, { detail: serverCheckText(check.reason, i, check.wait) })}</p>;
 }
 
 /** "Stuck? The lessons A and B explain the keys for this." */
 function Stuck({ lessons }: { lessons: LessonLink[] }) {
+  const i = useI18n();
   if (!lessons.length) return null;
-  return (
-    <p className="text-sm">
-      Stuck? The {lessons.length === 1 ? 'lesson' : 'lessons'}{' '}
-      {lessons.map((l, i) => (
-        <Fragment key={l.href}>
-          {i > 0 && (i === lessons.length - 1 ? ' and ' : ', ')}
-          <Link href={l.href} className="underline">
-            {l.title}
-          </Link>
-        </Fragment>
-      ))}{' '}
-      {lessons.length === 1 ? 'explains' : 'explain'} the keys for this.
-    </p>
-  );
+  return <p className="text-sm">{i.rich(i.m.task.stuck, { n: lessons.length, lessons: linkList(i, lessons) })}</p>;
 }
 
 function TextDiff({ want, got }: { want: string[]; got: string[] }) {
+  const { m } = useI18n();
   const block = (title: string, lines: string[]) => (
     <figure className="min-w-0 flex-1">
       <figcaption className="text-sm text-muted">{title}</figcaption>
@@ -267,8 +261,8 @@ function TextDiff({ want, got }: { want: string[]; got: string[] }) {
   );
   return (
     <div className="flex flex-wrap gap-3">
-      {block('Goal', want)}
-      {block('Now', got)}
+      {block(m.task.goal, want)}
+      {block(m.task.now, got)}
     </div>
   );
 }

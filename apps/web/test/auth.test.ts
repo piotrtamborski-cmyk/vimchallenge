@@ -149,7 +149,8 @@ describe('sign-in with an email link', () => {
 
   it('never returns to another site', () => {
     expect(safeReturn('/tasks/x?text=2')).toBe('/tasks/x?text=2');
-    for (const bad of ['https://evil.example', '//evil.example', '/\\evil.example', 'tasks', '/sign-in?next=/x', '/api/auth/sign-out', '/a\nb', null])
+    expect(safeReturn('/de/tasks/x')).toBe('/de/tasks/x');
+    for (const bad of ['https://evil.example', '//evil.example', '/\\evil.example', 'tasks', '/sign-in?next=/x', '/de/sign-in', '/pl/api/x', '/api/auth/sign-out', '/a\nb', null])
       expect(safeReturn(bad)).toBe('/');
   });
 });

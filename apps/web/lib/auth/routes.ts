@@ -8,6 +8,7 @@
  */
 import { authorizeUrl, exchange, normalEmail, OAuthError, signInMail, SESSION_MAX_MS, type OAuthProvider, type Provider } from '@vimchallenge/accounts';
 import { readBody } from '../body.ts';
+import { LANG_NAMES, splitLang } from '../i18n/locales.ts';
 import { forbidden, sameOrigin } from '../origin.ts';
 import { clientKey, RateLimiter } from '../rate-limit.ts';
 import { clearCookie, flowCookie, readCookie, sessionCookie, setCookie } from './cookies.ts';
@@ -28,7 +29,9 @@ const client = (request: Request) => clientKey(request.headers, process.env.CLIE
 /** A path on this site to return to; anything else (another site, `//host`) becomes `fallback`. */
 export function safeReturn(path: string | null | undefined, fallback = '/'): string {
   if (!path || path.length > 512 || !path.startsWith('/') || path.startsWith('//') || path.startsWith('/\\')) return fallback;
-  if (/[\u0000-\u001f\u007f]/.test(path) || path.startsWith('/sign-in') || path.startsWith('/api/')) return fallback;
+  // A page in another language (`/de/sign-in`) is judged by the page under its language code.
+  const page = splitLang(path, Object.keys(LANG_NAMES)).path;
+  if (/[\u0000-\u001f\u007f]/.test(path) || page.startsWith('/sign-in') || page.startsWith('/api/')) return fallback;
   return path;
 }
 

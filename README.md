@@ -195,6 +195,26 @@ practised beforehand; a private pool for the league may come later.
 - **Kept**: the keys of each attempt until a week after the day is settled; results with the account.
   Rooms and training never add to the league.
 
+## Languages
+
+Every page lives under `apps/web/app/[lang]`. English has no prefix in the address (`/lessons`; a rewrite
+in `next.config.ts` serves it as `/en/lessons`), every other language has its code (`/de/lessons`).
+`apps/web/proxy.ts` picks the language: a code in the address always wins and is remembered in the
+`vc_lang` cookie; an address without one goes to the remembered language, or on a first visit to the
+best match of the browser's `Accept-Language` (then the page says so once, with a link back to
+English); otherwise English. `/en/…` leads back to the address without a prefix, which is how the
+language menu in the footer switches to English. API endpoints redirect to addresses without a prefix
+and the proxy adds the player's language.
+
+The interface's text is in `apps/web/lib/i18n/messages/en.ts`: places are `{name}`, links `<tag>…</tag>`,
+plurals one form per CLDR category, filled with `Intl` (numbers, dates and lists in the language's
+way). Lessons and tasks are still English only (`docs/translation-plan.md`, stage 2). To add a
+language, add `messages/xx.ts` with the shape of `en.ts` (TypeScript checks it), register it in
+`messages/index.ts` and put its code in `LANGS` (`apps/web/lib/i18n/locales.ts`);
+`apps/web/test/i18n.test.ts` checks that every message keeps English's places, tags and code. In
+development `/xx/…` shows a pseudo language (every message accented and a third longer), which
+shows text left out of the dictionary and layouts too tight for longer languages.
+
 ## Content Security Policy
 
 Every page gets a Content Security Policy with a fresh nonce (`apps/web/proxy.ts`, policy in

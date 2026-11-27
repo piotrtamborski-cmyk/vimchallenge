@@ -1,86 +1,61 @@
 /** What the sign-in and account pages say for the codes the account endpoints redirect with. */
+import type { ServerI18n } from '../i18n/server.ts';
 
-export const METHOD_NAME: Record<string, string> = { email: 'an email link', github: 'GitHub', google: 'Google' };
+type Auth = ServerI18n['m']['auth'];
 
-/** What a valid player name looks like (`validName` in @vimchallenge/accounts). */
-export const NAME_RULES =
-  'A name has 3 to 24 characters: Latin letters without accents (A–Z), digits, - or _, and starts with a letter or a digit.';
+/** The account endpoints' error codes, as message names. */
+const ERROR: Record<string, keyof Auth['error'] | 'nameRules'> = {
+  'provider-off': 'providerOff',
+  'oauth-expired': 'oauthExpired',
+  'oauth-cancelled': 'oauthCancelled',
+  'oauth-failed': 'oauthFailed',
+  'email-in-use': 'emailInUse',
+  'email-invalid': 'emailInvalid',
+  'email-limit': 'emailLimit',
+  'email-failed': 'emailFailed',
+  'link-expired': 'linkExpired',
+  'link-other-account': 'linkOtherAccount',
+  'linked-elsewhere': 'linkedElsewhere',
+  'name-invalid': 'nameRules',
+  'name-taken': 'nameTaken',
+  'last-method': 'lastMethod',
+  'not-connected': 'notConnected',
+  'confirm-delete': 'confirmDelete',
+};
+
+const NOTICE: Record<string, keyof Auth['notice']> = {
+  renamed: 'renamed',
+  'boards-shown': 'boardsShown',
+  'boards-hidden': 'boardsHidden',
+  'connected-github': 'connectedGithub',
+  'connected-google': 'connectedGoogle',
+  'connected-email': 'connectedEmail',
+  'already-connected': 'alreadyConnected',
+  disconnected: 'disconnected',
+  'signed-out-others': 'signedOutOthers',
+  'email-sent': 'emailSent',
+};
 
 /** "GitHub or an email link" */
-export function methodList(methods: string): string {
+export function methodList(i: ServerI18n, methods: string): string {
+  const a = i.m.auth;
   const names = methods
     .split(',')
-    .map((m) => METHOD_NAME[m])
+    .map((m) => a.methodName[m as keyof Auth['methodName']])
     .filter(Boolean);
-  return names.length ? names.join(' or ') : 'the method you used before';
+  return names.length ? i.list(names, 'disjunction') : a.methodBefore;
 }
 
-export function errorMessage(code: string | undefined, methods = ''): string | undefined {
-  switch (code) {
-    case undefined:
-      return undefined;
-    case 'provider-off':
-      return 'That sign-in method is not available on this site.';
-    case 'oauth-expired':
-      return 'The sign-in took too long, was already used, or was started in another browser. Please try again.';
-    case 'oauth-cancelled':
-      return 'Sign-in was cancelled.';
-    case 'oauth-failed':
-      return 'The sign-in did not go through. Please try again, or use another method.';
-    case 'email-in-use':
-      return `An account already uses this email address. Sign in with ${methodList(methods)}, then connect this method on your account page.`;
-    case 'email-invalid':
-      return 'That does not look like an email address.';
-    case 'email-limit':
-      return 'Too many links were sent. Please wait a while before asking for another.';
-    case 'email-failed':
-      return 'The email could not be sent. Please try again later, or use another method.';
-    case 'link-expired':
-      return 'This link has expired or has already been used. Ask for a new one below.';
-    case 'link-other-account':
-      return 'Open this link in the browser where you are signed in to the account it adds the address to.';
-    case 'linked-elsewhere':
-      return 'This sign-in method belongs to another vimchallenge account. Sign in there to use it, or delete that account first.';
-    case 'name-invalid':
-      return NAME_RULES;
-    case 'name-taken':
-      return 'Someone already has that name.';
-    case 'last-method':
-      return 'That is your only way to sign in. Connect another one first, or delete the account.';
-    case 'not-connected':
-      return 'That method is not connected to this account.';
-    case 'confirm-delete':
-      return 'Tick the box to confirm that the account should be deleted.';
-    default:
-      return 'Something went wrong. Please try again.';
-  }
+export function errorMessage(i: ServerI18n, code: string | undefined, methods = ''): string | undefined {
+  if (code === undefined) return undefined;
+  const a = i.m.auth;
+  const name = ERROR[code];
+  if (!name) return i.m.common.somethingWrong;
+  if (name === 'nameRules') return a.nameRules;
+  return i.t(a.error[name], { methods: methodList(i, methods) });
 }
 
-export function noticeMessage(code: string | undefined): string | undefined {
-  switch (code) {
-    case undefined:
-      return undefined;
-    case 'renamed':
-      return 'Name saved.';
-    case 'boards-shown':
-      return 'Your name now appears on the public leaderboards.';
-    case 'boards-hidden':
-      return 'Your name no longer appears on the public leaderboards. You still see your own place.';
-    case 'connected-github':
-      return 'GitHub is connected: you can sign in with it from now on.';
-    case 'connected-google':
-      return 'Google is connected: you can sign in with it from now on.';
-    case 'connected-email':
-      return 'Address added. From now on you can sign in with a link sent to it.';
-    case 'already-connected':
-      return 'That method is already connected to this account.';
-    case 'disconnected':
-      return 'Disconnected.';
-    case 'signed-out-others':
-      return 'Signed out of all other devices.';
-    case 'email-sent':
-      return 'Check your inbox and open the link in this browser to add the address. The link works once and expires in 15 minutes.';
-    default:
-      return undefined;
-  }
+export function noticeMessage(i: ServerI18n, code: string | undefined): string | undefined {
+  const name = code === undefined ? undefined : NOTICE[code];
+  return name && i.m.auth.notice[name];
 }

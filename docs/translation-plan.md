@@ -353,6 +353,12 @@ spacja”.
 
 ## 6. Etapy
 
+> **Stan 2026-11-27:** etap 1 jest zrobiony na gałęzi `claude/i18n-infrastructure` (opis w README, sekcja
+> *Languages*). Różnica względem planu: adresy angielskie przepisuje na `/en/…` nie proxy, tylko `rewrites` w
+> `next.config.ts`. Przepisanie z proxy na `localhost` Next traktuje jak cudzą stronę, gdy serwer słucha na
+> 127.0.0.1, jak w `vimchallenge-web.service`, i kończy się pętlą przekierowań. Do zrobienia z etapu 0
+> zostały tytuły i polecenia zadań w widokach pokoju i wyzwania dnia, które przychodzą z serwera (etap 2).
+
 | Etap | Zakres | Gotowe, gdy |
 |---|---|---|
 | **0. Angielski** | Poprawki z sekcji 1, ujednolicenie terminologii, kody zamiast tekstów (silnik, API, `server-check`), jeden komunikat o nazwie | Testy przechodzą, a na stronie nie ma żadnego zdania składanego z kawałków |

@@ -8,26 +8,18 @@
  */
 import { checkGoals, type GoalFailure, type Snapshot } from '@vimchallenge/engine';
 import type { BrowserEditor } from '@vimchallenge/engine/browser';
+import { REJECT_REASON } from '@/lib/server-check';
 import type { AttemptStatus, CheckResult, TaskView } from '@vimchallenge/rooms';
 import { score } from '@vimchallenge/rooms/scoring';
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
-import { describe, modeLabel, notation } from './goals';
+import { describe, modeLabel, notation, rejectionText, serverCheckText } from './goals';
+import { useI18n } from './I18n';
 import { useNonce } from './Nonce';
 import { CodeText, Prompt } from './Prompt';
 
-export const seconds = (ms: number) => `${(ms / 1000).toFixed(1)} s`;
 export const clock = (ms: number) => {
   const s = Math.max(0, Math.ceil(ms / 1000));
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
-};
-
-/** Why the server's judge refused a run (`reason` of a rejected check). */
-const REFUSED: Record<string, string> = {
-  'too-many-keys': 'The server refused this run: it has more keys than the server accepts.',
-  'text-size': 'The server refused this run: the text grew past the size the server accepts.',
-  time: 'The server refused this run: replaying it took too long.',
-  memory: 'The server refused this run: replaying it used too much memory.',
-  error: 'The server failed while replaying this run.',
 };
 
 export type Send = (action: 'keys' | 'check' | 'skip', body: object) => Promise<Record<string, unknown>>;
@@ -44,8 +36,8 @@ export interface TimedTaskProps {
   now: number;
   /** Sends an action of this attempt to the server. */
   send: Send;
-  /** 'round' or 'task', in what the page says. */
-  unit: string;
+  /** What the page calls the attempt: a round of a room or a task of the daily challenge. */
+  unit: 'round' | 'task';
   /** Above the title: where in the game this is. */
   heading: ReactNode;
   /** Under the clock: who else is playing. */
@@ -59,6 +51,9 @@ export interface TimedTaskProps {
 export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, now, send, unit, heading, aside, waiting, onDone }: TimedTaskProps) {
   const titleId = useId();
   const nonce = useNonce();
+  const i = useI18n();
+  const { m, t } = i;
+  const u = m.timed[unit];
   const host = useRef<HTMLDivElement>(null);
   const editor = useRef<BrowserEditor | null>(null);
   const sent = useRef(mine.keys.length);
@@ -83,14 +78,14 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
     sending.current = send('keys', { from, keys: batch })
       .then((res) => {
         if (typeof res.have === 'number') sent.current = res.have;
-        if (res.error === 'closed') setMessage(`This ${unit} is over for you.`);
-        if (res.error === 'too-many-keys') setMessage(`This ${unit} has more keys than the server accepts.`);
+        if (res.error === 'closed') setMessage(u.over);
+        if (res.error === 'too-many-keys') setMessage(u.tooManyKeys);
       })
       .finally(() => {
         sending.current = null;
       });
     return sending.current;
-  }, [send, unit]);
+  }, [send, u]);
 
   useEffect(() => {
     if (closed) return;
@@ -107,7 +102,7 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
       return;
     }
     setFailures(null);
-    setMessage('Checking on the server…');
+    setMessage(m.timed.checking);
     for (let i = 0; i < 50 && sent.current < ed.log().length; i++) {
       await flush();
       if (sent.current < ed.log().length) await new Promise((r) => setTimeout(r, 100));
@@ -124,18 +119,18 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
       setMessage(null);
     } else if ('result' in res && res.result === 'error' && res.error === 'missing-keys') {
       sent.current = res.have ?? 0;
-      setMessage('Some keys had not reached the server yet. Press Check again.');
+      setMessage(m.timed.missingKeys);
     } else if ('result' in res && res.result === 'error' && res.error === 'judge-unavailable') {
-      setMessage('The server could not check right now. Press Check again: the time of this check is kept.');
+      setMessage(m.timed.judgeDown);
     } else if ('result' in res && (res.result === 'closed' || (res.result === 'error' && res.error === 'late'))) {
-      setMessage(`Too late: the ${unit} is over.`);
+      setMessage(u.tooLate);
       onDone?.();
     } else if ('result' in res && res.result === 'rejected') {
-      setMessage(REFUSED[res.reason] ?? 'The server refused this run.');
+      setMessage(t(m.timed.refused, { detail: serverCheckText(REJECT_REASON[res.reason] ?? 'rejected', i) }));
     } else {
-      setMessage('The check did not reach the server. Please try again.');
+      setMessage(m.timed.unreachable);
     }
-  }, [flush, send, solve, task.expected, unit, onDone]);
+  }, [flush, send, solve, task.expected, u, m, t, i, onDone]);
   const checkRef = useRef(check);
   checkRef.current = check;
 
@@ -157,7 +152,7 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
           setMessage(null);
         },
         onSubmit: () => void checkRef.current(),
-        onRejected: setMessage,
+        onRejected: (r) => setMessage(rejectionText(r, i)),
       });
       editor.current = ed;
       setSnapshot(ed.snapshot());
@@ -180,13 +175,11 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
           {task.title}
         </h2>
         <Prompt text={task.prompt} className="text-lg leading-relaxed" />
-        <p className="font-mono text-2xl" aria-label="Time left">
+        <p className="font-mono text-2xl" aria-label={m.timed.timeLeft}>
           {clock(deadline - now)}
         </p>
         {!closed && (
-          <p className="text-sm text-muted">
-            A solve now earns {base} + {bonusNow} points.
-          </p>
+<p className="text-sm text-muted">{t(m.timed.solveNow, { base, bonus: bonusNow })}</p>
         )}
         {aside}
       </div>
@@ -194,25 +187,23 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
         {solve ? (
           <div role="status" className="space-y-1 rounded border border-good/40 p-4">
             <p className="font-semibold text-good">
-              Solved in {seconds(solve.ms)}: {solve.base} + {solve.bonus} = {solve.base + solve.bonus} points.
+              {t(m.timed.solvedIn, { time: i.seconds(solve.ms), base: solve.base, bonus: solve.bonus, total: solve.base + solve.bonus })}
             </p>
             {waiting && <p className="text-muted">{waiting}</p>}
           </div>
         ) : mine.status !== 'open' ? (
           <p role="status" className="text-muted">
-            {mine.status === 'skipped' ? `You skipped this ${unit}.` : `Time is up for this ${unit}.`} {waiting}
+            {mine.status === 'skipped' ? u.skipped : u.timeUp} {waiting}
           </p>
         ) : (
           <>
             <div ref={host} className="vc-editor min-h-28" />
             <div className="flex items-center justify-between font-mono text-sm text-muted">
-              <span className="font-semibold text-ink">{snapshot ? `-- ${modeLabel(snapshot.mode)} --` : 'Loading editor…'}</span>
+              <span className="font-semibold text-ink">{snapshot ? `-- ${modeLabel(snapshot.mode)} --` : m.common.loadingEditor}</span>
               {snapshot && <span>{snapshot.cursor.join(':')}</span>}
             </div>
-            <p className="min-h-6 overflow-x-auto whitespace-nowrap font-mono text-sm" aria-label="Keys typed">
-              <span className="text-muted">
-                {keys.length} {keys.length === 1 ? 'key' : 'keys'}
-              </span>{' '}
+            <p className="min-h-6 overflow-x-auto whitespace-nowrap font-mono text-sm" aria-label={m.common.keysTyped}>
+              <span className="text-muted">{t(m.common.keys, { n: keys.length })}</span>{' '}
               {notation(keys.slice(-60))}
             </p>
             <div className="flex flex-wrap items-center gap-3">
@@ -222,30 +213,28 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
                 onClick={() => void check()}
                 className="rounded bg-accent px-4 py-2 font-semibold text-accent-ink"
               >
-                Check
+                {m.common.check}
               </button>
               {skipping ? (
                 <>
-                  <span className="text-sm">No points for this {unit}?</span>
+                  <span className="text-sm">{u.skipQuestion}</span>
                   <button
                     type="button"
                     onClick={() => void send('skip', {}).then(() => onDone?.())}
                     className="rounded border border-bad px-3 py-1.5 text-bad"
                   >
-                    Yes, skip it
+                    {m.timed.yesSkip}
                   </button>
                   <button type="button" onClick={() => setSkipping(false)} className="text-sm underline">
-                    Keep playing
+                    {m.timed.keepPlaying}
                   </button>
                 </>
               ) : (
                 <button type="button" onClick={() => setSkipping(true)} className="rounded border border-line px-4 py-2 hover:bg-line/40">
-                  Skip
+                  {m.timed.skip}
                 </button>
               )}
-              <span className="text-sm text-muted">
-                <kbd className="font-mono">Alt+Enter</kbd> checks without leaving the mode
-              </span>
+              <span className="text-sm text-muted">{i.rich(m.common.altEnter, { kbd: (text) => <kbd className="font-mono">{text}</kbd> })}</span>
             </div>
           </>
         )}
@@ -253,11 +242,11 @@ export function TimedTask({ task, mine, startsAt, deadline, base, referenceMs, n
           {message && <p>{message}</p>}
           {failures && (
             <>
-              <p className="font-semibold text-bad">Not yet.</p>
+              <p className="font-semibold text-bad">{m.common.notYet}</p>
               <ul className="list-inside list-disc">
                 {failures.map((f) => (
                   <li key={f.field}>
-                    <CodeText text={describe(f)} />
+                    <CodeText text={describe(f, i)} />
                   </li>
                 ))}
               </ul>
