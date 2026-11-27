@@ -1,0 +1,17 @@
+{
+  "name": "@vimchallenge/loadtest",
+  "version": "0.0.0",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "rooms": "node --disable-warning=ExperimentalWarning src/rooms.ts",
+    "pages": "node --disable-warning=ExperimentalWarning src/pages.ts"
+  },
+  "dependencies": {
+    "@vimchallenge/engine": "*",
+    "@vimchallenge/rooms": "*",
+    "@vimchallenge/tasks": "*",
+    "playwright-core": "^1.65.1"
+  }
+}

@@ -12,7 +12,7 @@
     "apps/*"
   ],
   "scripts": {
-    "typecheck": "tsc -p packages/engine && tsc -p packages/tasks && tsc -p packages/judge && tsc -p packages/accounts && tsc -p packages/rooms && tsc -p packages/daily && tsc -p packages/conformance && tsc -p apps/web",
+    "typecheck": "tsc -p packages/engine && tsc -p packages/tasks && tsc -p packages/judge && tsc -p packages/accounts && tsc -p packages/rooms && tsc -p packages/daily && tsc -p packages/loadtest && tsc -p packages/conformance && tsc -p apps/web",
     "test": "vitest run",
     "conformance": "npm run -w @vimchallenge/conformance run --",
     "dev": "npm run -w @vimchallenge/web dev",

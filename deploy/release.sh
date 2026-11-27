@@ -8,7 +8,8 @@
 # build, so the running services keep serving the old one until the restart. ~/current points at
 # the release to run; deploy/rollback.sh points it back at the previous one. The two newest
 # releases are kept (current and the one before, about 700 MB each). Before the switch, the
-# accounts database is copied, so a release that changes it can be rolled back with its data.
+# accounts database is copied and the copy's path kept in <release>/.backup-before, so a release
+# that changes the database in a way older ones cannot use can be rolled back with that copy.
 set -euo pipefail
 
 repo=${VC_REPO:-https://github.com/piotrtamborski-cmyk/vimchallenge.git}
@@ -35,7 +36,10 @@ NEXT_TELEMETRY_DISABLED=1 npm run -s build
 touch "$release/.complete"
 
 if [ -f "$database" ]; then
-  node --disable-warning=ExperimentalWarning "$release/packages/accounts/src/backup.ts" "$database" "$backups"
+  copy=$(node --disable-warning=ExperimentalWarning "$release/packages/accounts/src/backup.ts" "$database" "$backups")
+  echo "$copy"
+  # The database as the releases before this one used it: what a rollback past a schema change restores.
+  printf '%s\n' "${copy#backup }" > "$release/.backup-before"
 fi
 
 ln -sfn "$release" "$home/current.new"

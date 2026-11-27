@@ -263,6 +263,8 @@ keeps the two newest releases and never deletes one a running service still work
 release changes `deploy/systemd/`, copy the changed files again as in step 4 and run
 `systemctl daemon-reload` before the restart.
 
+### Rolling back
+
 Rollback to the newest complete release before the current one:
 
 ```bash
@@ -270,9 +272,26 @@ sudo -u vimchallenge -H bash ~vimchallenge/current/deploy/rollback.sh
 systemctl restart vimchallenge-judge vimchallenge-web
 ```
 
-A release may add to the database's schema, which it does when it first opens it. An older release
-refuses a newer schema (`/api/health` answers `"accounts":"error"`); restore the copy made before the
-release then, as below.
+A release may add to the database's schema, which it does when it first opens it. Each change of
+schema says which older releases can still use the database (`READERS` in
+`packages/accounts/src/db.ts`). An added table or column keeps them working; then the rollback
+simply switches. When the older release cannot use the database, or predates that record (before
+schema 4), `rollback.sh` does not switch. Instead, it names the copy that `release.sh` made just before
+the current release was installed (`~/current/.backup-before`). That copy has to come back first, and
+everything written since it was made is lost:
+
+```bash
+systemctl stop vimchallenge-web vimchallenge-judge
+cd /var/lib/vimchallenge
+# Keep the newer database, with its write-ahead log, to look at later.
+mv accounts.db accounts.db.newer; [ -e accounts.db-wal ] && mv accounts.db-wal accounts.db.newer-wal; rm -f accounts.db-shm
+install -o vimchallenge -g vimchallenge -m 0600 "$(cat ~vimchallenge/current/.backup-before)" accounts.db
+sudo -u vimchallenge -H bash ~vimchallenge/current/deploy/rollback.sh
+systemctl start vimchallenge-judge vimchallenge-web
+```
+
+To see beforehand whether a release can use the database:
+`node packages/accounts/src/schema.ts /var/lib/vimchallenge/accounts.db <release directory>`.
 
 A restart drops runs the judge is replaying at that moment; the page then says the server check is not
 available, and the solve still counts in training.
@@ -296,6 +315,28 @@ systemctl start vimchallenge-web
 
 Sign-ins and solves after that copy are lost; sessions made since then end.
 
+### Restore drill
+
+Every copy should open and give the same leaderboards as the site. Practise this on the host, without
+touching the live database, at least once before launch and after each change of schema:
+
+```bash
+cd /home/vimchallenge/current
+sudo -u vimchallenge node --disable-warning=ExperimentalWarning packages/daily/src/restore-check.ts \
+  "$(ls -1 /var/backups/vimchallenge/vimchallenge-*.db | tail -1)" /var/lib/vimchallenge/accounts.db
+```
+
+The script works on a scratch copy of the backup:
+1. It opens the copy as this release would, migrating it if it is older, and checks it.
+2. It counts every table beside the live one.
+3. It compares every daily, weekly, monthly and all-time table with the same table rebuilt from the
+   stored attempts.
+
+It prints how long the restore took, and exits with 1 when the copy is damaged or a table
+differs. The live side has more rows when the site changed since the copy. For the recovery-point and
+recovery-time targets (2 h and 4 h to begin with), note the age of the newest copy
+(`ls -l /var/backups/vimchallenge | tail -2`) and how long the steps above take by hand.
+
 ## Daily challenge corrections
 
 When a task of a day's set turns out to be faulty (a wrong goal, a judge fault), take it out of that
@@ -312,6 +353,65 @@ sudo -u vimchallenge node --disable-warning=ExperimentalWarning packages/daily/s
 `restore` undoes a void with the same arguments; `rebuild <day>` works out a day's entries again from
 its attempts (after restoring a backup, say). The web app reads the tables straight from the entries,
 so it shows the change at once; there is nothing to restart.
+
+## What to watch
+
+| What | How | Look for |
+|---|---|---|
+| Both services up, the release | `curl -s localhost:3100/api/health` | `"ok":true`, `"judge":"up"`, `"accounts":"ok"`, the expected commit |
+| The judge's pool | `curl -s localhost:3101/healthz` | busy workers and the queue; a queue that does not drain means more checks than workers |
+| Memory and CPU of each service | `systemctl show -p MemoryCurrent,MemoryPeak,CPUUsageNSec vimchallenge-web vimchallenge-judge` | memory well under `MemoryMax` (web 400 MB, judge 350 MB); CPU seconds per minute |
+| Disk | `df -h /home /var/lib /var/backups` | room for two releases (about 700 MB each) and 14 days of copies |
+| Backups | `systemctl list-timers vimchallenge-backup.timer`, `journalctl -u vimchallenge-backup -n 5` | a copy every six hours, none `failed` |
+| Errors | `journalctl -u vimchallenge-web -u vimchallenge-judge -p warning --since -1h` | judge timeouts, sign-in failures, database errors |
+| Check times | the judge's log lines (time per request) | most well under 500 ms |
+| Open connections | `ss -tn state established '( sport = :3100 )' \| wc -l` | about one per open room or daily page |
+
+## Load test
+
+`packages/loadtest/src/rooms.ts` plays rooms against a running site from another machine. Each
+simulated guest keeps the room's event stream open, types each round's published solution in key
+packets, and checks it. It measures:
+- the time from a check to its verdict;
+- the time from a solver's check to every other player's stream showing the solve;
+- errors.
+
+The launch test is 10 rooms of 8 players for 30 minutes. Targets: 95% of verdicts within 500 ms, 95%
+of solves shown to the others within 1 s.
+
+The site limits new rooms and joins per client address, and all simulated players come from one
+machine. For the test only, let the web app take each player's address from a header the tool sends:
+
+```ini
+# /etc/systemd/system/vimchallenge-web.service.d/loadtest.conf: remove after the test
+[Service]
+Environment=CLIENT_IP_HEADER=x-loadtest-client
+```
+
+Never on a public site: anyone could then pick their own address and escape the limits. Then:
+
+```bash
+node --disable-warning=ExperimentalWarning packages/loadtest/src/rooms.ts --url http://test-box:3100 \
+  --rooms 10 --players 8 --minutes 30 --client-header x-loadtest-client --out loadtest.json
+```
+
+While it runs, watch the host as in "What to watch", for example every 10 seconds:
+`while sleep 10; do date +%T; systemctl show -p MemoryCurrent,CPUUsageNSec vimchallenge-web vimchallenge-judge; curl -s localhost:3101/healthz; echo; done`.
+Restarting both services in the middle of a match is part of the drill. The rooms carry on with the
+same round after the restart, and the tool counts the reconnects. Ctrl+C stops it after the matches
+under way.
+
+Page speed, from a machine with Chromium:
+
+```bash
+node --disable-warning=ExperimentalWarning packages/loadtest/src/pages.ts --url http://test-box:3100 --out pages.json
+```
+
+It loads each main page with an empty cache, as a desktop and as a phone (CPU four times slower,
+slow 4G), and reports LCP and CLS. Then it types into a task's editor at about twelve keys a second
+and reports each key's time to the next paint, and how much of it the page's own handlers took.
+Headless Chromium on a busy machine adds waiting of its own, so compare runs on the same machine.
+Field data from real visits comes only after launch.
 
 ## Logs
 

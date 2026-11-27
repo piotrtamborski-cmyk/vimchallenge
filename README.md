@@ -14,9 +14,10 @@ day at the daily challenge, which feeds daily, weekly, monthly and all-time lead
 | Path | What |
 |---|---|
 | `apps/web` | The web app (Next.js): home page, lessons, task list and task pages with the Vim editor, rooms, the daily challenge and leaderboards, sign-in, account and privacy pages. |
-| `packages/accounts` | Accounts without passwords: the SQLite schema, sign-in methods (email links, GitHub, Google) connected to one account, sessions, confirmed solves, and the database backup script. |
+| `packages/accounts` | Accounts without passwords: the SQLite schema, sign-in methods (email links, GitHub, Google) connected to one account, sessions, confirmed solves, the database backup script, and the schema check a rollback runs. |
 | `packages/rooms` | Live rooms: members, matches, rounds and attempts in the same database, task draws by level, key packets, checks through the judge, and the scoring rules. |
-| `packages/daily` | The daily challenge and the leaderboards: one set a day, runs and their attempts, day entries rebuilt from them, the four tables, corrections, and the operator's tool for them. |
+| `packages/daily` | The daily challenge and the leaderboards: one set a day, runs and their attempts, day entries rebuilt from them, the four tables, corrections, and the operator's tools for them and for the restore drill. |
+| `packages/loadtest` | The load test for live rooms: simulated guests play rooms against a running site and the tool reports check and delivery times (see [deploy/README.md](deploy/README.md#load-test)). |
 | `packages/tasks` | Published tasks (`tasks.json`: prompt, initial state, goals and one solution, plus `variants` — the same technique on other texts, for "practise on new text") and lessons (`lessons.json`: explanation, keys and the tasks that practise them). Tests check every card's shape and that each task belongs to a lesson; CI replays every task in Vim. |
 | `packages/judge` | The server-side judge: a pool of worker threads that replay a key log in the headless engine under time, memory and size limits, and a small HTTP service in front of it. |
 | `deploy` | Running on a server: [`deploy/README.md`](deploy/README.md), systemd units and sandbox for the web app and the judge, the database backup timer, release and rollback scripts. |

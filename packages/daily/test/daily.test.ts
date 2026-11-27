@@ -5,7 +5,9 @@ import { Accounts, openDatabase } from '@vimchallenge/accounts';
 import { COUNTDOWN_MS, GRACE_MS, JudgeUnavailable, Rooms, type JudgeVerdict } from '@vimchallenge/rooms';
 import { tasks } from '@vimchallenge/tasks';
 import { describe, expect, it } from 'vitest';
+import { backup } from '@vimchallenge/accounts/backup';
 import { run as admin } from '../src/admin.ts';
+import { restoreCheck, run as restoreDrill } from '../src/restore-check.ts';
 import { Daily, KEYS_KEPT_MS, leaguePoints, type Board } from '../src/index.ts';
 
 /**
@@ -23,9 +25,9 @@ const BANK = [1, 2, 3, 4, 5].flatMap((level) =>
 const S = 1000;
 
 /** A fake clock and a judge that passes a run whose last key is `Z`. */
-function setup(start = '2026-05-31T12:00:00Z') {
+function setup(start = '2026-05-31T12:00:00Z', path = ':memory:') {
   let now = Date.parse(start);
-  const db = openDatabase(':memory:');
+  const db = openDatabase(path);
   const accounts = new Accounts(db, () => now);
   const judge = { down: false, calls: 0 };
   const solved: string[] = [];
@@ -438,6 +440,42 @@ describe('the admin tool', () => {
       expect(out.some((l) => l.startsWith('3. level 3') && l.endsWith('VOIDED'))).toBe(true);
       expect(out.at(-1)).toMatch(/ void 3: wrong goal$/);
       expect(admin([path, 'void', '2026-02-30', '1', 'x'], () => {})).toBe(2);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('the restore drill', () => {
+  it('opens a backup and gets the same tables after rebuilding them from the attempts', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'vc-restore-'));
+    try {
+      const live = join(dir, 'accounts.db');
+      const { db, daily, user, play, clock } = setup('2026-05-31T12:00:00Z', live);
+      const ada = user('ada');
+      const bob = user('bob');
+      await play(ada, [5 * S, null, 30 * S, null, 90 * S]);
+      await play(bob, [8 * S, 15 * S, null, null, null], false);
+      clock.set(daily.closesAt('2026-05-31') + S);
+      daily.settle();
+      const copy = backup(live, join(dir, 'backups'));
+
+      const report = restoreCheck(copy, live, clock.now);
+      expect(report.differences).toEqual([]);
+      expect(report).toMatchObject({ days: 1, boards: 4, live: { sameEntries: true } });
+      expect(report.counts).toMatchObject({ daily_runs: 2, daily_entries: 2, users: 2 });
+      expect(report.live!.counts).toEqual(report.counts);
+
+      // A copy whose entries do not follow from its attempts fails the drill.
+      db.prepare("UPDATE daily_entries SET points = points + 1 WHERE user_id = ?").run(ada);
+      const tampered = backup(live, join(dir, 'backups'), 14, new Date(Date.now() + 1000));
+      expect(restoreCheck(tampered, undefined, clock.now).differences).toEqual(['day 2026-05-31', 'entries']);
+      const out: string[] = [];
+      expect(restoreDrill([tampered], (l) => out.push(l))).toBe(1);
+      expect(out.at(-1)).toBe('DIFFERENT after the rebuild: day 2026-05-31, entries');
+      expect(restoreDrill([join(dir, 'missing.db')], () => {})).toBe(1);
+      expect(restoreDrill([], () => {})).toBe(2);
+      db.close();
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

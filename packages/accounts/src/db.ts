@@ -1,6 +1,12 @@
 /**
  * The accounts database: one SQLite file next to the web app, opened with Node's built-in driver.
  * Migrations are numbered by `PRAGMA user_version` and run once, in order, when the file is opened.
+ *
+ * A release rolled back to after an update meets a database with migrations it does not know.
+ * Each migration therefore says, in `READERS`, the oldest schema a release may know and still use
+ * the database after it: an added table or nullable column leaves older releases working, a
+ * changed, renamed or dropped one does not. The database keeps the highest of these in
+ * `schema_readers`, and a release opens a newer database when its own schema is at least that.
  */
 import type { DatabaseSync } from 'node:sqlite';
 
@@ -256,9 +262,36 @@ const MIGRATIONS: readonly string[] = [
     before TEXT NOT NULL
   ) STRICT;
   `,
+  // 4: which releases can use this database (see the top of this file).
+  `
+  CREATE TABLE schema_readers (oldest INTEGER NOT NULL) STRICT;
+  INSERT INTO schema_readers (oldest) VALUES (1);
+  `,
 ];
 
+/**
+ * For each migration, the oldest schema a release may know and still use the database after it.
+ * 1 to 4 only add tables and a nullable column, so a release of any schema can use the result.
+ */
+const READERS: readonly number[] = [1, 1, 1, 1];
+if (READERS.length !== MIGRATIONS.length) throw new Error('every migration needs its entry in READERS');
+
+/** The migration that made `schema_readers`. */
+const READERS_TABLE_SINCE = 4;
+
 export const SCHEMA_VERSION = MIGRATIONS.length;
+
+/** Marks releases that open a newer database when its `schema_readers` allows; older ones never do. */
+export const READS_NEWER_SCHEMAS = true;
+
+/** The database's schema and the oldest schema a release may know to use it. */
+export function schemaOf(db: DatabaseSync): { version: number; oldestReader: number } {
+  const version = Number((db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version);
+  const hasReaders = db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'schema_readers'").get();
+  // Before migration 4 nothing was recorded: then only a release of that very schema or newer fits.
+  const oldestReader = hasReaders ? Number((db.prepare('SELECT max(oldest) AS o FROM schema_readers').get() as { o: number }).o) : version;
+  return { version, oldestReader };
+}
 
 /** Opens (and creates or migrates) the database at `path`; `:memory:` for tests. */
 export function openDatabase(path: string): DatabaseSync {
@@ -275,13 +308,19 @@ export function openDatabase(path: string): DatabaseSync {
 }
 
 function migrate(db: DatabaseSync) {
-  const current = Number((db.prepare('PRAGMA user_version').get() as { user_version: number }).user_version);
-  if (current > MIGRATIONS.length)
-    throw new Error(`the database has schema ${current}, newer than this release (${MIGRATIONS.length}); run a newer release`);
+  const { version: current, oldestReader } = schemaOf(db);
+  if (current > MIGRATIONS.length) {
+    if (oldestReader <= MIGRATIONS.length) return;
+    throw new Error(
+      `the database has schema ${current}, which releases before schema ${oldestReader} cannot use; this release has ${MIGRATIONS.length}. ` +
+        'Run a newer release, or restore the copy made before the update (deploy/README.md, "Rolling back").',
+    );
+  }
   for (let v = current; v < MIGRATIONS.length; v++) {
     db.exec('BEGIN IMMEDIATE');
     try {
       db.exec(MIGRATIONS[v]!);
+      if (v + 1 >= READERS_TABLE_SINCE) db.prepare('UPDATE schema_readers SET oldest = max(oldest, ?)').run(READERS[v]!);
       db.exec(`PRAGMA user_version = ${v + 1}`);
       db.exec('COMMIT');
     } catch (err) {
