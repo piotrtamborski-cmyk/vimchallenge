@@ -16,6 +16,17 @@ import type { InitialState, Snapshot, Step } from './types.ts';
 
 const modules: EngineModules = { state, view, commands, language, vim };
 
+/**
+ * Why the editor refused input: a key or input it does not support (`name`, e.g. `<F5>` or
+ * `insertFromDrop`), a paste where pasting is off or outside Insert mode, or an error of the
+ * engine on a key (`detail`, in English: for bug reports).
+ */
+export type Rejection =
+  | { code: 'unsupported'; name: string }
+  | { code: 'paste-off' }
+  | { code: 'paste-mode' }
+  | { code: 'key-error'; key: string; detail: string };
+
 export interface EditorOptions {
   initial: InitialState;
   /** Accept pasted text in Insert mode and on the command line (training). Default true. */
@@ -27,8 +38,8 @@ export interface EditorOptions {
   onKey?: (step: Step) => void;
   /** Alt+Enter: submit in the current mode, e.g. with an active selection. */
   onSubmit?: (trail: readonly Step[]) => void;
-  /** Input the editor refused or the engine could not handle. */
-  onRejected?: (message: string) => void;
+  /** Input the editor refused or the engine could not handle; the page says why in its language. */
+  onRejected?: (rejection: Rejection) => void;
   /**
    * Keys already typed in this attempt (a reloaded page, a second tab): replayed from the initial
    * state before the editor takes input, and kept at the start of the log. No callbacks run for them.
@@ -91,7 +102,7 @@ export function mountEditor(parent: HTMLElement, options: EditorOptions): Browse
       session.feed(token);
     } catch (err) {
       // The judge replays the same token and hits the same error, so the log stays valid.
-      options.onRejected?.(`${token}: ${(err as Error).message}`);
+      options.onRejected?.({ code: 'key-error', key: token, detail: (err as Error).message });
     }
     const trail = session.trail();
     options.onKey?.(trail[trail.length - 1]!);
@@ -124,7 +135,7 @@ export function mountEditor(parent: HTMLElement, options: EditorOptions): Browse
       return;
     }
     stop(e);
-    if (decision.kind === 'unsupported') options.onRejected?.(`${decision.name} is not supported`);
+    if (decision.kind === 'unsupported') options.onRejected?.({ code: 'unsupported', name: decision.name });
     else feed(decision.token);
   }
 
@@ -136,15 +147,15 @@ export function mountEditor(parent: HTMLElement, options: EditorOptions): Browse
     else if (e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph') feed('<CR>');
     else if (e.inputType === 'deleteContentBackward') feed('<BS>');
     else if (e.inputType === 'deleteContentForward') feed('<Del>');
-    else options.onRejected?.(`${e.inputType} is not supported`);
+    else options.onRejected?.({ code: 'unsupported', name: e.inputType });
   }
 
   function onPaste(e: ClipboardEvent) {
     stop(e);
     const mode = session.snapshot().mode;
     const text = e.clipboardData?.getData('text/plain') ?? '';
-    if (!allowPaste) options.onRejected?.('Pasting is turned off here');
-    else if (mode !== 'insert' && mode !== 'replace' && mode !== 'cmdline') options.onRejected?.('Paste in Insert mode');
+    if (!allowPaste) options.onRejected?.({ code: 'paste-off' });
+    else if (mode !== 'insert' && mode !== 'replace' && mode !== 'cmdline') options.onRejected?.({ code: 'paste-mode' });
     else for (const t of textTokens(text)) feed(t);
   }
 

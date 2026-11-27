@@ -95,14 +95,18 @@ describe('confirmOnServer', () => {
     answer(200, { verdict: 'failed', failures: [] });
     expect((await confirm()).state).toBe('not-confirmed');
     answer(200, { verdict: 'rejected', reason: 'time' });
-    expect(await confirm()).toEqual({ state: 'not-confirmed', detail: 'Replaying the run took the server too long.' });
+    expect(await confirm()).toEqual({ state: 'not-confirmed', reason: 'time' });
+    answer(200, { verdict: 'failed', failures: [] });
+    expect(await confirm()).toEqual({ state: 'not-confirmed', reason: 'different' });
     answer(409, { error: 'changed', version: 2 });
-    expect((await confirm()).state).toBe('not-confirmed');
+    expect(await confirm()).toEqual({ state: 'not-confirmed', reason: 'changed' });
     answer(503, { error: 'busy' });
-    expect((await confirm()).state).toBe('unavailable');
+    expect(await confirm()).toEqual({ state: 'unavailable', reason: 'off' });
+    answer(500, { error: 'the judge failed' });
+    expect(await confirm()).toEqual({ state: 'unavailable', reason: 'failed' });
     vi.stubGlobal('fetch', async () => {
       throw new TypeError('network');
     });
-    expect((await confirm()).state).toBe('unavailable');
+    expect(await confirm()).toEqual({ state: 'unavailable', reason: 'unreachable' });
   });
 });

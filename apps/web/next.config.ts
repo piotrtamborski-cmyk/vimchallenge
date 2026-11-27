@@ -1,5 +1,6 @@
 import { execSync } from 'node:child_process';
 import type { NextConfig } from 'next';
+import { englishRewrites } from './lib/i18n/locales.ts';
 
 /** Commit the build was made from, shown by /api/health (deploy/release.sh builds from a clone). */
 function release(): string {
@@ -29,6 +30,10 @@ const config: NextConfig = {
   env: { VC_RELEASE: release() },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
+  },
+  // Before the pages are matched, after the proxy has picked the language.
+  async rewrites() {
+    return { beforeFiles: englishRewrites(), afterFiles: [], fallback: [] };
   },
 };
 
