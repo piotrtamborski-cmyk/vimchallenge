@@ -22,12 +22,12 @@ export default function PrivacyPage() {
         <ul className="list-inside list-disc space-y-1">
           <li>Your name, which you choose and can change.</li>
           <li>
-            How you sign in: an email address, or the user number GitHub or Google gives the account you sign in with, with the
-            address they verified for it. That address is only used to spot a second account of the same person.
+            How you sign in: an email address, or the user ID that GitHub or Google gives your account there, together with the
+            email address they verified. That address is only used to spot a second account of the same person.
           </li>
           <li>Your sessions: when each started and was last used. The cookie holds a random token; only its hash is stored.</li>
           <li>Each solve the server confirmed: the task, which text, the time and the number of keys. Never the keys themselves.</li>
-          <li>Sign-in links sent by email, with their address, for a day.</li>
+          <li>Sign-in links we email you, with the address they went to, for one day.</li>
         </ul>
         <p>Nothing is sold or shared, and there is no tracking, advertising or analytics.</p>
       </section>
@@ -38,7 +38,7 @@ export default function PrivacyPage() {
           The name you choose for the room, whether you are ready, when your page was last connected, and for each round the keys
           you typed, your result, time and points. The keys are kept so the server can judge your run and a reload can carry on
           where you were. Other players see your name, your status and your results, never your keys. Everything about a room
-          is deleted a week after its last activity. A solve of a signed-in player also goes to their progress, as in training.
+          is deleted a week after its last activity. A solve of a signed-in player also goes to their progress, as in practice.
         </p>
       </section>
 
@@ -47,7 +47,7 @@ export default function PrivacyPage() {
         <p>
           For each day you play: when you started, which tasks you were given and when, the keys you typed in each task, and your
           result, time and points. The keys are kept so the server can judge your run, a reload can carry on, and a disputed
-          result can be looked into; they are deleted a week after the day&apos;s table is final. Your results stay with your
+          result can be looked into; they are deleted a week after the day&apos;s leaderboard is final. Your results stay with your
           account for the leaderboards.
         </p>
         <p>
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-semibold">Cookies</h2>
         <p>
           One cookie keeps you signed in. While you sign in with GitHub or Google, a second one lives for ten minutes to tie the
-          sign-in to your browser. A guest who creates or joins a room gets a third, for 30 days, so the room knows them again;
+          sign-in to your browser. A guest who creates or joins a room gets a third, for 30 days, so the room recognises them;
           it holds a random token, of which only a hash is stored. All are needed for what you asked the site to do, so there is
           nothing to consent to.
         </p>

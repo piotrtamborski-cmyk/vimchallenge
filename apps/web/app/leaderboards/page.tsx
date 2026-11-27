@@ -87,12 +87,12 @@ export default async function LeaderboardsPage({ searchParams }: Props) {
               : 'Not final yet: runs of this period may still be under way, so places can change.'}{' '}
           {daily
             ? 'Most points first, then more solves, then less time on them (in whole seconds); equal results share a place.'
-            : 'League points summed over the days: each day gives up to 1000, the share of the most its set could give. Equal sums share a place.'}
+            : 'League points summed over the days: each day gives up to 1000, your share of that day’s maximum, scaled to 1000. Equal sums share a place.'}
         </p>
 
         {board.rows.length === 0 ? (
           <p>
-            No one is on the public table yet.{' '}
+            No one is on the public leaderboard yet.{' '}
             {!board.you && (
               <Link href="/daily" className="underline">
                 Play today’s set →
@@ -127,7 +127,7 @@ export default async function LeaderboardsPage({ searchParams }: Props) {
             {!board.you.listed && (
               <span className="text-muted">
                 {' '}
-                Your name is not on the public table;{' '}
+                Your name is not on the public leaderboard;{' '}
                 <Link href="/account#leaderboards" className="underline">
                   show it
                 </Link>
@@ -141,7 +141,7 @@ export default async function LeaderboardsPage({ searchParams }: Props) {
       {board.set && (
         <section aria-labelledby="set" className="space-y-2">
           <h2 id="set" className="text-lg font-semibold">
-            The set of this day
+            This day’s set
           </h2>
           <ol className="list-inside list-decimal space-y-1">
             {board.set.map((t) => (

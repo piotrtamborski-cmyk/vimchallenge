@@ -36,9 +36,9 @@ export default async function DailyPage() {
             everyone gets the same five tasks.
           </p>
           <p className="text-muted">
-            Without an account you can practise any task in{' '}
+            Without an account you can{' '}
             <Link href="/tasks" className="underline">
-              training
+              practise any task
             </Link>{' '}
             or play with friends in a{' '}
             <Link href="/rooms" className="underline">

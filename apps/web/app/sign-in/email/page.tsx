@@ -19,7 +19,7 @@ export default async function EmailLinkPage({ searchParams }: Props) {
     return (
       <div className="max-w-md space-y-4">
         <h1 className="text-2xl font-semibold">This link no longer works</h1>
-        <p>It has expired (links work for 15 minutes) or was already used.</p>
+        <p>It has expired (links work for 15 minutes) or has already been used.</p>
         <p>
           <Link href="/sign-in" className="underline">
             Ask for a new link
@@ -45,17 +45,17 @@ export default async function EmailLinkPage({ searchParams }: Props) {
       <p>
         {user ? (
           <>
-            Add <strong>{link.email}</strong> to your account <strong>{user.name}</strong>, so you can sign in with links to it?
+            Add <strong>{link.email}</strong> to your account <strong>{user.name}</strong>, so you can also sign in with links sent there?
           </>
         ) : (
           <>
-            Sign in as <strong>{link.email}</strong>? If you have no account yet, this makes one.
+            Sign in as <strong>{link.email}</strong>? If you don't have an account yet, this creates one.
           </>
         )}
       </p>
       <input type="hidden" name="token" value={token} />
       <button type="submit" className="rounded bg-accent px-4 py-2 font-semibold text-accent-ink">
-        {user ? 'Add the address' : 'Sign in'}
+        {user ? 'Add address' : 'Sign in'}
       </button>
     </form>
   );

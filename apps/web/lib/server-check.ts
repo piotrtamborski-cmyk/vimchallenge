@@ -40,15 +40,15 @@ export async function confirmOnServer(
   const body = (await res.json().catch(() => ({}))) as { verdict?: string; reason?: string; error?: string; saved?: boolean };
   if (res.status === 200 && body.verdict === 'passed') return { state: 'confirmed', saved: body.saved === true };
   if (res.status === 200 && body.verdict === 'rejected')
-    return { state: 'not-confirmed', detail: REJECTED[body.reason ?? ''] ?? `The server rejected the run (${body.reason}).` };
+    return { state: 'not-confirmed', detail: REJECTED[body.reason ?? ''] ?? 'The server rejected the run.' };
   if (res.status === 200)
     return { state: 'not-confirmed', detail: 'The server replayed your keys and reached a different result. This is a bug in vimchallenge.' };
   if (res.status === 409)
     return { state: 'not-confirmed', detail: 'This task has changed since the page was loaded. Reload the page to get the new version.' };
   if (res.status === 429) {
     const wait = Number(res.headers.get('retry-after')) || 60;
-    return { state: 'unavailable', detail: `Too many checks from your network; the server checks again in ${wait} s.` };
+    return { state: 'unavailable', detail: `Too many checks from your network. Try again in ${wait} s.` };
   }
   if (res.status === 503) return { state: 'unavailable', detail: 'The server check is not available right now.' };
-  return { state: 'unavailable', detail: `The server could not check the run: ${body.error ?? `HTTP ${res.status}`}.` };
+  return { state: 'unavailable', detail: 'The server could not check the run. Please try again later.' };
 }

@@ -13,7 +13,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { clock, seconds, TimedTask, type Send } from './TimedTask';
 
 const LEVEL_NAME: Record<string, string> = { mixed: 'rising levels', 1: 'level 1', 2: 'level 2', 3: 'level 3', 4: 'level 4', 5: 'level 5' };
-const STATUS: Record<AttemptStatus, string> = { open: 'working', solved: 'finished', skipped: 'skipped', timeout: 'out of time' };
+const STATUS: Record<AttemptStatus, string> = { open: 'working', solved: 'solved', skipped: 'skipped', timeout: 'out of time' };
 const START_REASON: Record<string, string> = {
   'too-few': 'The match needs at least two players who are ready.',
   'not-host': 'The host starts the match.',
@@ -114,7 +114,7 @@ export function Room({ initial, invite }: { initial: RoomView; invite: string })
       {view.phase === 'finished' && view.match && <Final match={view.match} />}
       {(view.phase === 'lobby' || view.phase === 'finished') && <Lobby view={view} engineReady={engineReady} />}
       {view.phase !== 'lobby' && view.phase !== 'finished' && !view.you?.playing && (
-        <p className="text-muted">A match is under way. You play in the next one; until then you can watch here.</p>
+        <p className="text-muted">A match is under way. You’ll play in the next one; until then you can watch here.</p>
       )}
     </div>
   );
@@ -158,7 +158,7 @@ function Lobby({ view, engineReady }: { view: RoomView; engineReady: boolean }) 
     setError(null);
     const res = await post(view.code, action, body);
     setBusy(false);
-    if (res.result && res.result !== 'ok') setError(START_REASON[String(res.result)] ?? `Could not start: ${String(res.result)}.`);
+    if (res.result && res.result !== 'ok') setError(START_REASON[String(res.result)] ?? 'The match could not start. Please try again.');
     else if (res.error) setError('That did not work. Please try again.');
     return res;
   };
@@ -194,7 +194,7 @@ function Lobby({ view, engineReady }: { view: RoomView; engineReady: boolean }) 
               onClick={() => void act('start')}
               className="rounded bg-accent px-4 py-2 font-semibold text-accent-ink disabled:opacity-50"
             >
-              Start the match
+              Start match
             </button>
           )}
           <button
@@ -203,7 +203,7 @@ function Lobby({ view, engineReady }: { view: RoomView; engineReady: boolean }) 
             onClick={() => void act('leave').then(() => router.push('/rooms'))}
             className="rounded px-2 py-2 text-sm text-muted underline"
           >
-            Leave the room
+            Leave room
           </button>
         </div>
       )}
@@ -311,7 +311,7 @@ function RoundResults({ result }: { result: RoundResult }) {
 function Standings({ match, final }: { match: MatchView; final?: boolean }) {
   return (
     <table className="w-full border-collapse text-left">
-      <caption className="pb-2 text-left font-semibold">{final ? 'Final table' : 'Standings'}</caption>
+      <caption className="pb-2 text-left font-semibold">{final ? 'Final standings' : 'Standings'}</caption>
       <thead>
         <tr className="text-sm text-muted">
           <th className="py-1 pr-4 font-normal">Place</th>

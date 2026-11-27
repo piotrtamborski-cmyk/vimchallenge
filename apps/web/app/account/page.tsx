@@ -111,7 +111,7 @@ export default async function AccountPage({ searchParams }: Props) {
           Name
         </h2>
         <p id="name-rules" className="text-sm text-muted">
-          Shown to other players in rooms and leaderboards. {NAME_MIN} to {NAME_MAX} letters, digits, - or _.
+          Shown to other players in rooms and leaderboards. {NAME_MIN} to {NAME_MAX} characters: Latin letters without accents (A–Z), digits, - or _.
         </p>
         <form method="post" action="/api/account/name" className="flex flex-wrap gap-3">
           <label>
@@ -162,7 +162,7 @@ export default async function AccountPage({ searchParams }: Props) {
             <input type="checkbox" name="boards" value="on" defaultChecked={onBoards === true} className="mt-1" />
             <span>
               Show my name and results on the public leaderboards
-              <span className="block text-sm text-muted">Hidden, you still see your own place, and others do not see you at all.</span>
+              <span className="block text-sm text-muted">If hidden, you still see your own place, but others don’t see you at all.</span>
             </span>
           </label>
           <button type="submit" className={button}>
@@ -233,7 +233,7 @@ export default async function AccountPage({ searchParams }: Props) {
           Devices
         </h2>
         <p>
-          Signed in on {sessions} {sessions === 1 ? 'device' : 'devices'}. A device signs out by itself after 30 days without a visit.
+          Signed in on {sessions} {sessions === 1 ? 'device' : 'devices'}. A device is signed out automatically after 30 days without a visit.
         </p>
         <div className="flex flex-wrap gap-3">
           <form method="post" action="/api/auth/sign-out">
@@ -244,7 +244,7 @@ export default async function AccountPage({ searchParams }: Props) {
           {sessions > 1 && (
             <form method="post" action="/api/account/sessions">
               <button type="submit" className={button}>
-                Sign out on every other device
+                Sign out of all other devices
               </button>
             </form>
           )}
@@ -253,7 +253,7 @@ export default async function AccountPage({ searchParams }: Props) {
 
       <section aria-labelledby="delete" className="space-y-3">
         <h2 id="delete" className="text-lg font-semibold">
-          Delete the account
+          Delete account
         </h2>
         <form method="post" action="/api/account/delete" className="space-y-3">
           <label className="flex items-start gap-2">
@@ -261,7 +261,7 @@ export default async function AccountPage({ searchParams }: Props) {
             <span>Delete my account, its sign-in methods and all my progress. This cannot be undone.</span>
           </label>
           <button type="submit" className="rounded border border-bad px-3 py-1.5 text-bad hover:bg-bad/10">
-            Delete the account
+            Delete account
           </button>
         </form>
       </section>

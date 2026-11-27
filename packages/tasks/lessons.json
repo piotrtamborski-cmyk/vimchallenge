@@ -57,7 +57,7 @@
     "summary": "Move by characters and lines, and jump to the ends of a line and of the file.",
     "requires": [],
     "body": [
-      "In Normal mode, `h`, `j`, `k` and `l` move the cursor left, down, up and right. They sit under your right hand, so you need not reach for the arrow keys.",
+      "In Normal mode, `h`, `j`, `k` and `l` move the cursor left, down, up and right. They sit under your right hand, so you don't have to reach for the arrow keys.",
       "A number before a motion repeats it: `3l` moves three characters to the right and `2j` two lines down.",
       "`0` goes to the first column of the line, `^` to its first non-blank character and `$` to its last character.",
       "`gg` jumps to the first line of the file and `G` to the last one. With a number, `G` goes to that line: `5G` is line 5."
@@ -155,7 +155,7 @@
   {
     "id": "words",
     "plan": "L04",
-    "section": "Motion and range",
+    "section": "Moving around",
     "title": "Words",
     "summary": "Move by words: to the start of the next word, to the end of a word, and back.",
     "requires": [
@@ -199,7 +199,7 @@
   {
     "id": "lines",
     "plan": "L05",
-    "section": "Motion and range",
+    "section": "Moving around",
     "title": "Lines",
     "summary": "Open, delete, copy and move whole lines.",
     "requires": [
@@ -248,7 +248,7 @@
   {
     "id": "search",
     "plan": "L06",
-    "section": "Motion and range",
+    "section": "Moving around",
     "title": "Search",
     "summary": "Find a character in the line, search the file for a pattern, and go to the next match.",
     "requires": [
@@ -287,7 +287,7 @@
       },
       {
         "keys": "?cat<CR>",
-        "does": "Search backward"
+        "does": "Search backwards"
       },
       {
         "keys": "n N",
@@ -459,7 +459,7 @@
       "`v` starts selecting characters at the cursor and `V` whole lines. Motions then extend the selection, and it is highlighted, so you see exactly what an operator will touch.",
       "Both ends are included: `vwe`, started on the `b` of `beta` in `alpha beta gamma`, selects up to the last `a` of `gamma`.",
       "With a selection, an operator acts on it at once: `d` deletes it, `y` copies it, `>` indents the lines and `~` switches the case.",
-      "`o` jumps to the other end of the selection and `<Esc>` ends it. Some tasks want the selection still active at the end: press Check, or Alt+Enter, while it is."
+      "`o` jumps to the other end of the selection and `<Esc>` ends it. Some tasks want the selection still active at the end: press Check or Alt+Enter while it is still active."
     ],
     "keys": [
       {
@@ -492,7 +492,7 @@
   {
     "id": "undo-and-redo",
     "plan": "L11",
-    "section": "Control of changes",
+    "section": "Changing text",
     "title": "Undo, redo and repeat",
     "summary": "Take a change back with undo, bring it back with redo, and do it again elsewhere with `.`.",
     "requires": [
@@ -536,7 +536,7 @@
   {
     "id": "formatting",
     "plan": "L12",
-    "section": "Control of changes",
+    "section": "Changing text",
     "title": "Formatting",
     "summary": "Join lines, indent them, and change the case of words and lines.",
     "requires": [
@@ -655,8 +655,8 @@
       "search"
     ],
     "body": [
-      "Ex commands start with `:` and take a range of lines in front: `:2,4d` deletes lines 2 to 4. In a range, `.` is the current line, `$` the last one and `%` all of them.",
-      "`:t` copies lines and `:m` moves them, each to below the line you name: `:3t0` copies line 3 above the first line, `:2,3m5` moves lines 2 and 3 below line 5.",
+      "Ex commands start with `:` and take a range of lines in front: `:2,4d` deletes lines 2 to 4. In a range, `.` is the current line, `$` the last one, and `%` means the whole file.",
+      "`:t` copies lines and `:m` moves them, in both cases to just below the line you give: `:3t0` copies line 3 above the first line, `:2,3m5` moves lines 2 and 3 below line 5.",
       "Either end of a range can be a pattern: `:/^BEGIN$/,/^END$/` runs from the next `BEGIN` line to the `END` after it, and `+1` or `-1` move an end by one line.",
       "`:sort` sorts the lines of its range. With `u` it also drops duplicates, and with `n` it compares the first number in each line.",
       "`:g/pattern/` runs a command on every line that matches, and `:v/pattern/` on every line that does not: `:g/^DBG /d` deletes the debug lines, `:v/^OK /d` keeps only the OK ones."
@@ -845,7 +845,7 @@
     "id": "multi-step-edits",
     "plan": "L18",
     "section": "Putting it together",
-    "title": "Edits in several steps",
+    "title": "Multi-step edits",
     "summary": "Plan an edit that takes several commands: split the goal, narrow the range, and put the steps in an order that keeps the rest intact.",
     "requires": [
       "words",

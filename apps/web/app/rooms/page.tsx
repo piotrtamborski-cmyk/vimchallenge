@@ -1,12 +1,13 @@
 import { LEVEL_BASE, tasks } from '@vimchallenge/tasks';
 import type { Metadata } from 'next';
 import { Message } from '@/components/Messages';
+import { NAME_RULES } from '@/lib/auth/messages';
 import { pagePlayer } from '@/lib/rooms/page';
 
 export const metadata: Metadata = { title: 'Rooms' };
 
 const ERROR: Record<string, string> = {
-  'name-invalid': 'A name has 3 to 24 letters, digits, - or _, and starts with a letter or a digit.',
+  'name-invalid': NAME_RULES,
   settings: 'Choose from 1 to 5 rounds and a level.',
   rate: 'Too many rooms from your network just now. Please wait a few minutes.',
   'not-found': 'There is no room with that code. It may have expired: rooms are deleted a week after their last game.',
@@ -25,8 +26,8 @@ export default async function RoomsPage({ searchParams }: Props) {
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold">Rooms</h1>
         <p className="text-lg text-muted">
-          Play the same tasks with friends at the same moment. Everyone gets the same text; each round goes to the fastest
-          correct check. No account needed.
+          Play the same tasks with friends at the same moment. Everyone gets the same text; every correct solve scores, and
+          faster solves score more. No account needed.
         </p>
         <Message error={error ? (ERROR[error] ?? 'Something went wrong. Please try again.') : undefined} />
       </header>
@@ -62,10 +63,10 @@ export default async function RoomsPage({ searchParams }: Props) {
             </select>
           </label>
           <button type="submit" className="rounded bg-accent px-4 py-2 font-semibold text-accent-ink">
-            Create the room
+            Create room
           </button>
         </form>
-        <p className="text-sm text-muted">You get a link to send to up to seven others. The room keeps its link for more matches.</p>
+        <p className="text-sm text-muted">You get a link to send to up to seven others. The room keeps the same link for later matches.</p>
       </section>
 
       <section aria-labelledby="join" className="space-y-3">
@@ -78,7 +79,7 @@ export default async function RoomsPage({ searchParams }: Props) {
             <input name="code" required maxLength={40} autoComplete="off" spellCheck={false} className={`${field} font-mono`} />
           </label>
           <button type="submit" className="rounded border border-line px-4 py-2 hover:bg-line/40">
-            Go to the room
+            Go to room
           </button>
         </form>
       </section>
@@ -90,11 +91,11 @@ export default async function RoomsPage({ searchParams }: Props) {
         <p>
           A correct solve earns the points of its level: {levels.map((l) => `${LEVEL_BASE[l]} (level ${l})`).join(', ')}. A solve within
           the task&apos;s reference time earns a quarter more; the bonus then shrinks to nothing at twice that time. A round lasts four
-          times the reference time, at least a minute, or until everyone has finished.
+          times the reference time (at least one minute), or ends sooner once everyone has finished.
         </p>
         <p>
           A check that fails costs nothing, but the clock keeps running. The time that counts is when the server received your
-          check. The table ranks by points, then by solves, then by the time spent on the solves.
+          check. The standings rank players by points, then by solves, then by the time spent on the solves.
         </p>
       </section>
     </div>

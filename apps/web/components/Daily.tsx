@@ -21,10 +21,14 @@ const STATUS: Record<RunTaskView['status'], string> = {
 
 const START_ERROR: Record<string, string> = {
   'not-eligible': 'The daily challenge needs an account with a verified email address.',
-  played: 'You have already played today’s set. A new one comes at midnight UTC.',
+  played: 'You have already played today’s set. A new one arrives at midnight UTC.',
   busy: 'Finish the set you started first.',
   'no-tasks': 'There is no set today.',
 };
+
+/** A day of the challenge (`2026-11-27`) as people write it: 27 November 2026. */
+const dayName = (day: string) =>
+  new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(Date.parse(`${day}T00:00:00Z`));
 
 const minutes = (ms: number) => `${Math.round(ms / 60_000)} minutes`;
 
@@ -130,7 +134,7 @@ function Start({ view, engineReady, apply }: { view: DailyView; engineReady: boo
         <p>
           Yesterday you scored {you.yesterday.points} of {you.yesterday.maxPoints} points: {you.yesterday.league} league points.{' '}
           <Link href={`/leaderboards?period=day&at=${you.yesterday.day}`} className="underline">
-            Yesterday’s table →
+            Yesterday’s leaderboard →
           </Link>
         </p>
       )}
@@ -140,7 +144,7 @@ function Start({ view, engineReady, apply }: { view: DailyView; engineReady: boo
         </h2>
         <SetTable set={view.set} />
         <ul className="list-inside list-disc space-y-1 text-muted">
-          <li>One go per account and day. Each task appears when you start it, and its clock starts then.</li>
+          <li>One go per account per day. Each task appears when you start it, and its clock starts then.</li>
           <li>A solve earns the points of its level, and up to a quarter more for speed. Skipping or running out of time earns nothing.</li>
           <li>
             The whole set must be done within {minutes(view.set.totalMs)} of starting. You can start until midnight UTC (
@@ -271,12 +275,12 @@ function Result({ run }: { run: RunView }) {
     <section aria-labelledby="result" className="space-y-6">
       <div className="space-y-1">
         <h2 id="result" className="text-xl font-semibold">
-          Your run of {run.day}: {run.points} of {run.maxPoints} points
+          Your run on {dayName(run.day)}: {run.points} of {run.maxPoints} points
         </h2>
         <p>
-          {run.league} league points (the share of the most the set could give, out of 1000) ·{' '}
+          {run.league} league points (your share of the set’s maximum, scaled to 1000) ·{' '}
           <Link href={`/leaderboards?period=day&at=${run.day}`} className="underline">
-            See the table →
+            See the leaderboard →
           </Link>
         </p>
       </div>
@@ -312,7 +316,7 @@ function Result({ run }: { run: RunView }) {
         </tbody>
       </table>
       <p className="text-sm text-muted">
-        The table of the day is final once every run that could start before midnight UTC is over. A new set comes at midnight UTC.
+        The day’s leaderboard is final once every run that could start before midnight UTC is over. A new set arrives at midnight UTC.
       </p>
     </section>
   );
