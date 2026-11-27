@@ -1,45 +1,69 @@
 /**
  * Live updates of rooms in this process: pages subscribe to a room (app/api/rooms/[code]/events)
- * and are told when it changes, by a player's action or by the clock (a round starting or ending).
- * The rooms themselves live in the database; this only says when to look again.
+ * and are sent the room again when it changes, by a player's action or by the clock (a round
+ * starting or ending). The rooms themselves live in the database; this only says when to look again.
+ *
+ * After a change the room is read once and each watching page gets its own view of it. Changes
+ * made in the same turn of the event loop go out together, after the request that made them has
+ * its answer: a solve answers the solver first, then tells the room.
  */
-import type { Rooms } from '@vimchallenge/rooms';
+import type { Player, RoomView, Rooms } from '@vimchallenge/rooms';
 
-type Listener = () => void;
-
-interface Hub {
-  listeners: Map<string, Set<Listener>>;
-  timers: Map<string, NodeJS.Timeout>;
+/** A page watching a room: whose it is, and how to send it the room. */
+export interface Watcher {
+  player?: Player;
+  send(view: RoomView | undefined): void;
 }
 
-const store = globalThis as typeof globalThis & { __vcRoomsHub?: Hub };
-const hub = (store.__vcRoomsHub ??= { listeners: new Map(), timers: new Map() });
+interface Hub {
+  watchers: Map<string, Set<Watcher>>;
+  timers: Map<string, NodeJS.Timeout>;
+  /** Rooms with a change not sent yet. */
+  pending: Set<string>;
+}
 
-export function subscribe(rooms: Rooms, code: string, listener: Listener): () => void {
-  let set = hub.listeners.get(code);
-  if (!set) hub.listeners.set(code, (set = new Set()));
-  set.add(listener);
+const store = globalThis as typeof globalThis & { __vcRoomWatchers?: Hub };
+const hub = (store.__vcRoomWatchers ??= { watchers: new Map(), timers: new Map(), pending: new Set() });
+
+export function subscribe(rooms: Rooms, code: string, watcher: Watcher): () => void {
+  let set = hub.watchers.get(code);
+  if (!set) hub.watchers.set(code, (set = new Set()));
+  set.add(watcher);
   schedule(rooms, code);
   return () => {
-    set.delete(listener);
+    set.delete(watcher);
     if (!set.size) {
-      hub.listeners.delete(code);
+      hub.watchers.delete(code);
       clearTimeout(hub.timers.get(code));
       hub.timers.delete(code);
     }
   };
 }
 
-/** Tells every page watching the room to look again, and sets the timer for its next step. */
+/** The room changed: send it to every page watching it, once for all changes of this moment. */
 export function changed(rooms: Rooms, code: string): void {
-  for (const listener of [...(hub.listeners.get(code) ?? [])]) listener();
+  if (hub.pending.has(code)) return;
+  hub.pending.add(code);
+  setImmediate(() => {
+    hub.pending.delete(code);
+    publish(rooms, code);
+  });
+}
+
+function publish(rooms: Rooms, code: string) {
+  const watchers = [...(hub.watchers.get(code) ?? [])];
+  if (watchers.length) {
+    const views = rooms.views(code, watchers.map((w) => w.player));
+    for (const [i, w] of watchers.entries()) w.send(views[i]);
+  }
   schedule(rooms, code);
 }
 
+/** Sets the timer for the room's next step on its own, if anyone watches it. */
 function schedule(rooms: Rooms, code: string) {
   clearTimeout(hub.timers.get(code));
   hub.timers.delete(code);
-  if (!hub.listeners.has(code)) return;
+  if (!hub.watchers.has(code)) return;
   const at = rooms.nextEvent(code);
   if (at === undefined) return;
   const timer = setTimeout(() => changed(rooms, code), Math.min(Math.max(0, at - Date.now()), 2 ** 31 - 1));

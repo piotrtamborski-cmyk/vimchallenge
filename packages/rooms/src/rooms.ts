@@ -207,6 +207,21 @@ interface AttemptRow {
   bonus: number;
 }
 
+/** An attempt as the room's view needs it: everything but the keys. */
+type AttemptSummary = Omit<AttemptRow, 'keys'>;
+
+/** What the views of a room are made from, read once for everyone who watches it. */
+interface RoomData {
+  room: RoomRow;
+  now: number;
+  members: MemberRow[];
+  match?: MatchRow;
+  players: { player: string; name: string }[];
+  rounds: RoundRow[];
+  /** The attempts of the match by round, in the order the players joined it. */
+  attempts: Map<number, AttemptSummary[]>;
+}
+
 type Row = Record<string, unknown>;
 
 /** A player's attempt at a round of the room's current match, or why there is none. */
@@ -316,7 +331,7 @@ export class Rooms {
     const now = this.now();
     return transaction(this.db, () => {
       const members = this.members(room.id);
-      const permission = this.startPermission(room, members, player.id);
+      const permission = this.startPermission(room, members, player.id, this.latestMatch(room.id));
       if (permission !== 'ok') return permission;
       const players = members.filter((m) => m.ready && now - m.seenAt < AWAY_MS);
       if (players.length < MIN_PLAYERS) return 'too-few';
@@ -439,17 +454,39 @@ export class Rooms {
 
   /** The room as `viewer` sees it, after applying the steps that are due. */
   view(code: string, viewer?: Player): RoomView | undefined {
+    return this.views(code, [viewer])[0];
+  }
+
+  /**
+   * The room as each of `viewers` sees it, read from the database once: after a change, every
+   * page watching the room is sent its view, and the room's state is the same for all of them.
+   */
+  views(code: string, viewers: readonly (Player | undefined)[]): (RoomView | undefined)[] {
+    const data = this.load(code);
+    return viewers.map((viewer) => data && this.render(data, viewer));
+  }
+
+  private load(code: string): RoomData | undefined {
     const room = this.room(code);
     if (!room) return undefined;
     this.settleRoom(room);
-    const now = this.now();
-    const members = this.members(room.id);
-    const me = viewer && members.find((m) => m.player === viewer.id);
     const match = this.latestMatch(room.id);
-    const matchView = match && this.matchView(match, viewer?.id, members, now);
+    const data: RoomData = { room, now: this.now(), members: this.members(room.id), match, players: [], rounds: [], attempts: new Map() };
+    if (match) {
+      data.players = this.db.prepare('SELECT player, name FROM match_players WHERE match_id = ?').all(match.id) as { player: string; name: string }[];
+      data.rounds = this.rounds(match.id);
+      data.attempts = this.matchAttempts(match.id);
+    }
+    return data;
+  }
+
+  private render(d: RoomData, viewer?: Player): RoomView {
+    const { room, now, members, match } = d;
+    const me = viewer && members.find((m) => m.player === viewer.id);
+    const matchView = match && this.matchView(d, match, viewer?.id);
     const running = !!match && match.finishedAt === null;
     const phase: Phase = !match ? 'lobby' : !running ? 'finished' : phaseOf(matchView!.round, now, matchView!.past.length);
-    const permission = viewer ? this.startPermission(room, members, viewer.id) : 'not-member';
+    const permission = viewer ? this.startPermission(room, members, viewer.id, match) : 'not-member';
     const readyCount = members.filter((m) => m.ready && now - m.seenAt < AWAY_MS).length;
     const start =
       permission !== 'ok'
@@ -502,7 +539,7 @@ export class Rooms {
    */
   private settleRoom(room: RoomRow) {
     const match = this.latestMatch(room.id);
-    if (!match || match.finishedAt !== null) return;
+    if (!match || match.finishedAt !== null || !this.settleDue(match.id)) return;
     transaction(this.db, () => {
       const now = this.now();
       for (;;) {
@@ -541,18 +578,30 @@ export class Rooms {
     });
   }
 
-  private matchView(match: MatchRow, viewer: string | undefined, members: MemberRow[], now: number): MatchView {
-    const players = this.db.prepare('SELECT player, name FROM match_players WHERE match_id = ?').all(match.id) as { player: string; name: string }[];
+  /**
+   * Whether settleRoom has something to do, read without taking the write lock: most of the time
+   * a round is under way with players still on it, and every view used to open a write transaction.
+   */
+  private settleDue(matchId: string): boolean {
+    const now = this.now();
+    const r = this.rounds(matchId).find((x) => x.endedAt === null);
+    if (!r) return true;
+    if (r.startsAt === null || now < r.startsAt) return false;
+    if (now > r.deadline!) return true;
+    return !this.db.prepare("SELECT 1 FROM attempts WHERE match_id = ? AND round = ? AND status = 'open' LIMIT 1").get(matchId, r.number);
+  }
+
+  private matchView(d: RoomData, match: MatchRow, viewer: string | undefined): MatchView {
+    const { players, members, now, rounds } = d;
     const nameOf = new Map(players.map((p) => [p.player, p.name]));
     const away = (player: string) => {
       const m = members.find((x) => x.player === player);
       return !m || now - m.seenAt >= AWAY_MS;
     };
-    const rounds = this.rounds(match.id);
     const ended = rounds.filter((r) => r.endedAt !== null);
     const tallies = new Map<string, Tally>(players.map((p) => [p.player, { player: p.player, name: p.name, points: 0, solves: 0, seconds: 0 }]));
     const past: RoundResult[] = ended.map((r) => {
-      const attempts = this.attempts(match.id, r.number);
+      const attempts = d.attempts.get(r.number) ?? [];
       for (const a of attempts) {
         const t = tallies.get(a.player);
         if (!t || a.status !== 'solved') continue;
@@ -581,7 +630,7 @@ export class Rooms {
     const current = rounds.find((r) => r.endedAt === null && r.startsAt !== null);
     let round: RoundView | undefined;
     if (current) {
-      const attempts = this.attempts(match.id, current.number);
+      const attempts = d.attempts.get(current.number) ?? [];
       const mine = attempts.find((a) => a.player === viewer);
       const started = now >= current.startsAt!;
       const text = started && mine ? this.taskText(current) : undefined;
@@ -605,7 +654,7 @@ export class Rooms {
         statuses: attempts.map((a) => ({ name: nameOf.get(a.player) ?? '?', you: a.player === viewer, away: away(a.player), status: a.status })),
         mine: mine && {
           status: mine.status,
-          keys: started ? (JSON.parse(mine.keys) as string[]) : [],
+          keys: started ? this.keysOf(match.id, current.number, mine.player) : [],
           checks: mine.checks,
           ms: mine.ms ?? undefined,
           base: mine.base,
@@ -624,10 +673,9 @@ export class Rooms {
     };
   }
 
-  private startPermission(room: RoomRow, members: MemberRow[], player: string): 'ok' | 'not-member' | 'not-host' | 'running' {
+  private startPermission(room: RoomRow, members: MemberRow[], player: string, match: MatchRow | undefined): 'ok' | 'not-member' | 'not-host' | 'running' {
     const me = members.find((m) => m.player === player);
     if (!me) return 'not-member';
-    const match = this.latestMatch(room.id);
     if (match && match.finishedAt === null) return 'running';
     if (room.host === player) return 'ok';
     const now = this.now();
@@ -739,11 +787,31 @@ export class Rooms {
       }));
   }
 
-  private attempts(matchId: string, round: number): AttemptRow[] {
+  private attempts(matchId: string, round: number): AttemptSummary[] {
     return this.db
-      .prepare('SELECT a.* FROM attempts a JOIN match_players p ON p.match_id = a.match_id AND p.player = a.player WHERE a.match_id = ? AND a.round = ? ORDER BY p.rowid')
+      .prepare(`SELECT ${SUMMARY_COLUMNS} FROM attempts a JOIN match_players p ON p.match_id = a.match_id AND p.player = a.player WHERE a.match_id = ? AND a.round = ? ORDER BY p.rowid`)
       .all(matchId, round)
-      .map(toAttempt);
+      .map(toSummary);
+  }
+
+  /** The attempts of every round of a match, in one query. */
+  private matchAttempts(matchId: string): Map<number, AttemptSummary[]> {
+    const byRound = new Map<number, AttemptSummary[]>();
+    const rows = this.db
+      .prepare(`SELECT a.round, ${SUMMARY_COLUMNS} FROM attempts a JOIN match_players p ON p.match_id = a.match_id AND p.player = a.player WHERE a.match_id = ? ORDER BY a.round, p.rowid`)
+      .all(matchId);
+    for (const r of rows) {
+      const n = Number(r.round);
+      const list = byRound.get(n);
+      if (list) list.push(toSummary(r));
+      else byRound.set(n, [toSummary(r)]);
+    }
+    return byRound;
+  }
+
+  private keysOf(matchId: string, round: number, player: string): string[] {
+    const r = this.db.prepare('SELECT keys FROM attempts WHERE match_id = ? AND round = ? AND player = ?').get(matchId, round, player);
+    return r ? (JSON.parse(String(r.keys)) as string[]) : [];
   }
 
   private attempt(matchId: string, round: number, player: string): AttemptRow | undefined {
@@ -752,9 +820,12 @@ export class Rooms {
   }
 }
 
-const toAttempt = (r: Row): AttemptRow => ({
+const SUMMARY_COLUMNS = 'a.player, a.key_count, a.status, a.submitted_count, a.submitted_at, a.checks, a.resolved_at, a.ms, a.base, a.bonus';
+
+const toAttempt = (r: Row): AttemptRow => ({ ...toSummary(r), keys: String(r.keys) });
+
+const toSummary = (r: Row): AttemptSummary => ({
   player: String(r.player),
-  keys: String(r.keys),
   keyCount: Number(r.key_count),
   status: r.status as AttemptStatus,
   submittedCount: num(r.submitted_count),

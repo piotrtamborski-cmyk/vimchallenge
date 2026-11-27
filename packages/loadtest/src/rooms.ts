@@ -213,14 +213,34 @@ class Player {
     }
     let sent = 0;
     let typed = 0;
-    const send = async () => {
-      if (typed <= sent) return;
+    // Like the page: one packet in flight at a time; the next one carries what was typed meanwhile.
+    let inFlight: Promise<void> | null = null;
+    let refused = false;
+    const sendOnce = (): Promise<void> => {
+      if (inFlight) return inFlight;
+      if (typed <= sent) return Promise.resolve();
       const packet = keys.slice(sent, typed);
-      const out = await this.act(code, 'keys', { round: round.number, from: sent, keys: packet }, 'packet');
-      if (out.ok === true) sent = Number(out.have);
-      else rec.count(`keys: ${String(out.error)}`);
+      inFlight = this.act(code, 'keys', { round: round.number, from: sent, keys: packet }, 'packet')
+        .then((out) => {
+          if (out.ok === true) sent = Number(out.have);
+          else {
+            refused = true;
+            rec.count(`keys: ${String(out.error)}`);
+          }
+        })
+        .finally(() => {
+          inFlight = null;
+        });
+      return inFlight;
     };
-    const flusher = setInterval(() => void send(), 250);
+    /** Everything typed so far reaches the server (or the server refuses it). */
+    const send = async () => {
+      for (let tries = 0; tries < 20 && typed > sent && !refused; tries++) await sendOnce();
+      await inFlight;
+    };
+    const flusher = setInterval(() => {
+      if (!refused) void sendOnce();
+    }, 250);
     const check = async (count: number) => {
       const checkedAt = Date.now();
       const out = await this.act(code, 'check', { round: round.number, count }, 'check');
@@ -241,6 +261,12 @@ class Player {
       let final = await check(keys.length);
       if (final.result === 'error' && final.out.error === 'missing-keys') {
         await send();
+        final = await check(keys.length);
+      }
+      // While the judge restarts, a player checks again a little later; the server keeps the time of the first check.
+      for (let tries = 0; tries < 10 && final.result === 'error' && final.out.error === 'judge-unavailable'; tries++) {
+        rec.count('check: judge unavailable, checked again');
+        await sleep(3000);
         final = await check(keys.length);
       }
       rec.count(`check: ${final.result}${final.result === 'error' ? ` ${String(final.out.error)}` : ''}`);

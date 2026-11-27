@@ -308,12 +308,15 @@ To restore a copy:
 ```bash
 systemctl stop vimchallenge-web
 cd /var/lib/vimchallenge
-mv accounts.db accounts.db.broken; rm -f accounts.db-wal accounts.db-shm
+mv accounts.db accounts.db.broken; [ -e accounts.db-wal ] && mv accounts.db-wal accounts.db.broken-wal; rm -f accounts.db-shm
 install -o vimchallenge -g vimchallenge -m 0600 /var/backups/vimchallenge/vimchallenge-<time>.db accounts.db
 systemctl start vimchallenge-web
 ```
 
-Sign-ins and solves after that copy are lost; sessions made since then end.
+Sign-ins and solves after that copy are lost; sessions made since then end. The latest changes
+live in `accounts.db-wal` until SQLite folds them into the main file, which may be hours later.
+So the main file alone is never a backup, and the write-ahead log moves together with it. The
+copies of `backup.ts` are complete on their own.
 
 ### Restore drill
 
@@ -383,10 +386,14 @@ The site limits new rooms and joins per client address, and all simulated player
 machine. For the test only, let the web app take each player's address from a header the tool sends:
 
 ```ini
-# /etc/systemd/system/vimchallenge-web.service.d/loadtest.conf: remove after the test
+# /etc/systemd/system/vimchallenge-web.service.d/zz-loadtest.conf: remove after the test
 [Service]
 Environment=CLIENT_IP_HEADER=x-loadtest-client
 ```
+
+Drop-ins apply in the order of their names, so the name has to sort after any other that sets
+`CLIENT_IP_HEADER` (such as `test-lan.conf`). `systemctl show -p Environment vimchallenge-web`
+shows the value in force.
 
 Never on a public site: anyone could then pick their own address and escape the limits. Then:
 

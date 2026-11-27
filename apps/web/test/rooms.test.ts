@@ -3,6 +3,7 @@ import { Accounts, openDatabase } from '@vimchallenge/accounts';
 import { Rooms, type RoomView } from '@vimchallenge/rooms';
 import { describe, expect, it } from 'vitest';
 import type { AuthContext } from '../lib/auth/context.ts';
+import type { Watcher } from '../lib/rooms/hub.ts';
 import { createRoom, roomAction, roomEvents, roomState } from '../lib/rooms/routes.ts';
 
 const SITE = 'https://vimchallenge.test';
@@ -144,10 +145,10 @@ describe('rooms over HTTP', () => {
   it('streams the room as Server-Sent Events', async () => {
     const { s, alice, code } = await twoPlayers();
     const abort = new AbortController();
-    const listeners: (() => void)[] = [];
+    const watchers: Watcher[] = [];
     const request = new Request(`${SITE}/api/rooms/${code}/events`, { headers: alice.get('/').headers, signal: abort.signal });
-    const res = roomEvents(request, s.ctx, code, (_code, l) => {
-      listeners.push(l);
+    const res = roomEvents(request, s.ctx, code, (_code, w) => {
+      watchers.push(w);
       return () => {};
     });
     expect(res.headers.get('content-type')).toBe('text/event-stream; charset=utf-8');
@@ -155,8 +156,12 @@ describe('rooms over HTTP', () => {
     const first = new TextDecoder().decode((await reader.read()).value);
     expect(first).toMatch(/^data: \{.*"code":"/);
     expect(JSON.parse(first.slice(6)).you.name).toBe('alice');
-    listeners[0]!();
+    // A change is sent with the view the hub read for this page.
+    expect(watchers[0]!.player).toBeDefined();
+    watchers[0]!.send(s.ctx.rooms.view(code, watchers[0]!.player));
     expect(new TextDecoder().decode((await reader.read()).value)).toMatch(/^data: /);
+    watchers[0]!.send(undefined);
+    expect(new TextDecoder().decode((await reader.read()).value)).toBe('event: gone\ndata: {}\n\n');
     abort.abort();
     expect((await reader.read()).done).toBe(true);
   });

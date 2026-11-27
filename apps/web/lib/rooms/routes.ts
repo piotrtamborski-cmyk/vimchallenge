@@ -4,11 +4,12 @@
  * from this site; JSON also needs `application/json`, which other sites cannot send without a CORS
  * preflight this app never answers.
  */
-import type { Player, Rooms, RoomSettings } from '@vimchallenge/rooms';
+import type { Player, Rooms, RoomSettings, RoomView } from '@vimchallenge/rooms';
 import type { AuthContext } from '../auth/context.ts';
 import { readBody } from '../body.ts';
 import { forbidden, sameOrigin } from '../origin.ts';
 import { clientKey, RateLimiter } from '../rate-limit.ts';
+import type { Watcher } from './hub.ts';
 import { playerOf, playerOrGuest } from './player.ts';
 
 export interface RoomsRouteContext {
@@ -143,15 +144,11 @@ export async function roomAction(request: Request, ctx: RoomsRouteContext, code:
 
 /**
  * GET /api/rooms/{code}/events: Server-Sent Events with the room as this player sees it, sent
- * whenever it changes and every 20 seconds (which also marks the player present and keeps the
- * connection open through proxies).
+ * whenever it changes (by `subscribe`, which reads the room once for all its pages) and every 20
+ * seconds. The 20-second message marks the player present and keeps the connection open through
+ * proxies; a change sent to everyone does not write anything.
  */
-export function roomEvents(
-  request: Request,
-  ctx: RoomsRouteContext,
-  code: string,
-  subscribe: (code: string, listener: () => void) => () => void,
-): Response {
+export function roomEvents(request: Request, ctx: RoomsRouteContext, code: string, subscribe: (code: string, watcher: Watcher) => () => void): Response {
   const { player } = playerOf(request.headers, ctx.auth);
   if (!ctx.rooms.view(code, player)) return json(404, { error: 'not-found' });
   const encoder = new TextEncoder();
@@ -159,18 +156,25 @@ export function roomEvents(
   const stream = new ReadableStream<Uint8Array>({
     start(controller) {
       let open = true;
-      const send = () => {
+      const write = (view: RoomView | undefined) => {
         if (!open) return;
         try {
-          if (player) ctx.rooms.touch(code, player);
-          const view = ctx.rooms.view(code, player);
           controller.enqueue(encoder.encode(view ? `data: ${JSON.stringify(view)}\n\n` : 'event: gone\ndata: {}\n\n'));
         } catch {
           stop();
         }
       };
-      const unsubscribe = subscribe(code, send);
-      const heartbeat = setInterval(send, 20_000);
+      const beat = () => {
+        if (!open) return;
+        try {
+          if (player) ctx.rooms.touch(code, player);
+          write(ctx.rooms.view(code, player));
+        } catch {
+          stop();
+        }
+      };
+      const unsubscribe = subscribe(code, { player, send: write });
+      const heartbeat = setInterval(beat, 20_000);
       stop = () => {
         if (!open) return;
         open = false;
@@ -183,7 +187,7 @@ export function roomEvents(
         }
       };
       request.signal.addEventListener('abort', stop);
-      send();
+      beat();
       // Others see this player present again.
       ctx.notify(code);
     },

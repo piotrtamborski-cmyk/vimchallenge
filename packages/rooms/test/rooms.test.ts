@@ -356,3 +356,28 @@ describe('a match', () => {
     ]);
   });
 });
+
+describe('views for everyone watching', () => {
+  it('equal each viewer’s own view, in the lobby, during a round and after one', async () => {
+    const s = started({ rounds: 3 });
+    expect(s.rooms.join(s.code, C, 'carol')).toBe('ok');
+    const viewers = [A, B, C, undefined, { id: 'g:stranger' }];
+    const same = () => expect(s.rooms.views(s.code, viewers)).toEqual(viewers.map((v) => s.rooms.view(s.code, v)));
+    same();
+    s.clock.advance(COUNTDOWN_MS);
+    s.rooms.appendKeys(s.code, A, 1, 0, ['x', 'Z']);
+    s.rooms.appendKeys(s.code, B, 1, 0, ['y']);
+    same();
+    // The viewer's own keys come back to their page, and only to it.
+    const [a, b, c] = s.rooms.views(s.code, [A, B, C]);
+    expect(a!.match!.round!.mine!.keys).toEqual(['x', 'Z']);
+    expect(b!.match!.round!.mine!.keys).toEqual(['y']);
+    expect(c!.match!.round!.mine).toBeUndefined();
+    s.clock.advance(2_000);
+    await s.rooms.check(s.code, A, 1, 2);
+    s.rooms.skip(s.code, B, 1);
+    same();
+    expect(s.view(A).match!.past).toHaveLength(1);
+    expect(s.rooms.views('nothing-he', viewers)).toEqual(viewers.map(() => undefined));
+  });
+});
