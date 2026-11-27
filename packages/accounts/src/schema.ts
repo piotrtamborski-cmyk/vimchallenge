@@ -9,8 +9,9 @@
  */
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { pathToFileURL } from 'node:url';
 import { schemaOf } from './db.ts';
+import { isMain } from './main.ts';
 
 const sqlite = process.getBuiltinModule('node:sqlite');
 
@@ -33,7 +34,7 @@ export async function releaseSchema(dir: string): Promise<ReleaseSchema> {
   return { version: m.SCHEMA_VERSION, readsNewer: m.READS_NEWER_SCHEMAS === true };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isMain(import.meta.url)) {
   const [database, release] = process.argv.slice(2);
   if (!database) {
     console.error('usage: node schema.ts <database> [<release directory>]');

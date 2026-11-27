@@ -29,3 +29,22 @@ describe('backup', () => {
     expect(new Accounts(openDatabase(copy)).user(user.user.id)?.name).toBe('ada');
   });
 });
+
+describe('backup script', () => {
+  it('runs when started through a symlink, as the timer starts it through ~/current', async () => {
+    const { execFileSync } = await import('node:child_process');
+    const { symlinkSync } = await import('node:fs');
+    const { fileURLToPath } = await import('node:url');
+    const dir = mkdtempSync(join(tmpdir(), 'vc-backup-'));
+    dirs.push(dir);
+    const path = join(dir, 'app.db');
+    openDatabase(path).close();
+    const root = fileURLToPath(new URL('../../../', import.meta.url));
+    symlinkSync(root, join(dir, 'current'));
+    const out = execFileSync(process.execPath, ['--disable-warning=ExperimentalWarning', join(dir, 'current/packages/accounts/src/backup.ts'), path, join(dir, 'copies')], {
+      encoding: 'utf8',
+    });
+    expect(out).toMatch(/^backup .*vimchallenge-\d{8}T\d{6}Z\.db\n$/);
+    expect(readdirSync(join(dir, 'copies'))).toHaveLength(1);
+  });
+});

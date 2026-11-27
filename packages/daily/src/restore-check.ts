@@ -19,9 +19,8 @@
 import { copyFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { DatabaseSync } from 'node:sqlite';
-import { openDatabase } from '@vimchallenge/accounts';
+import { isMain, openDatabase } from '@vimchallenge/accounts';
 import { JudgeUnavailable } from '@vimchallenge/rooms';
 import { Daily, PAGE_SIZE } from './daily.ts';
 import { monthOf, type Period, weekOf } from './periods.ts';
@@ -137,4 +136,4 @@ export function run(args: string[], print: (line: string) => void = console.log)
   return 0;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = run(process.argv.slice(2));
+if (isMain(import.meta.url)) process.exitCode = run(process.argv.slice(2));

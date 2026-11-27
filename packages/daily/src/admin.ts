@@ -11,8 +11,7 @@
  * correction. `restore` undoes a void (runs that started after the void never got the task, so it
  * gives them nothing). `rebuild` works out a day's entries again from its attempts.
  */
-import { fileURLToPath } from 'node:url';
-import { openDatabase } from '@vimchallenge/accounts';
+import { isMain, openDatabase } from '@vimchallenge/accounts';
 import { JudgeUnavailable } from '@vimchallenge/rooms';
 import { Daily } from './daily.ts';
 import { validDay } from './periods.ts';
@@ -61,4 +60,4 @@ export function run(args: string[], print: (line: string) => void = console.log)
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) process.exitCode = run(process.argv.slice(2));
+if (isMain(import.meta.url)) process.exitCode = run(process.argv.slice(2));

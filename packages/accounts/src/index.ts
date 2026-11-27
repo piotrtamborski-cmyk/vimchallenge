@@ -3,3 +3,4 @@ export { openDatabase, READS_NEWER_SCHEMAS, SCHEMA_VERSION, schemaOf, transactio
 export * from './mail.ts';
 export { NAME_MAX, NAME_MIN, normalEmail, validName } from './names.ts';
 export * from './oauth.ts';
+export { isMain } from './main.ts';

@@ -8,7 +8,7 @@
  */
 import { chmodSync, mkdirSync, readdirSync, renameSync, rmSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { isMain } from './main.ts';
 
 const sqlite = process.getBuiltinModule('node:sqlite');
 
@@ -45,7 +45,7 @@ export function backup(database: string, directory: string, keepDays = 14, now =
   return target;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (isMain(import.meta.url)) {
   const [database, directory, days] = process.argv.slice(2);
   if (!database || !directory) {
     console.error('usage: node backup.ts <database> <directory> [days to keep]');
