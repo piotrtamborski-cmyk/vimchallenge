@@ -214,6 +214,11 @@ export async function accountAction(request: Request, ctx: AuthContext, action: 
     const result = ctx.accounts.unlink(user.id, provider, field(form, 'subject'));
     return accountPage(ctx, result === 'ok' ? { notice: 'disconnected' } : { error: result === 'last' ? 'last-method' : 'not-connected' });
   }
+  if (action === 'boards') {
+    const shown = field(form, 'boards') === 'on';
+    ctx.accounts.setOnBoards(user.id, shown);
+    return accountPage(ctx, { notice: shown ? 'boards-shown' : 'boards-hidden' });
+  }
   if (action === 'sessions') {
     ctx.accounts.endOtherSessions(user.id, token);
     return accountPage(ctx, { notice: 'signed-out-others' });

@@ -43,6 +43,20 @@ export default function PrivacyPage() {
       </section>
 
       <section className="space-y-2">
+        <h2 className="text-lg font-semibold">In the daily challenge</h2>
+        <p>
+          For each day you play: when you started, which tasks you were given and when, the keys you typed in each task, and your
+          result, time and points. The keys are kept so the server can judge your run, a reload can carry on, and a disputed
+          result can be looked into; they are deleted a week after the day&apos;s table is final. Your results stay with your
+          account for the leaderboards.
+        </p>
+        <p>
+          The public leaderboards show your name and results only if you chose that when you started, or later on your account
+          page. Otherwise only you see your place. Nobody else sees your keys or your email address.
+        </p>
+      </section>
+
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">Cookies</h2>
         <p>
           One cookie keeps you signed in. While you sign in with GitHub or Google, a second one lives for ten minutes to tie the

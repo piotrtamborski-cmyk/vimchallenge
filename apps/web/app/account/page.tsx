@@ -7,6 +7,7 @@ import { Message } from '@/components/Messages';
 import { authContext } from '@/lib/auth/context';
 import { errorMessage, noticeMessage } from '@/lib/auth/messages';
 import { currentUser, signInMethods } from '@/lib/auth/session';
+import { dailyContext } from '@/lib/daily/context';
 
 export const metadata: Metadata = { title: 'Your account' };
 
@@ -33,6 +34,8 @@ export default async function AccountPage({ searchParams }: Props) {
   const methods = signInMethods();
   const has = (p: string) => identities.some((i) => i.provider === p);
   const solved = tasks.filter((t) => progress.has(t.id));
+  const onBoards = accounts.onBoards(user.id);
+  const league = dailyContext().board('all', 'all', user.id)?.you;
 
   return (
     <div className="max-w-3xl space-y-10">
@@ -124,6 +127,43 @@ export default async function AccountPage({ searchParams }: Props) {
               autoComplete="username"
               className="rounded border border-line bg-panel px-3 py-1.5 font-mono"
             />
+          </label>
+          <button type="submit" className={button}>
+            Save
+          </button>
+        </form>
+      </section>
+
+      <section aria-labelledby="leaderboards" className="space-y-3">
+        <h2 id="leaderboards" className="text-lg font-semibold">
+          Leaderboards
+        </h2>
+        <p>
+          {league ? (
+            <>
+              {league.days} {league.days === 1 ? 'day' : 'days'} of the{' '}
+              <Link href="/daily" className="underline">
+                daily challenge
+              </Link>{' '}
+              played: {league.points} league points, place {league.rank} of all time.
+            </>
+          ) : (
+            <>
+              You have not played the{' '}
+              <Link href="/daily" className="underline">
+                daily challenge
+              </Link>{' '}
+              yet.
+            </>
+          )}
+        </p>
+        <form method="post" action="/api/account/boards" className="space-y-3">
+          <label className="flex items-start gap-2">
+            <input type="checkbox" name="boards" value="on" defaultChecked={onBoards === true} className="mt-1" />
+            <span>
+              Show my name and results on the public leaderboards
+              <span className="block text-sm text-muted">Hidden, you still see your own place, and others do not see you at all.</span>
+            </span>
           </label>
           <button type="submit" className={button}>
             Save

@@ -6,15 +6,17 @@ same versioned tasks and the same judging rules.
 Early stage: the editor engine, the conformance harnesses that check it against real Vim, and the web app
 with 18 lessons and all 80 tasks of the planned bank (five levels) on three texts each, judged in the browser and confirmed by the
 server's judge. Players may sign in with GitHub, Google or an email link to keep their progress,
-and play live rooms with up to eight people; neither needs an account.
+and play live rooms with up to eight people; neither needs an account. Signed-in players get one go a
+day at the daily challenge, which feeds daily, weekly, monthly and all-time leaderboards.
 
 ## Layout
 
 | Path | What |
 |---|---|
-| `apps/web` | The web app (Next.js): home page, lessons, task list and task pages with the Vim editor, sign-in, account and privacy pages. |
+| `apps/web` | The web app (Next.js): home page, lessons, task list and task pages with the Vim editor, rooms, the daily challenge and leaderboards, sign-in, account and privacy pages. |
 | `packages/accounts` | Accounts without passwords: the SQLite schema, sign-in methods (email links, GitHub, Google) connected to one account, sessions, confirmed solves, and the database backup script. |
 | `packages/rooms` | Live rooms: members, matches, rounds and attempts in the same database, task draws by level, key packets, checks through the judge, and the scoring rules. |
+| `packages/daily` | The daily challenge and the leaderboards: one set a day, runs and their attempts, day entries rebuilt from them, the four tables, corrections, and the operator's tool for them. |
 | `packages/tasks` | Published tasks (`tasks.json`: prompt, initial state, goals and one solution, plus `variants` — the same technique on other texts, for "practise on new text") and lessons (`lessons.json`: explanation, keys and the tasks that practise them). Tests check every card's shape and that each task belongs to a lesson; CI replays every task in Vim. |
 | `packages/judge` | The server-side judge: a pool of worker threads that replay a key log in the headless engine under time, memory and size limits, and a small HTTP service in front of it. |
 | `deploy` | Running on a server: [`deploy/README.md`](deploy/README.md), systemd units and sandbox for the web app and the judge, the database backup timer, release and rollback scripts. |
@@ -144,6 +146,36 @@ from the planning card). Everyone gets the round's task at the same moment, afte
   stream is down. Other players see each other's status during a round and results after it, never keys.
 - A signed-in player's solve also counts in their progress. A room and everything in it is deleted a
   week after its last activity.
+
+## Daily challenge and leaderboards
+
+Every UTC day has one official set (`/daily`): five tasks, one per level, on the same texts for
+everyone, drawn when the day's first visitor asks (each level's least recently used task, then its
+least used text). An account with a verified email address (from any sign-in method) has one go.
+For now the sets come from the public bank in `packages/tasks`, so every task and text can be
+practised beforehand; a private pool for the league may come later.
+
+- **A run** gives the tasks one at a time: each appears when the player starts it, its clock starts
+  then, and it ends when solved, skipped or out of time (four times its reference time, at least a
+  minute). Keys, checks, the judge's grace and the points work as in a room. The whole run must end
+  within the time of all its tasks from its start (about 17 minutes at most), so a run started just
+  before midnight still counts for the day, week and month it started in.
+- **An entry** per run and day holds its points, solves, whole seconds on them, and league points:
+  `floor(1000 × points / the most the day's tasks can give)` (1725 for a full set; versions of both
+  rules are stored with the day). Entries are rebuilt from the attempts, never added to.
+- **Tables** (`/leaderboards`): a day ranks by its points, then more solves, then less time; a week
+  (from Monday), a month and all time rank by the sum of league points. Equal results share a place.
+  A day is settled, and its table final, when its last possible run is over: midnight UTC plus the
+  time of its tasks plus the grace. Days, weeks and months are UTC; pages show the boundary in the
+  reader's own time zone.
+- **Names** appear on the public tables only if the player chose so when starting (or on their account
+  page); otherwise they see their own place and nobody else sees them.
+- **Corrections**: `node packages/daily/src/admin.ts <database> void <day> <position> <reason>` takes a
+  faulty task out of a day for everyone and rebuilds the day's entries, so all four tables follow;
+  a day without any task that counts is cancelled. The entries before are kept with the correction
+  (`show`, `restore` and `rebuild` too; see the file).
+- **Kept**: the keys of each attempt until a week after the day is settled; results with the account.
+  Rooms and training never add to the league.
 
 ## Content Security Policy
 

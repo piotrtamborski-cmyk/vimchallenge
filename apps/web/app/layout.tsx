@@ -27,7 +27,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Skip to content
         </a>
         <header className="border-b border-line">
-          <nav className="mx-auto flex max-w-5xl items-center gap-6 px-4 py-3">
+          <nav className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
             <Link href="/" className="font-mono text-lg font-semibold">
               vimchallenge
             </Link>
@@ -37,8 +37,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Link href="/tasks" className="text-muted hover:text-ink">
               Tasks
             </Link>
+            <Link href="/daily" className="text-muted hover:text-ink">
+              Daily
+            </Link>
             <Link href="/rooms" className="text-muted hover:text-ink">
               Rooms
+            </Link>
+            <Link href="/leaderboards" className="text-muted hover:text-ink">
+              Leaderboards
             </Link>
             <span className="ml-auto">
               {user ? (

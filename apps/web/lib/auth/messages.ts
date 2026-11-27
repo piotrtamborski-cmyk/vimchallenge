@@ -58,6 +58,10 @@ export function noticeMessage(code: string | undefined): string | undefined {
       return undefined;
     case 'renamed':
       return 'Name saved.';
+    case 'boards-shown':
+      return 'Your name now appears on the public leaderboards.';
+    case 'boards-hidden':
+      return 'Your name no longer appears on the public leaderboards. You still see your own place.';
     case 'connected-github':
       return 'GitHub is connected: you can sign in with it from now on.';
     case 'connected-google':

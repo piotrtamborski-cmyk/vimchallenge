@@ -4,13 +4,14 @@ Two systemd services on an Ubuntu 24.04 host (an LXC container works), run from 
 
 | Service | Listens on | What |
 |---|---|---|
-| `vimchallenge-web` | `127.0.0.1:3100` | The Next.js app: pages, tasks, accounts, live rooms, `/api/judge` (forwards to the judge, rate-limited per visitor, saves the solves of signed-in players), `/api/health`. Visitors reach it through the Cloudflare Tunnel. |
+| `vimchallenge-web` | `127.0.0.1:3100` | The Next.js app: pages, tasks, accounts, live rooms, the daily challenge and leaderboards, `/api/judge` (forwards to the judge, rate-limited per visitor, saves the solves of signed-in players), `/api/health`. Visitors reach it through the Cloudflare Tunnel. |
 | `vimchallenge-judge` | `127.0.0.1:3101` | The judge (`packages/judge`): replays key logs in worker threads under time and memory limits. Only the web app calls it. Stores nothing. |
 
 The web app keeps accounts and rooms in one SQLite file, `/var/lib/vimchallenge/accounts.db` (Node's
 built-in `node:sqlite`, no database server). Rooms run inside the web app: their state is in the
 database, and pages follow them over Server-Sent Events, which pass through the tunnel like any
-response (a message every 20 seconds keeps the connection open). `vimchallenge-backup.timer` copies it every six hours to
+response (a message every 20 seconds keeps the connection open). The daily challenge needs no timer
+either: a day is settled by the first request after its last run could have ended. `vimchallenge-backup.timer` copies it every six hours to
 `/var/backups/vimchallenge`. Releases live in the home directory of the `vimchallenge` user:
 
 ```text
@@ -294,6 +295,23 @@ systemctl start vimchallenge-web
 ```
 
 Sign-ins and solves after that copy are lost; sessions made since then end.
+
+## Daily challenge corrections
+
+When a task of a day's set turns out to be faulty (a wrong goal, a judge fault), take it out of that
+day for everyone. The day's entries are rebuilt, and with them the daily, weekly, monthly and
+all-time tables; the entries before are kept with the correction. Run it as the service user, with
+the day (UTC) and the task's position in the set (1 to 5):
+
+```bash
+cd /home/vimchallenge/current
+sudo -u vimchallenge node --disable-warning=ExperimentalWarning packages/daily/src/admin.ts /var/lib/vimchallenge/accounts.db show 2026-12-01
+sudo -u vimchallenge node --disable-warning=ExperimentalWarning packages/daily/src/admin.ts /var/lib/vimchallenge/accounts.db void 2026-12-01 3 "wrong expected text"
+```
+
+`restore` undoes a void with the same arguments; `rebuild <day>` works out a day's entries again from
+its attempts (after restoring a backup, say). The web app reads the tables straight from the entries,
+so it shows the change at once; there is nothing to restart.
 
 ## Logs
 

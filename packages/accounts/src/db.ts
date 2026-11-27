@@ -160,6 +160,102 @@ const MIGRATIONS: readonly string[] = [
     FOREIGN KEY (match_id, round) REFERENCES rounds (match_id, number) ON DELETE CASCADE
   ) STRICT;
   `,
+  // 3: the daily challenge and the leaderboards (packages/daily).
+  `
+  -- Whether the player's name may appear on the public leaderboards: NULL until they choose.
+  ALTER TABLE users ADD COLUMN on_boards INTEGER;
+
+  -- One official set a day (UTC), the same for everyone.
+  CREATE TABLE daily_sets (
+    day TEXT PRIMARY KEY,
+    -- Versions of the points per task and of the league points per day.
+    scoring INTEGER NOT NULL,
+    league INTEGER NOT NULL,
+    created_at INTEGER NOT NULL,
+    -- When the last run that could start on this day was over: its entries are final.
+    settled_at INTEGER,
+    -- Every task of the day was voided: the day counts for no one.
+    cancelled_at INTEGER
+  ) STRICT;
+
+  CREATE TABLE daily_tasks (
+    day TEXT NOT NULL REFERENCES daily_sets (day) ON DELETE CASCADE,
+    position INTEGER NOT NULL,
+    task_id TEXT NOT NULL,
+    task_version INTEGER NOT NULL,
+    text INTEGER NOT NULL,
+    level INTEGER NOT NULL,
+    base INTEGER NOT NULL,
+    reference_ms INTEGER NOT NULL,
+    available_ms INTEGER NOT NULL,
+    -- A faulty task, taken out of the day for everyone (daily_corrections says why).
+    voided_at INTEGER,
+    PRIMARY KEY (day, position)
+  ) STRICT;
+
+  -- An account's one scored go at a day's set. It belongs to the day it started on.
+  CREATE TABLE daily_runs (
+    day TEXT NOT NULL REFERENCES daily_sets (day) ON DELETE CASCADE,
+    user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    started_at INTEGER NOT NULL,
+    -- The start plus the time of every task of the set: the latest the run can go on.
+    ends_at INTEGER NOT NULL,
+    finished_at INTEGER,
+    PRIMARY KEY (day, user_id)
+  ) STRICT;
+  CREATE INDEX daily_runs_user ON daily_runs (user_id, day);
+
+  -- One task of a run, from the moment it was given. Like a round's attempt in a room.
+  CREATE TABLE daily_attempts (
+    day TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    starts_at INTEGER NOT NULL,
+    deadline INTEGER NOT NULL,
+    -- Deleted a week after the day is settled; the count stays.
+    keys TEXT NOT NULL DEFAULT '[]',
+    key_count INTEGER NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'solved', 'skipped', 'timeout')),
+    submitted_count INTEGER,
+    submitted_at INTEGER,
+    checks INTEGER NOT NULL DEFAULT 0,
+    resolved_at INTEGER,
+    ms INTEGER,
+    base INTEGER NOT NULL DEFAULT 0,
+    bonus INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, user_id, position),
+    FOREIGN KEY (day, user_id) REFERENCES daily_runs (day, user_id) ON DELETE CASCADE,
+    FOREIGN KEY (day, position) REFERENCES daily_tasks (day, position) ON DELETE CASCADE
+  ) STRICT;
+
+  -- A run's result, rebuilt from its attempts and the tasks of the day that count. The weekly,
+  -- monthly and all-time tables are sums of these.
+  CREATE TABLE daily_entries (
+    day TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    points INTEGER NOT NULL,
+    solves INTEGER NOT NULL,
+    seconds INTEGER NOT NULL,
+    -- The most the tasks that count could give: what the league points are relative to.
+    max_points INTEGER NOT NULL,
+    league INTEGER NOT NULL,
+    PRIMARY KEY (day, user_id),
+    FOREIGN KEY (day, user_id) REFERENCES daily_runs (day, user_id) ON DELETE CASCADE
+  ) STRICT;
+  CREATE INDEX daily_entries_user ON daily_entries (user_id, day);
+
+  -- Tasks voided or restored after the fact, with the day's entries as they were before.
+  CREATE TABLE daily_corrections (
+    id INTEGER PRIMARY KEY,
+    day TEXT NOT NULL REFERENCES daily_sets (day) ON DELETE CASCADE,
+    position INTEGER NOT NULL,
+    action TEXT NOT NULL CHECK (action IN ('void', 'restore')),
+    reason TEXT NOT NULL,
+    at INTEGER NOT NULL,
+    -- JSON: [{ user, points, league }] before the correction.
+    before TEXT NOT NULL
+  ) STRICT;
+  `,
 ];
 
 export const SCHEMA_VERSION = MIGRATIONS.length;

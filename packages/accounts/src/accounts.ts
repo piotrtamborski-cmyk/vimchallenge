@@ -168,6 +168,16 @@ export class Accounts {
   }
 
   /** Deletes the account with its sign-in methods, sessions and progress. */
+  /** Whether the player's name may appear on the public leaderboards; null until they choose. */
+  onBoards(userId: string): boolean | null {
+    const v = this.db.prepare('SELECT on_boards FROM users WHERE id = ?').get(userId)?.on_boards;
+    return v === null || v === undefined ? null : Number(v) === 1;
+  }
+
+  setOnBoards(userId: string, shown: boolean): void {
+    this.db.prepare('UPDATE users SET on_boards = ? WHERE id = ?').run(shown ? 1 : 0, userId);
+  }
+
   deleteUser(userId: string): void {
     this.db.prepare('DELETE FROM users WHERE id = ?').run(userId);
   }

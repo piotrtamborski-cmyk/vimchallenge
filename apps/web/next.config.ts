@@ -22,7 +22,7 @@ const securityHeaders = [
 
 const config: NextConfig = {
   // Workspace packages ship TypeScript sources.
-  transpilePackages: ['@vimchallenge/engine', '@vimchallenge/tasks', '@vimchallenge/accounts', '@vimchallenge/rooms'],
+  transpilePackages: ['@vimchallenge/engine', '@vimchallenge/tasks', '@vimchallenge/accounts', '@vimchallenge/rooms', '@vimchallenge/daily'],
   // Types are checked by `npm run typecheck` at the repository root.
   typescript: { ignoreBuildErrors: true },
   poweredByHeader: false,

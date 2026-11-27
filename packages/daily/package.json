@@ -1,0 +1,17 @@
+{
+  "name": "@vimchallenge/daily",
+  "version": "0.0.0",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./periods": "./src/periods.ts"
+  },
+  "dependencies": {
+    "@vimchallenge/accounts": "*",
+    "@vimchallenge/engine": "*",
+    "@vimchallenge/rooms": "*",
+    "@vimchallenge/tasks": "*"
+  }
+}

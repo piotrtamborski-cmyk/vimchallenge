@@ -32,6 +32,12 @@ export default function Home() {
         <Link href="/tasks" className="underline">
           All {tasks.length} tasks
         </Link>
+        <Link href="/daily" className="underline">
+          Today’s challenge: five tasks, one go →
+        </Link>
+        <Link href="/rooms" className="underline">
+          Play with friends in a room →
+        </Link>
       </p>
     </div>
   );

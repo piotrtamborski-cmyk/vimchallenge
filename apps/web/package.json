@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@vimchallenge/accounts": "*",
+    "@vimchallenge/daily": "*",
     "@vimchallenge/engine": "*",
     "@vimchallenge/rooms": "*",
     "@vimchallenge/tasks": "*",
