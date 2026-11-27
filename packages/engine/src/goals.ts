@@ -1,3 +1,4 @@
+import { parseKeys } from './keys.ts';
 import type { Change, HistoryMove, InitialState, Pos, Snapshot, Step } from './types.ts';
 
 /** Goals of a task: every field that is present must match the final state. */
@@ -28,7 +29,26 @@ export interface StepGoal {
   lines?: string[];
   /** Cursor after the key. */
   cursor?: Pos;
+  /** Line of the cursor after the key, at any column. */
+  line?: number;
+  /** Mode after the key. */
   mode?: string;
+  /** Mode the key was pressed in. */
+  fromMode?: string;
+  /** Marks after the key (other marks may be set too). */
+  marks?: Record<string, Pos>;
+  /**
+   * The keys so far end with one of these, in key notation: `.` for a repeat, `@q` for playing a
+   * macro (a count before it is fine). Proves which command made the step, not just its result.
+   */
+  keys?: string[];
+  /**
+   * The key changed at least this many lines at once and kept their number: a block insert,
+   * change or delete reaches every line of the block in one key, typing or deleting line by line
+   * never does. (Vim fills the other lines of a block insert when it ends, the editor while typing;
+   * both pass when this is one less than the height of the block.)
+   */
+  linesAtOnce?: number;
   /** No key so far, this one included, has changed the text. */
   beforeFirstEdit?: boolean;
 }
@@ -115,20 +135,44 @@ export function checkGoals(trail: readonly Step[], e: Expected): GoalFailure[] {
 function missingStep(trail: readonly Step[], goals: StepGoal[]): StepGoal | undefined {
   let g = 0;
   let edited = false;
+  const tokens: string[] = [];
+  const endings = goals.map((goal) => goal.keys?.map(parseKeys));
   for (let i = 0; i < trail.length && g < goals.length; i++) {
     const step = trail[i]!;
+    if (i > 0) tokens.push(step.token ?? '');
     if (i > 0 && !sameValue(step.snapshot.lines, trail[i - 1]!.snapshot.lines)) edited = true;
-    if (stepMatches(goals[g]!, step, trail[i - 1], edited)) g++;
+    if (stepMatches(goals[g]!, endings[g], tokens, step, trail[i - 1], edited)) g++;
   }
   return goals[g];
 }
 
-function stepMatches(goal: StepGoal, step: Step, prev: Step | undefined, edited: boolean): boolean {
+const endsWith = (tokens: readonly string[], end: readonly string[]) =>
+  end.length > 0 && end.length <= tokens.length && end.every((t, i) => tokens[tokens.length - end.length + i] === t);
+
+/** Lines that differ between two texts of the same length; none when the number of lines changed. */
+function changedLines(before: readonly string[], after: readonly string[]): number {
+  if (before.length !== after.length) return 0;
+  return after.filter((l, i) => l !== before[i]).length;
+}
+
+function stepMatches(
+  goal: StepGoal,
+  endings: string[][] | undefined,
+  tokens: readonly string[],
+  step: Step,
+  prev: Step | undefined,
+  edited: boolean,
+): boolean {
   if (goal.change && step.change !== goal.change) return false;
   if (goal.from && (!prev || !sameValue(prev.snapshot.lines, goal.from))) return false;
   if (goal.lines && !sameValue(step.snapshot.lines, goal.lines)) return false;
   if (goal.cursor && !sameValue(step.snapshot.cursor, goal.cursor)) return false;
+  if (goal.line !== undefined && step.snapshot.cursor[0] !== goal.line) return false;
   if (goal.mode && step.snapshot.mode !== goal.mode) return false;
+  if (goal.fromMode && prev?.snapshot.mode !== goal.fromMode) return false;
+  for (const [m, at] of Object.entries(goal.marks ?? {})) if (!sameValue(step.snapshot.marks[m], at)) return false;
+  if (endings && !endings.some((end) => endsWith(tokens, end))) return false;
+  if (goal.linesAtOnce !== undefined && (!prev || changedLines(prev.snapshot.lines, step.snapshot.lines) < goal.linesAtOnce)) return false;
   if (goal.beforeFirstEdit && edited) return false;
   return true;
 }

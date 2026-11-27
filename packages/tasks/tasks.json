@@ -2778,7 +2778,7 @@
   },
   {
     "id": "return-to-a-mark",
-    "version": 1,
+    "version": 2,
     "plan": "V039",
     "level": 3,
     "title": "Return to a mark",
@@ -2813,10 +2813,27 @@
       },
       "steps": [
         {
-          "label": "Visit the last line.",
+          "label": "Set mark `a` on the `e`.",
+          "marks": {
+            "a": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "label": "Then visit the last line.",
+          "line": 3
+        },
+        {
+          "label": "Then jump back to exactly that letter with the mark: a backtick, then `a`.",
+          "fromMode": "normal",
+          "keys": [
+            "`a"
+          ],
           "cursor": [
-            3,
-            1
+            1,
+            2
           ]
         }
       ]
@@ -2854,10 +2871,27 @@
           },
           "steps": [
             {
-              "label": "Visit the last line.",
+              "label": "Set mark `a` on the `e`.",
+              "marks": {
+                "a": [
+                  1,
+                  2
+                ]
+              }
+            },
+            {
+              "label": "Then visit the last line.",
+              "line": 3
+            },
+            {
+              "label": "Then jump back to exactly that letter with the mark: a backtick, then `a`.",
+              "fromMode": "normal",
+              "keys": [
+                "`a"
+              ],
               "cursor": [
-                3,
-                1
+                1,
+                2
               ]
             }
           ]
@@ -2895,10 +2929,27 @@
           },
           "steps": [
             {
-              "label": "Visit the last line.",
+              "label": "Set mark `a` on the `s`.",
+              "marks": {
+                "a": [
+                  1,
+                  4
+                ]
+              }
+            },
+            {
+              "label": "Then visit the last line.",
+              "line": 3
+            },
+            {
+              "label": "Then jump back to exactly that letter with the mark: a backtick, then `a`.",
+              "fromMode": "normal",
+              "keys": [
+                "`a"
+              ],
               "cursor": [
-                3,
-                1
+                1,
+                4
               ]
             }
           ]
@@ -2985,7 +3036,7 @@
   },
   {
     "id": "repeat-a-change",
-    "version": 1,
+    "version": 2,
     "plan": "V041",
     "level": 3,
     "title": "Repeat a change",
@@ -3005,6 +3056,20 @@
       "lines": [
         "alpha blue",
         "beta blue"
+      ],
+      "steps": [
+        {
+          "label": "Make the last change by repeating the first one with `.`.",
+          "keys": [
+            "."
+          ],
+          "fromMode": "normal",
+          "change": "edit",
+          "lines": [
+            "alpha blue",
+            "beta blue"
+          ]
+        }
       ]
     },
     "variants": [
@@ -3027,6 +3092,21 @@
             "one dog",
             "two dog",
             "three dog"
+          ],
+          "steps": [
+            {
+              "label": "Make the last change by repeating the first one with `.`.",
+              "keys": [
+                "."
+              ],
+              "fromMode": "normal",
+              "change": "edit",
+              "lines": [
+                "one dog",
+                "two dog",
+                "three dog"
+              ]
+            }
           ]
         }
       },
@@ -3049,6 +3129,21 @@
             "size: large",
             "color: red",
             "fit: large"
+          ],
+          "steps": [
+            {
+              "label": "Make the last change by repeating the first one with `.`.",
+              "keys": [
+                "."
+              ],
+              "fromMode": "normal",
+              "change": "edit",
+              "lines": [
+                "size: large",
+                "color: red",
+                "fit: large"
+              ]
+            }
           ]
         }
       }
@@ -3950,7 +4045,7 @@
   },
   {
     "id": "insert-in-a-column",
-    "version": 1,
+    "version": 2,
     "plan": "V054",
     "level": 4,
     "title": "Insert in a column",
@@ -3972,6 +4067,18 @@
         "# host",
         "# port",
         "# mode"
+      ],
+      "steps": [
+        {
+          "label": "Insert into every line at once: select the column with `<C-v>`, then `I`.",
+          "fromMode": "insert",
+          "linesAtOnce": 2,
+          "lines": [
+            "# host",
+            "# port",
+            "# mode"
+          ]
+        }
       ]
     },
     "variants": [
@@ -3996,6 +4103,19 @@
             "- b = 2",
             "- c = 3",
             "- d = 4"
+          ],
+          "steps": [
+            {
+              "label": "Insert into every line at once: select the column with `<C-v>`, then `I`.",
+              "fromMode": "insert",
+              "linesAtOnce": 3,
+              "lines": [
+                "- a = 1",
+                "- b = 2",
+                "- c = 3",
+                "- d = 4"
+              ]
+            }
           ]
         }
       },
@@ -4018,6 +4138,18 @@
             "* x",
             "* y",
             "* z"
+          ],
+          "steps": [
+            {
+              "label": "Insert into every line at once: select the column with `<C-v>`, then `I`.",
+              "fromMode": "insert",
+              "linesAtOnce": 2,
+              "lines": [
+                "* x",
+                "* y",
+                "* z"
+              ]
+            }
           ]
         }
       }
@@ -4026,7 +4158,7 @@
   },
   {
     "id": "delete-a-column",
-    "version": 1,
+    "version": 2,
     "plan": "V055",
     "level": 4,
     "title": "Delete a column",
@@ -4048,6 +4180,18 @@
         "az",
         "by",
         "cx"
+      ],
+      "steps": [
+        {
+          "label": "Delete the whole column with one key on a block selection (`<C-v>`).",
+          "fromMode": "visual-block",
+          "linesAtOnce": 3,
+          "lines": [
+            "az",
+            "by",
+            "cx"
+          ]
+        }
       ]
     },
     "variants": [
@@ -4070,6 +4214,18 @@
             "idname",
             "idmail",
             "idrole"
+          ],
+          "steps": [
+            {
+              "label": "Delete the whole column with one key on a block selection (`<C-v>`).",
+              "fromMode": "visual-block",
+              "linesAtOnce": 3,
+              "lines": [
+                "idname",
+                "idmail",
+                "idrole"
+              ]
+            }
           ]
         }
       },
@@ -4094,6 +4250,19 @@
             "B2",
             "C3",
             "D4"
+          ],
+          "steps": [
+            {
+              "label": "Delete the whole column with one key on a block selection (`<C-v>`).",
+              "fromMode": "visual-block",
+              "linesAtOnce": 4,
+              "lines": [
+                "A1",
+                "B2",
+                "C3",
+                "D4"
+              ]
+            }
           ]
         }
       }
@@ -4450,7 +4619,7 @@
   },
   {
     "id": "record-a-macro",
-    "version": 1,
+    "version": 2,
     "plan": "V060",
     "level": 4,
     "title": "Record a macro",
@@ -4472,6 +4641,22 @@
         "- one",
         "- two",
         "- three"
+      ],
+      "steps": [
+        {
+          "label": "Make the last change by playing the macro with `@q`.",
+          "keys": [
+            "@q",
+            "@@"
+          ],
+          "fromMode": "normal",
+          "change": "edit",
+          "lines": [
+            "- one",
+            "- two",
+            "- three"
+          ]
+        }
       ]
     },
     "variants": [
@@ -4496,6 +4681,23 @@
             "- pears",
             "- plums",
             "- figs"
+          ],
+          "steps": [
+            {
+              "label": "Make the last change by playing the macro with `@q`.",
+              "keys": [
+                "@q",
+                "@@"
+              ],
+              "fromMode": "normal",
+              "change": "edit",
+              "lines": [
+                "- apples",
+                "- pears",
+                "- plums",
+                "- figs"
+              ]
+            }
           ]
         }
       },
@@ -4518,6 +4720,22 @@
             "* a",
             "* b",
             "* c"
+          ],
+          "steps": [
+            {
+              "label": "Make the last change by playing the macro with `@q`.",
+              "keys": [
+                "@q",
+                "@@"
+              ],
+              "fromMode": "normal",
+              "change": "edit",
+              "lines": [
+                "* a",
+                "* b",
+                "* c"
+              ]
+            }
           ]
         }
       }
@@ -4793,7 +5011,7 @@
   },
   {
     "id": "search-backwards",
-    "version": 1,
+    "version": 2,
     "plan": "V063",
     "level": 4,
     "title": "Search backwards",
@@ -4824,9 +5042,21 @@
       ],
       "steps": [
         {
-          "label": "Reach the `ERR` on line 3 first, searching backwards.",
+          "label": "Search backwards with `?` from the end: the first hit is the `ERR` on line 3.",
+          "fromMode": "cmdline",
           "cursor": [
             3,
+            1
+          ]
+        },
+        {
+          "label": "Then repeat the search with `n` to the `ERR` on line 1.",
+          "keys": [
+            "n",
+            "N"
+          ],
+          "cursor": [
+            1,
             1
           ]
         }
@@ -4865,16 +5095,32 @@
           ],
           "steps": [
             {
-              "label": "Reach the `WARN` on line 5 first, searching backwards.",
+              "label": "Search backwards with `?` from the end: the first hit is the `WARN` on line 5.",
+              "fromMode": "cmdline",
               "cursor": [
                 5,
                 1
               ]
             },
             {
-              "label": "Then the one on line 3.",
+              "label": "Then repeat the search with `n` to the `WARN` on line 3.",
+              "keys": [
+                "n",
+                "N"
+              ],
               "cursor": [
                 3,
+                1
+              ]
+            },
+            {
+              "label": "Then repeat the search with `n` to the `WARN` on line 1.",
+              "keys": [
+                "n",
+                "N"
+              ],
+              "cursor": [
+                1,
                 1
               ]
             }
@@ -4909,9 +5155,21 @@
           ],
           "steps": [
             {
-              "label": "Reach the `TODO` on line 3 first, searching backwards.",
+              "label": "Search backwards with `?` from the end: the first hit is the `TODO` on line 3.",
+              "fromMode": "cmdline",
               "cursor": [
                 3,
+                1
+              ]
+            },
+            {
+              "label": "Then repeat the search with `n` to the `TODO` on line 1.",
+              "keys": [
+                "n",
+                "N"
+              ],
+              "cursor": [
+                1,
                 1
               ]
             }
@@ -5076,7 +5334,7 @@
   },
   {
     "id": "macro-on-records",
-    "version": 1,
+    "version": 2,
     "plan": "V066",
     "level": 5,
     "title": "A macro on records",
@@ -5100,6 +5358,23 @@
         "ops (bob)",
         "ux (eve)",
         "--"
+      ],
+      "steps": [
+        {
+          "label": "Make the last change by playing the macro with `@a`.",
+          "keys": [
+            "@a",
+            "@@"
+          ],
+          "fromMode": "normal",
+          "change": "edit",
+          "lines": [
+            "dev (ada)",
+            "ops (bob)",
+            "ux (eve)",
+            "--"
+          ]
+        }
       ]
     },
     "variants": [
@@ -5124,6 +5399,23 @@
             "v2 (k2)",
             "v3 (k3)",
             "end"
+          ],
+          "steps": [
+            {
+              "label": "Make the last change by playing the macro with `@a`.",
+              "keys": [
+                "@a",
+                "@@"
+              ],
+              "fromMode": "normal",
+              "change": "edit",
+              "lines": [
+                "v1 (k1)",
+                "v2 (k2)",
+                "v3 (k3)",
+                "end"
+              ]
+            }
           ]
         }
       },
@@ -5150,6 +5442,24 @@
             "3 (z)",
             "4 (w)",
             "--"
+          ],
+          "steps": [
+            {
+              "label": "Make the last change by playing the macro with `@a`.",
+              "keys": [
+                "@a",
+                "@@"
+              ],
+              "fromMode": "normal",
+              "change": "edit",
+              "lines": [
+                "1 (x)",
+                "2 (y)",
+                "3 (z)",
+                "4 (w)",
+                "--"
+              ]
+            }
           ]
         }
       }
@@ -5521,7 +5831,7 @@
   },
   {
     "id": "number-a-column",
-    "version": 1,
+    "version": 2,
     "plan": "V071",
     "level": 5,
     "title": "Number a column",
@@ -5543,6 +5853,18 @@
         "row 1: a",
         "row 2: b",
         "row 3: c"
+      ],
+      "steps": [
+        {
+          "label": "Number every line at once with `g<C-a>` on a block selection (`<C-v>`) of the zeros.",
+          "fromMode": "visual-block",
+          "linesAtOnce": 3,
+          "lines": [
+            "row 1: a",
+            "row 2: b",
+            "row 3: c"
+          ]
+        }
       ]
     },
     "variants": [
@@ -5567,6 +5889,19 @@
             "item 2",
             "item 3",
             "item 4"
+          ],
+          "steps": [
+            {
+              "label": "Number every line at once with `g<C-a>` on a block selection (`<C-v>`) of the zeros.",
+              "fromMode": "visual-block",
+              "linesAtOnce": 4,
+              "lines": [
+                "item 1",
+                "item 2",
+                "item 3",
+                "item 4"
+              ]
+            }
           ]
         }
       },
@@ -5589,6 +5924,18 @@
             "1. x",
             "2. y",
             "3. z"
+          ],
+          "steps": [
+            {
+              "label": "Number every line at once with `g<C-a>` on a block selection (`<C-v>`) of the zeros.",
+              "fromMode": "visual-block",
+              "linesAtOnce": 3,
+              "lines": [
+                "1. x",
+                "2. y",
+                "3. z"
+              ]
+            }
           ]
         }
       }
@@ -5897,7 +6244,7 @@
   },
   {
     "id": "change-a-block",
-    "version": 1,
+    "version": 2,
     "plan": "V076",
     "level": 5,
     "title": "Change a block",
@@ -5923,6 +6270,14 @@
         "B--:y",
         "C--:z",
         "END"
+      ],
+      "steps": [
+        {
+          "label": "Change the digits of every line at once with `c` on one block selection (`<C-v>`).",
+          "fromMode": "visual-block",
+          "mode": "insert",
+          "linesAtOnce": 3
+        }
       ]
     },
     "variants": [
@@ -5945,6 +6300,14 @@
             "x--y",
             "x--y",
             "x--y"
+          ],
+          "steps": [
+            {
+              "label": "Change the digits of every line at once with `c` on one block selection (`<C-v>`).",
+              "fromMode": "visual-block",
+              "mode": "insert",
+              "linesAtOnce": 3
+            }
           ]
         }
       },
@@ -5969,6 +6332,14 @@
             "k--=v",
             "k--=v",
             "#"
+          ],
+          "steps": [
+            {
+              "label": "Change the digits of every line at once with `c` on one block selection (`<C-v>`).",
+              "fromMode": "visual-block",
+              "mode": "insert",
+              "linesAtOnce": 2
+            }
           ]
         }
       }
@@ -6089,7 +6460,7 @@
   },
   {
     "id": "macro-for-key-values",
-    "version": 1,
+    "version": 2,
     "plan": "V078",
     "level": 5,
     "title": "A macro for key values",
@@ -6113,6 +6484,27 @@
         "port=80",
         "long_key=xyz",
         "END"
+      ],
+      "steps": [
+        {
+          "label": "Make the last change by playing the macro with `@a`, which ends at the start of the next line.",
+          "keys": [
+            "@a",
+            "@@"
+          ],
+          "fromMode": "normal",
+          "change": "edit",
+          "lines": [
+            "a=1",
+            "port=80",
+            "long_key=xyz",
+            "END"
+          ],
+          "cursor": [
+            4,
+            1
+          ]
+        }
       ]
     },
     "variants": [
@@ -6135,6 +6527,26 @@
             "x=1",
             "y=2",
             "END"
+          ],
+          "steps": [
+            {
+              "label": "Make the last change by playing the macro with `@a`, which ends at the start of the next line.",
+              "keys": [
+                "@a",
+                "@@"
+              ],
+              "fromMode": "normal",
+              "change": "edit",
+              "lines": [
+                "x=1",
+                "y=2",
+                "END"
+              ],
+              "cursor": [
+                3,
+                1
+              ]
+            }
           ]
         }
       },
@@ -6161,6 +6573,28 @@
             "mode=c",
             "user=d",
             "END"
+          ],
+          "steps": [
+            {
+              "label": "Make the last change by playing the macro with `@a`, which ends at the start of the next line.",
+              "keys": [
+                "@a",
+                "@@"
+              ],
+              "fromMode": "normal",
+              "change": "edit",
+              "lines": [
+                "host=a",
+                "port=b",
+                "mode=c",
+                "user=d",
+                "END"
+              ],
+              "cursor": [
+                5,
+                1
+              ]
+            }
           ]
         }
       }

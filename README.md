@@ -61,6 +61,23 @@ whether the key edited the text, undid or redid — and `checkGoals` judges the 
 reference Vim runner classifies keys the same way from `undotree()`, and conformance requires both
 engines to agree on every undo and redo.
 
+A step can also say which command made it, which proves the technique a task teaches:
+- `keys`: the keys so far end with one of these. A task can require the repeat `.`, playing the
+  macro `@q` (or `@@`, with any count before it), or a jump with the mark `` `a ``.
+- `fromMode`: the mode the key was pressed in, e.g. a search's `<CR>` comes from the command line.
+- `marks`: the marks after the key, so the order "set the mark, then visit" can be judged.
+- `line`: the cursor is on this line, at any column.
+- `linesAtOnce`: one key changed at least this many lines and kept their number. This proves a
+  block operation: typing or deleting line by line never changes more than one line per key.
+  Vim fills a block insert's other lines when it ends, the editor fills them while typing, so a
+  block insert asks for one line less than the block's height and passes in both.
+
+Each task whose plan card names a technique (a repeat, a macro, a block operation, a mark, a
+backward search) has such steps on every text. The tests in `packages/tasks/test/judge.test.ts`
+check that the shortcuts to the same text fail. One condition is still checked only indirectly:
+the plan wants V078's macro replayed in a fresh buffer. Instead, the final playback must leave the
+cursor at the start of the next line, on records whose keys have other lengths.
+
 ## Judge service
 
 `POST /v1/judge` with `{"task": "undo-a-change", "version": 1, "text": 1, "keys": ["x", "u"]}` (`text` picks the

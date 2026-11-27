@@ -2308,5 +2308,65 @@
         1
       ]
     }
+  },
+  {
+    "id": "P111",
+    "source": "probe",
+    "title": "A line number alone goes to that line, on its first non-blank",
+    "keys": ":3<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "  c",
+        "d"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "b",
+        "  c",
+        "d"
+      ],
+      "cursor": [
+        3,
+        3
+      ]
+    }
+  },
+  {
+    "id": "P112",
+    "source": "probe",
+    "title": "Line addresses alone: last line, then a relative one",
+    "keys": ":$<CR>:-2<CR>",
+    "initial": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "cursor": [
+        1,
+        1
+      ]
+    },
+    "expected": {
+      "lines": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "cursor": [
+        2,
+        1
+      ]
+    }
   }
 ]

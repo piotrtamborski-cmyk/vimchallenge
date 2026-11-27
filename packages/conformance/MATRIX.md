@@ -6,7 +6,7 @@ Reference Vim 9.1.16 · @replit/codemirror-vim 6.4.0 · vim-core 0.1.0 (vendored
 
 Each case is replayed key by key in reference Vim and in the headless browser engine. After every key the text, mode and cursor must be equal; at the end visual selection, named registers and marks are compared too. Registers recorded with `q` are not compared (engine-specific key codes). After every key both engines must also agree on whether the key was an undo or a redo. Step goals (`expected.steps`, e.g. "cursor visited the end before the first edit") are judged on both runs; other semantic goals are listed but not judged yet.
 
-**419 match · 11 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 430 cases.
+**421 match · 11 same result but differ while typing · 0 differ in the result · 0 engine errors · 0 card goal fails in Vim · 0 Vim run failed** — of 432 cases.
 
 | Case | MVP | Result | Keys (first differing key in bold) | Difference: Vim → browser engine |
 |---|---|---|---|---|
@@ -48,9 +48,9 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | V036 |  | ✅ match | `citlis<Esc>` |  |
 | V037 |  | ✅ match | `vwe` |  |
 | V038 |  | ✅ match | `/^DROP$<CR>dd` |  |
-| V039 |  | ✅ match | `maG`a` | <br>_Semantic goal not judged yet: Po ustawieniu znacznika odwiedzono wiersz 3 przed powrotem._ |
+| V039 |  | ✅ match | `maG`a` | <br>Steps judged: Set mark `a` on the `e`. → Then visit the last line. → Then jump back to exactly that letter with the mark: a backtick, then `a`. |
 | V040 |  | ✅ match | `ddp` |  |
-| V041 |  | ✅ match | `/red<CR>ciwblue<Esc>n.` | <br>_Semantic goal not judged yet: Druga zamiana nastąpiła przez powtórzenie ostatniej zmiany._ |
+| V041 |  | ✅ match | `/red<CR>ciwblue<Esc>n.` | <br>Steps judged: Make the last change by repeating the first one with `.`. |
 | V042 |  | ✅ match | `:%s/old/new/<CR>` |  |
 | V043 |  | ✅ match | `:2,4d<CR>` |  |
 | V044 |  | ✅ match | `da[` |  |
@@ -63,31 +63,31 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | V051 |  | ✅ match | `:%s/\(\w\+\),\(\w\+\)/\2 \1/<CR>` |  |
 | V052 |  | ✅ match | `:g/^DBG /d<CR>` |  |
 | V053 |  | ✅ match | `:v/^OK /d<CR>` |  |
-| V054 |  | 🟡 same result, differs while typing | `<C-v>2jI` **#** `␠<Esc>` | text: `["#host","port","mode"]` → `["#host","#port","#mode"]`<br>_Semantic goal not judged yet: Wstawienie pochodzi z jednego zaznaczenia blokowego wysokości 3._ |
-| V055 |  | ✅ match | `<C-v>2jx` | <br>_Semantic goal not judged yet: Usunięto prostokąt o wymiarach 3 wiersze × 1 kolumna._ |
+| V054 |  | 🟡 same result, differs while typing | `<C-v>2jI` **#** `␠<Esc>` | text: `["#host","port","mode"]` → `["#host","#port","#mode"]`<br>Steps judged: Insert into every line at once: select the column with `<C-v>`, then `I`. |
+| V055 |  | ✅ match | `<C-v>2jx` | <br>Steps judged: Delete the whole column with one key on a block selection (`<C-v>`). |
 | V056 |  | ✅ match | `:2,5sort u<CR>` |  |
 | V057 |  | ✅ match | `:2,3m5<CR>` |  |
 | V058 |  | ✅ match | `"ayiwj0"Ayiw` |  |
 | V059 |  | ✅ match | `yiwj"_dd` |  |
-| V060 |  | ✅ match | `qqI- <Esc>jq2@q` | <br>_Semantic goal not judged yet: Makro w `q` nagrane w próbie i odtworzone na dwóch kolejnych wierszach._ |
+| V060 |  | ✅ match | `qqI- <Esc>jq2@q` | <br>Steps judged: Make the last change by playing the macro with `@q`. |
 | V061 |  | ✅ match | `oB<Esc>u<C-r>` | <br>Steps judged: Dodaj wiersz `B` → Cofnij dodanie → Ponów dodanie |
 | V062 |  | ✅ match | `ma2jmb:'a,'bs/x/y/g<CR>` |  |
-| V063 |  | ✅ match | `?^ERR<CR>n` | <br>_Semantic goal not judged yet: Dwa trafienia wyszukiwania wstecz w kolejności 3 → 1._ |
+| V063 |  | ✅ match | `?^ERR<CR>n` | <br>Steps judged: Search backwards with `?` from the end: the first hit is the `ERR` on line 3. → Then repeat the search with `n` to the `ERR` on line 1. |
 | V064 |  | ✅ match | `3gJ` |  |
 | V065 |  | ✅ match | `:2,4s/^\(\s*\)old:/\1new:/<CR>` |  |
-| V066 |  | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` | <br>_Semantic goal not judged yet: Makro nagrane w `a` i użyte do przetworzenia kolejnych dwóch rekordów._ |
+| V066 |  | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` | <br>Steps judged: Make the last change by playing the macro with `@a`. |
 | V067 |  | ✅ match | `:g/^X /s/\S\+$/[&]/<CR>` |  |
 | V068 |  | ✅ match | `:/^BEGIN$/,/^END$/s/\s\+$//e<CR>` |  |
 | V069 |  | ✅ match | `f=l"ayiwj0f=l"byiwciw<C-r>a<Esc>k0f=lciw<C-r>b<Esc>` |  |
 | V070 |  | ✅ match | `:/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>` |  |
-| V071 |  | ✅ match | `<C-v>2jg<C-a>` | <br>_Semantic goal not judged yet: Rosnąca numeracja powstała na zaznaczonym bloku cyfr._ |
+| V071 |  | ✅ match | `<C-v>2jg<C-a>` | <br>Steps judged: Number every line at once with `g<C-a>` on a block selection (`<C-v>`) of the zeros. |
 | V072 |  | ✅ match | `:%s/\<\(\k\+\)\s\+\1\>/\1/g<CR>` |  |
 | V073 |  | ✅ match | `:%s/  #.*$//e<CR>:%sort<CR>` |  |
 | V074 |  | ✅ match | `:%s/^\(flag_\w\+=\)\(\w\+\)/\1\U\2\E/<CR>` |  |
 | V075 |  | ✅ match | `:g/^@ /t$<CR>:4,5s/^@ //<CR>` |  |
-| V076 |  | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["HEAD","A-:x","B:y","C:z","END"]` → `["HEAD","A-:x","B-:y","C-:z","END"]`<br>_Semantic goal not judged yet: Jedna zmiana blokowa na prostokącie 3 × 2._ |
+| V076 |  | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["HEAD","A-:x","B:y","C:z","END"]` → `["HEAD","A-:x","B-:y","C-:z","END"]`<br>Steps judged: Change the digits of every line at once with `c` on one block selection (`<C-v>`). |
 | V077 |  | ✅ match | `ma:2,4s/(bad)/(ok)/<CR>`a` |  |
-| V078 |  | ✅ match | `qa0f:r=lxj0q2@a` | <br>_Semantic goal not judged yet: Zarejestrowano i odtworzono `a`. W świeżym buforze jedno `@a` ma przekształcić `tryb: auto↵END` w `tryb=auto↵END` i skończyć w `(2,1)`._ |
+| V078 |  | ✅ match | `qa0f:r=lxj0q2@a` | <br>Steps judged: Make the last change by playing the macro with `@a`, which ends at the start of the next line.<br>_Semantic goal not judged yet: W świeżym buforze jedno `@a` ma przekształcić `tryb: auto↵END` w `tryb=auto↵END` i skończyć w `(2,1)`._ |
 | V079 |  | ✅ match | `:2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>` |  |
 | V080 |  | ✅ match | `:3,5g/^  DEBUG /d<CR>:3,4s/\<old\>/new/g<CR>:3,4s/^  //<CR>` |  |
 | P001 |  | ✅ match | `xxu` |  |
@@ -200,6 +200,8 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | P108 |  | ✅ match | `yip` |  |
 | P109 |  | ✅ match | `yi(` |  |
 | P110 |  | ✅ match | `y0` |  |
+| P111 |  | ✅ match | `:3<CR>` |  |
+| P112 |  | ✅ match | `:$<CR>:-2<CR>` |  |
 | replace-a-letter | MVP | ✅ match | `ra` |  |
 | replace-a-letter@2 | MVP | ✅ match | `ro` |  |
 | replace-a-letter@3 | MVP | ✅ match | `ru` |  |
@@ -314,15 +316,15 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | find-and-delete-a-line | MVP | ✅ match | `/^DROP$<CR>dd` |  |
 | find-and-delete-a-line@2 | MVP | ✅ match | `/^DROP$<CR>dd` |  |
 | find-and-delete-a-line@3 | MVP | ✅ match | `/^DROP$<CR>dd` |  |
-| return-to-a-mark | MVP | ✅ match | `maG`a` | <br>Steps judged: Visit the last line. |
-| return-to-a-mark@2 | MVP | ✅ match | `maG`a` | <br>Steps judged: Visit the last line. |
-| return-to-a-mark@3 | MVP | ✅ match | `maG`a` | <br>Steps judged: Visit the last line. |
+| return-to-a-mark | MVP | ✅ match | `maG`a` | <br>Steps judged: Set mark `a` on the `e`. → Then visit the last line. → Then jump back to exactly that letter with the mark: a backtick, then `a`. |
+| return-to-a-mark@2 | MVP | ✅ match | `maG`a` | <br>Steps judged: Set mark `a` on the `e`. → Then visit the last line. → Then jump back to exactly that letter with the mark: a backtick, then `a`. |
+| return-to-a-mark@3 | MVP | ✅ match | `maG`a` | <br>Steps judged: Set mark `a` on the `s`. → Then visit the last line. → Then jump back to exactly that letter with the mark: a backtick, then `a`. |
 | move-a-line | MVP | ✅ match | `ddp` |  |
 | move-a-line@2 | MVP | ✅ match | `ddp` |  |
 | move-a-line@3 | MVP | ✅ match | `ddp` |  |
-| repeat-a-change | MVP | ✅ match | `/red<CR>ciwblue<Esc>n.` |  |
-| repeat-a-change@2 | MVP | ✅ match | `/cat<CR>ciwdog<Esc>n.n.` |  |
-| repeat-a-change@3 | MVP | ✅ match | `/small<CR>ciwlarge<Esc>n.` |  |
+| repeat-a-change | MVP | ✅ match | `/red<CR>ciwblue<Esc>n.` | <br>Steps judged: Make the last change by repeating the first one with `.`. |
+| repeat-a-change@2 | MVP | ✅ match | `/cat<CR>ciwdog<Esc>n.n.` | <br>Steps judged: Make the last change by repeating the first one with `.`. |
+| repeat-a-change@3 | MVP | ✅ match | `/small<CR>ciwlarge<Esc>n.` | <br>Steps judged: Make the last change by repeating the first one with `.`. |
 | substitute-the-first-match | MVP | ✅ match | `:%s/old/new/<CR>` |  |
 | substitute-the-first-match@2 | MVP | ✅ match | `:%s/-/+/<CR>` |  |
 | substitute-the-first-match@3 | MVP | ✅ match | `:%s/cat/cow/<CR>` |  |
@@ -359,12 +361,12 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | keep-only-matching-lines | MVP | ✅ match | `:v/^OK /d<CR>` |  |
 | keep-only-matching-lines@2 | MVP | ✅ match | `:v/^want/d<CR>` |  |
 | keep-only-matching-lines@3 | MVP | ✅ match | `:v/log$/d<CR>` |  |
-| insert-in-a-column | MVP | 🟡 same result, differs while typing | `<C-v>2jI` **#** `␠<Esc>` | text: `["#host","port","mode"]` → `["#host","#port","#mode"]` |
-| insert-in-a-column@2 | MVP | 🟡 same result, differs while typing | `<C-v>3jI` **-** `␠<Esc>` | text: `["-a = 1","b = 2","c = 3","d = 4"]` → `["-a = 1","-b = 2","-c = 3","-d = 4"]` |
-| insert-in-a-column@3 | MVP | 🟡 same result, differs while typing | `<C-v>2jI` ***** `␠<Esc>` | text: `["*x","y","z"]` → `["*x","*y","*z"]` |
-| delete-a-column | MVP | ✅ match | `<C-v>2jx` |  |
-| delete-a-column@2 | MVP | ✅ match | `<C-v>2jx` |  |
-| delete-a-column@3 | MVP | ✅ match | `<C-v>3jx` |  |
+| insert-in-a-column | MVP | 🟡 same result, differs while typing | `<C-v>2jI` **#** `␠<Esc>` | text: `["#host","port","mode"]` → `["#host","#port","#mode"]`<br>Steps judged: Insert into every line at once: select the column with `<C-v>`, then `I`. |
+| insert-in-a-column@2 | MVP | 🟡 same result, differs while typing | `<C-v>3jI` **-** `␠<Esc>` | text: `["-a = 1","b = 2","c = 3","d = 4"]` → `["-a = 1","-b = 2","-c = 3","-d = 4"]`<br>Steps judged: Insert into every line at once: select the column with `<C-v>`, then `I`. |
+| insert-in-a-column@3 | MVP | 🟡 same result, differs while typing | `<C-v>2jI` ***** `␠<Esc>` | text: `["*x","y","z"]` → `["*x","*y","*z"]`<br>Steps judged: Insert into every line at once: select the column with `<C-v>`, then `I`. |
+| delete-a-column | MVP | ✅ match | `<C-v>2jx` | <br>Steps judged: Delete the whole column with one key on a block selection (`<C-v>`). |
+| delete-a-column@2 | MVP | ✅ match | `<C-v>2jx` | <br>Steps judged: Delete the whole column with one key on a block selection (`<C-v>`). |
+| delete-a-column@3 | MVP | ✅ match | `<C-v>3jx` | <br>Steps judged: Delete the whole column with one key on a block selection (`<C-v>`). |
 | sort-and-dedupe-a-range | MVP | ✅ match | `:2,5sort u<CR>` |  |
 | sort-and-dedupe-a-range@2 | MVP | ✅ match | `:2,5sort u<CR>` |  |
 | sort-and-dedupe-a-range@3 | MVP | ✅ match | `:2,5sort u<CR>` |  |
@@ -377,27 +379,27 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | delete-without-losing-a-yank | MVP | ✅ match | `yiwj"_dd` |  |
 | delete-without-losing-a-yank@2 | MVP | ✅ match | `yiwj"_dd` |  |
 | delete-without-losing-a-yank@3 | MVP | ✅ match | `yiwjj"_dd` |  |
-| record-a-macro | MVP | ✅ match | `qqI- <Esc>jq2@q` |  |
-| record-a-macro@2 | MVP | ✅ match | `qqI- <Esc>jq3@q` |  |
-| record-a-macro@3 | MVP | ✅ match | `qqI* <Esc>jq2@q` |  |
+| record-a-macro | MVP | ✅ match | `qqI- <Esc>jq2@q` | <br>Steps judged: Make the last change by playing the macro with `@q`. |
+| record-a-macro@2 | MVP | ✅ match | `qqI- <Esc>jq3@q` | <br>Steps judged: Make the last change by playing the macro with `@q`. |
+| record-a-macro@3 | MVP | ✅ match | `qqI* <Esc>jq2@q` | <br>Steps judged: Make the last change by playing the macro with `@q`. |
 | undo-and-redo | MVP | ✅ match | `oB<Esc>u<C-r>` | <br>Steps judged: Add the line `B`. → Undo adding it. → Bring it back with redo. |
 | undo-and-redo@2 | MVP | ✅ match | `oend<Esc>u<C-r>` | <br>Steps judged: Add the line `end`. → Undo adding it. → Bring it back with redo. |
 | undo-and-redo@3 | MVP | ✅ match | `ddu<C-r>` | <br>Steps judged: Delete the line `x`. → Undo the deletion. → Delete it again with redo. |
 | substitute-between-marks | MVP | ✅ match | `ma2jmb:'a,'bs/x/y/g<CR>` |  |
 | substitute-between-marks@2 | MVP | ✅ match | `ma2jmb:'a,'bs/x/y/<CR>` |  |
 | substitute-between-marks@3 | MVP | ✅ match | `majmb:'a,'bs/x/y/g<CR>` |  |
-| search-backwards | MVP | ✅ match | `?^ERR<CR>n` | <br>Steps judged: Reach the `ERR` on line 3 first, searching backwards. |
-| search-backwards@2 | MVP | ✅ match | `?^WARN<CR>nn` | <br>Steps judged: Reach the `WARN` on line 5 first, searching backwards. → Then the one on line 3. |
-| search-backwards@3 | MVP | ✅ match | `?^TODO<CR>n` | <br>Steps judged: Reach the `TODO` on line 3 first, searching backwards. |
+| search-backwards | MVP | ✅ match | `?^ERR<CR>n` | <br>Steps judged: Search backwards with `?` from the end: the first hit is the `ERR` on line 3. → Then repeat the search with `n` to the `ERR` on line 1. |
+| search-backwards@2 | MVP | ✅ match | `?^WARN<CR>nn` | <br>Steps judged: Search backwards with `?` from the end: the first hit is the `WARN` on line 5. → Then repeat the search with `n` to the `WARN` on line 3. → Then repeat the search with `n` to the `WARN` on line 1. |
+| search-backwards@3 | MVP | ✅ match | `?^TODO<CR>n` | <br>Steps judged: Search backwards with `?` from the end: the first hit is the `TODO` on line 3. → Then repeat the search with `n` to the `TODO` on line 1. |
 | join-without-spaces | MVP | ✅ match | `3gJ` |  |
 | join-without-spaces@2 | MVP | ✅ match | `gJ` |  |
 | join-without-spaces@3 | MVP | ✅ match | `3gJ` |  |
 | rename-a-key | MVP | ✅ match | `:2,4s/^\(\s*\)old:/\1new:/<CR>` |  |
 | rename-a-key@2 | MVP | ✅ match | `:2,3s/^\(\s*\)port:/\1listen:/<CR>` |  |
 | rename-a-key@3 | MVP | ✅ match | `:2,4s/^\(\s*\)name:/\1title:/<CR>` |  |
-| macro-on-records | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` |  |
-| macro-on-records@2 | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` |  |
-| macro-on-records@3 | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q3@a` |  |
+| macro-on-records | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` | <br>Steps judged: Make the last change by playing the macro with `@a`. |
+| macro-on-records@2 | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q2@a` | <br>Steps judged: Make the last change by playing the macro with `@a`. |
+| macro-on-records@3 | MVP | ✅ match | `qa:s/^\([^:]*\):\(.*\)$/\2 (\1)/<CR>j0q3@a` | <br>Steps judged: Make the last change by playing the macro with `@a`. |
 | substitute-on-matching-lines | MVP | ✅ match | `:g/^X /s/\S\+$/[&]/<CR>` |  |
 | substitute-on-matching-lines@2 | MVP | ✅ match | `:g/^A /s/\S\+$/[&]/<CR>` |  |
 | substitute-on-matching-lines@3 | MVP | ✅ match | `:g/^T: /s/\S\+$/[&]/<CR>` |  |
@@ -410,9 +412,9 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | clean-a-block | MVP | ✅ match | `:/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>` |  |
 | clean-a-block@2 | MVP | ✅ match | `:/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>` |  |
 | clean-a-block@3 | MVP | ✅ match | `:/^BEGIN$/+1,/^END$/-1g/^#/d<CR>:/^BEGIN$/+1,/^END$/-1sort u<CR>` |  |
-| number-a-column | MVP | ✅ match | `<C-v>2jg<C-a>` |  |
-| number-a-column@2 | MVP | ✅ match | `<C-v>3jg<C-a>` |  |
-| number-a-column@3 | MVP | ✅ match | `<C-v>2jg<C-a>` |  |
+| number-a-column | MVP | ✅ match | `<C-v>2jg<C-a>` | <br>Steps judged: Number every line at once with `g<C-a>` on a block selection (`<C-v>`) of the zeros. |
+| number-a-column@2 | MVP | ✅ match | `<C-v>3jg<C-a>` | <br>Steps judged: Number every line at once with `g<C-a>` on a block selection (`<C-v>`) of the zeros. |
+| number-a-column@3 | MVP | ✅ match | `<C-v>2jg<C-a>` | <br>Steps judged: Number every line at once with `g<C-a>` on a block selection (`<C-v>`) of the zeros. |
 | collapse-doubled-words | MVP | ✅ match | `:%s/\<\(\k\+\)\s\+\1\>/\1/g<CR>` |  |
 | collapse-doubled-words@2 | MVP | ✅ match | `:%s/\<\(\k\+\)\s\+\1\>/\1/g<CR>` |  |
 | collapse-doubled-words@3 | MVP | ✅ match | `:%s/\<\(\k\+\)\s\+\1\>/\1/g<CR>` |  |
@@ -425,15 +427,15 @@ Each case is replayed key by key in reference Vim and in the headless browser en
 | copy-matching-lines-to-the-end | MVP | ✅ match | `:g/^@ /t$<CR>:4,5s/^@ //<CR>` |  |
 | copy-matching-lines-to-the-end@2 | MVP | ✅ match | `:g/^@ /t$<CR>:4,5s/^@ //<CR>` |  |
 | copy-matching-lines-to-the-end@3 | MVP | ✅ match | `:g/^@ /t$<CR>:6,7s/^@ //<CR>` |  |
-| change-a-block | MVP | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["HEAD","A-:x","B:y","C:z","END"]` → `["HEAD","A-:x","B-:y","C-:z","END"]` |
-| change-a-block@2 | MVP | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["x-y","xy","xy"]` → `["x-y","x-y","x-y"]` |
-| change-a-block@3 | MVP | 🟡 same result, differs while typing | `<C-v>jllc` **-** `-<Esc>` | text: `["#","k-=v","k=v","#"]` → `["#","k-=v","k-=v","#"]` |
+| change-a-block | MVP | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["HEAD","A-:x","B:y","C:z","END"]` → `["HEAD","A-:x","B-:y","C-:z","END"]`<br>Steps judged: Change the digits of every line at once with `c` on one block selection (`<C-v>`). |
+| change-a-block@2 | MVP | 🟡 same result, differs while typing | `<C-v>2jlc` **-** `-<Esc>` | text: `["x-y","xy","xy"]` → `["x-y","x-y","x-y"]`<br>Steps judged: Change the digits of every line at once with `c` on one block selection (`<C-v>`). |
+| change-a-block@3 | MVP | 🟡 same result, differs while typing | `<C-v>jllc` **-** `-<Esc>` | text: `["#","k-=v","k=v","#"]` → `["#","k-=v","k-=v","#"]`<br>Steps judged: Change the digits of every line at once with `c` on one block selection (`<C-v>`). |
 | mark-fix-and-return | MVP | ✅ match | `ma:2,4s/(bad)/(ok)/<CR>`a` |  |
 | mark-fix-and-return@2 | MVP | ✅ match | `ma:2,3s/(no)/(yes)/<CR>`a` |  |
 | mark-fix-and-return@3 | MVP | ✅ match | `ma:2,4s/(old)/(new)/<CR>`a` |  |
-| macro-for-key-values | MVP | ✅ match | `qa0f:r=lxj0q2@a` |  |
-| macro-for-key-values@2 | MVP | ✅ match | `qa0f:r=lxj0q@a` |  |
-| macro-for-key-values@3 | MVP | ✅ match | `qa0f:r=lxj0q3@a` |  |
+| macro-for-key-values | MVP | ✅ match | `qa0f:r=lxj0q2@a` | <br>Steps judged: Make the last change by playing the macro with `@a`, which ends at the start of the next line. |
+| macro-for-key-values@2 | MVP | ✅ match | `qa0f:r=lxj0q@a` | <br>Steps judged: Make the last change by playing the macro with `@a`, which ends at the start of the next line. |
+| macro-for-key-values@3 | MVP | ✅ match | `qa0f:r=lxj0q3@a` | <br>Steps judged: Make the last change by playing the macro with `@a`, which ends at the start of the next line. |
 | sort-numbers-and-mark-runs | MVP | ✅ match | `:2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>` |  |
 | sort-numbers-and-mark-runs@2 | MVP | ✅ match | `:2,5sort nu<CR>:g/ run$/s/run$/RUN/<CR>` |  |
 | sort-numbers-and-mark-runs@3 | MVP | ✅ match | `:2,4sort nu<CR>:g/ run$/s/run$/RUN/<CR>` |  |

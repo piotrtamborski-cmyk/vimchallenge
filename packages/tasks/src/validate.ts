@@ -55,6 +55,13 @@ function checkText(t: TaskVariant, at: (msg: string) => void) {
     if (!s.label?.trim()) at(`step ${i + 1} has no label`);
     else if (!balancedCode(s.label)) at(`step ${i + 1} label has an unclosed \` code span`);
     if (Object.keys(s).length === 1) at(`step ${i + 1} has no condition besides its label`);
+    for (const k of s.keys ?? []) {
+      const tokens = parseKeys(k);
+      if (!tokens.length || tokens.some((x) => !isToken(x))) at(`step ${i + 1} keys ${JSON.stringify(k)} are not keys`);
+    }
+    if (s.keys && !s.keys.length) at(`step ${i + 1} lists no keys`);
+    if (s.linesAtOnce !== undefined && !(Number.isInteger(s.linesAtOnce) && s.linesAtOnce > 0)) at(`step ${i + 1} linesAtOnce must be a positive integer`);
+    if (s.line !== undefined && !(Number.isInteger(s.line) && s.line > 0)) at(`step ${i + 1} line must be a positive integer`);
   }
 }
 

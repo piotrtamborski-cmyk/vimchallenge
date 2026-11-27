@@ -5820,9 +5820,9 @@ export function initVim(CM) {
       var command;
       var commandName;
       if (!params.commandName) {
-        // If only a line range is defined, move to the line.
+        // If only a line range is defined, move to the line. (Not named `move`: that is `:move`.)
         if (params.line !== undefined) {
-          commandName = 'move';
+          commandName = 'goToLine';
         }
       } else {
         command = this.matchCommand_(params.commandName);
@@ -6151,8 +6151,8 @@ export function initVim(CM) {
     vmapclear: function(cm, params) { vimApi.mapclear('visual'); },
     /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
     omapclear: function(cm, params) { vimApi.mapclear('operatorPending'); },
-    /** @arg {CodeMirrorV} cm @arg {ExParams} params*/
-    move: function(cm, params) {
+    /** `:{line}` with no command: go to that line, like `{line}G`. @arg {CodeMirrorV} cm @arg {ExParams} params*/
+    goToLine: function(cm, params) {
       commandDispatcher.processCommand(cm, cm.state.vim, {
         keys: "",
         type: 'motion',

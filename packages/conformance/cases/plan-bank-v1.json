@@ -1005,11 +1005,34 @@
           1,
           2
         ]
-      }
-    },
-    "semanticNotes": [
-      "Po ustawieniu znacznika odwiedzono wiersz 3 przed powrotem."
-    ]
+      },
+      "steps": [
+        {
+          "label": "Set mark `a` on the `e`.",
+          "marks": {
+            "a": [
+              1,
+              2
+            ]
+          }
+        },
+        {
+          "label": "Then visit the last line.",
+          "line": 3
+        },
+        {
+          "label": "Then jump back to exactly that letter with the mark: a backtick, then `a`.",
+          "fromMode": "normal",
+          "keys": [
+            "`a"
+          ],
+          "cursor": [
+            1,
+            2
+          ]
+        }
+      ]
+    }
   },
   {
     "id": "V040",
@@ -1060,11 +1083,22 @@
       "lines": [
         "alpha blue",
         "beta blue"
+      ],
+      "steps": [
+        {
+          "label": "Make the last change by repeating the first one with `.`.",
+          "keys": [
+            "."
+          ],
+          "fromMode": "normal",
+          "change": "edit",
+          "lines": [
+            "alpha blue",
+            "beta blue"
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "Druga zamiana nastąpiła przez powtórzenie ostatniej zmiany."
-    ]
+    }
   },
   {
     "id": "V042",
@@ -1399,11 +1433,20 @@
         "# host",
         "# port",
         "# mode"
+      ],
+      "steps": [
+        {
+          "label": "Insert into every line at once: select the column with `<C-v>`, then `I`.",
+          "fromMode": "insert",
+          "linesAtOnce": 2,
+          "lines": [
+            "# host",
+            "# port",
+            "# mode"
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "Wstawienie pochodzi z jednego zaznaczenia blokowego wysokości 3."
-    ]
+    }
   },
   {
     "id": "V055",
@@ -1428,11 +1471,20 @@
         "az",
         "by",
         "cx"
+      ],
+      "steps": [
+        {
+          "label": "Delete the whole column with one key on a block selection (`<C-v>`).",
+          "fromMode": "visual-block",
+          "linesAtOnce": 3,
+          "lines": [
+            "az",
+            "by",
+            "cx"
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "Usunięto prostokąt o wymiarach 3 wiersze × 1 kolumna."
-    ]
+    }
   },
   {
     "id": "V056",
@@ -1581,11 +1633,24 @@
         "- ena",
         "- dwa",
         "- tri"
+      ],
+      "steps": [
+        {
+          "label": "Make the last change by playing the macro with `@q`.",
+          "keys": [
+            "@q",
+            "@@"
+          ],
+          "fromMode": "normal",
+          "change": "edit",
+          "lines": [
+            "- ena",
+            "- dwa",
+            "- tri"
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "Makro w `q` nagrane w próbie i odtworzone na dwóch kolejnych wierszach."
-    ]
+    }
   },
   {
     "id": "V061",
@@ -1708,11 +1773,29 @@
       "cursor": [
         1,
         1
+      ],
+      "steps": [
+        {
+          "label": "Search backwards with `?` from the end: the first hit is the `ERR` on line 3.",
+          "fromMode": "cmdline",
+          "cursor": [
+            3,
+            1
+          ]
+        },
+        {
+          "label": "Then repeat the search with `n` to the `ERR` on line 1.",
+          "keys": [
+            "n",
+            "N"
+          ],
+          "cursor": [
+            1,
+            1
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "Dwa trafienia wyszukiwania wstecz w kolejności 3 → 1."
-    ]
+    }
   },
   {
     "id": "V064",
@@ -1795,11 +1878,25 @@
         "ops (jan)",
         "ux (ola)",
         "--"
+      ],
+      "steps": [
+        {
+          "label": "Make the last change by playing the macro with `@a`.",
+          "keys": [
+            "@a",
+            "@@"
+          ],
+          "fromMode": "normal",
+          "change": "edit",
+          "lines": [
+            "dev (ela)",
+            "ops (jan)",
+            "ux (ola)",
+            "--"
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "Makro nagrane w `a` i użyte do przetworzenia kolejnych dwóch rekordów."
-    ]
+    }
   },
   {
     "id": "V067",
@@ -1954,11 +2051,20 @@
         "row 1: a",
         "row 2: b",
         "row 3: c"
+      ],
+      "steps": [
+        {
+          "label": "Number every line at once with `g<C-a>` on a block selection (`<C-v>`) of the zeros.",
+          "fromMode": "visual-block",
+          "linesAtOnce": 3,
+          "lines": [
+            "row 1: a",
+            "row 2: b",
+            "row 3: c"
+          ]
+        }
       ]
-    },
-    "semanticNotes": [
-      "Rosnąca numeracja powstała na zaznaczonym bloku cyfr."
-    ]
+    }
   },
   {
     "id": "V072",
@@ -2093,11 +2199,16 @@
         "B--:y",
         "C--:z",
         "END"
+      ],
+      "steps": [
+        {
+          "label": "Change the digits of every line at once with `c` on one block selection (`<C-v>`).",
+          "fromMode": "visual-block",
+          "mode": "insert",
+          "linesAtOnce": 3
+        }
       ]
-    },
-    "semanticNotes": [
-      "Jedna zmiana blokowa na prostokącie 3 × 2."
-    ]
+    }
   },
   {
     "id": "V077",
@@ -2164,10 +2275,30 @@
         "port=80",
         "long_key=xyz",
         "END"
+      ],
+      "steps": [
+        {
+          "label": "Make the last change by playing the macro with `@a`, which ends at the start of the next line.",
+          "keys": [
+            "@a",
+            "@@"
+          ],
+          "fromMode": "normal",
+          "change": "edit",
+          "lines": [
+            "a=1",
+            "port=80",
+            "long_key=xyz",
+            "END"
+          ],
+          "cursor": [
+            4,
+            1
+          ]
+        }
       ]
     },
     "semanticNotes": [
-      "Zarejestrowano i odtworzono `a`.",
       "W świeżym buforze jedno `@a` ma przekształcić `tryb: auto↵END` w `tryb=auto↵END` i skończyć w `(2,1)`."
     ]
   },
